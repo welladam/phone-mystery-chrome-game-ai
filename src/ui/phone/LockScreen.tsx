@@ -1,0 +1,115 @@
+import { useEffect, useState } from "react";
+import { Delete, Lock } from "lucide-react";
+import { NOTIFICATIONS } from "../../content/shared";
+import { checkLock, getLock } from "../../content/manifest";
+
+type Props = {
+  onUnlock: () => void;
+  reducedMotion: boolean;
+};
+
+const PREVIEW = NOTIFICATIONS.filter((item) => item.at.startsWith("09/03")).slice(0, 3);
+
+export default function LockScreen({ onUnlock, reducedMotion }: Props) {
+  const [code, setCode] = useState("");
+  const [shake, setShake] = useState(false);
+  const [message, setMessage] = useState<string>();
+
+  const lock = getLock("LOCK_001");
+
+  /**
+   * A verificação acontece dentro do atualizador funcional: digitação rápida
+   * (ou teclado físico) não pode perder dígitos por ler um estado antigo.
+   */
+  function press(digit: string) {
+    setMessage(undefined);
+    setCode((current) => {
+      if (current.length >= 4) return current;
+      const next = current + digit;
+      if (next.length < 4 || !lock) return next;
+
+      if (checkLock(lock, next)) {
+        queueMicrotask(onUnlock);
+        return next;
+      }
+
+      setShake(true);
+      setMessage("Código incorreto. O papel dentro da capinha traz a data de nascimento dela.");
+      setTimeout(
+        () => {
+          setShake(false);
+          setCode("");
+        },
+        reducedMotion ? 0 : 420,
+      );
+      return next;
+    });
+  }
+
+  // Teclado físico funciona igual ao teclado da tela.
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      if (/^[0-9]$/.test(event.key)) {
+        press(event.key);
+      } else if (event.key === "Backspace") {
+        setCode((current) => current.slice(0, -1));
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  });
+
+  return (
+    <div className="lockscreen">
+      <div className="lockscreen__clock">
+        <span className="lockscreen__hour">06:32</span>
+        <span className="lockscreen__date">segunda-feira, 9 de março</span>
+      </div>
+
+      <ul className="lockscreen__notifications">
+        {PREVIEW.map((item) => (
+          <li key={item.id}>
+            <span className="lockscreen__from">{item.from}</span>
+            <span className="lockscreen__preview">{item.preview}</span>
+            <span className="lockscreen__at">{item.at}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className={`lockscreen__pad${shake && !reducedMotion ? " lockscreen__pad--shake" : ""}`}>
+        <p className="lockscreen__hint">
+          <Lock size={14} aria-hidden />
+          Digite o código de quatro dígitos
+        </p>
+        <div className="lockscreen__dots" aria-label={`${code.length} de 4 dígitos digitados`}>
+          {[0, 1, 2, 3].map((index) => (
+            <span key={index} className={index < code.length ? "is-filled" : ""} />
+          ))}
+        </div>
+        <div className="keypad">
+          {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((digit) => (
+            <button key={digit} type="button" onClick={() => press(digit)}>
+              {digit}
+            </button>
+          ))}
+          <span />
+          <button type="button" onClick={() => press("0")}>
+            0
+          </button>
+          <button
+            type="button"
+            onClick={() => setCode((current) => current.slice(0, -1))}
+            aria-label="Apagar último dígito"
+          >
+            <Delete size={18} aria-hidden />
+          </button>
+        </div>
+        {message && (
+          <p className="lockscreen__error" role="alert">
+            {message}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
