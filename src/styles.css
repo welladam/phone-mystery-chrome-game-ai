@@ -810,6 +810,7 @@ pre {
   align-content: start;
   overflow-y: auto;
   padding-bottom: 0.8rem;
+  padding-top: 12px;
 }
 
 .app-tile {

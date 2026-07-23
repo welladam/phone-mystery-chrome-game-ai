@@ -177,11 +177,17 @@ em quatro arquivos (`cap-a` a `cap-d`), um por ato.
 
 ## 11. Substituir fotografias e áudios
 
-Os assets são **opcionais** e substituíveis sem tocar em código.
+Os assets são **opcionais** e substituíveis sem tocar em código. Cada foto e
+cada áudio é carregado pelo **nome de arquivo real** definido na história — o
+campo `file` de cada foto em `src/content/shared.ts` e o `id` de cada áudio.
 
-- Fotos: coloque o arquivo em `public/assets/photos/<ID>.jpg`, usando o
-  identificador da foto (`PHOTO_001.jpg`, `PHOTO_014.jpg`, …).
-- Áudios: coloque em `public/assets/audio/<ID>.m4a` (`VOICE_004.m4a`, …).
+- Fotos: coloque o arquivo em `public/assets/photos/` com o mesmo nome que
+  aparece no campo "Arquivo" da própria foto no jogo — por exemplo
+  `IMG_20260308_1944.jpg` (a foto do mirante), `tribuna_barao.png` (a matéria)
+  ou `print_live_diego_080326.png` (a transmissão). A extensão pode ser `.jpg`
+  ou `.png`, o que já estiver no nome.
+- Áudios: coloque em `public/assets/audio/` com o identificador da gravação —
+  `VOICE_001.m4a` a `VOICE_004.m4a`.
 
 Enquanto o arquivo não existir, o jogo desenha um **placeholder** com os
 metadados corretos (data, hora, álbum e descrição). No caso dos áudios, a

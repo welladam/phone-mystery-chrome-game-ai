@@ -136,6 +136,7 @@ export function PhotosApp({ api }: { api: AppApi }) {
             <button key={photo.id} type="button" onClick={() => setSelected(photo.id)}>
               <PhotoAsset
                 photoId={photo.id}
+                file={photo.file}
                 alt={photo.alt}
                 takenAt={photo.takenAt}
                 album={photo.album}
@@ -153,6 +154,7 @@ export function PhotosApp({ api }: { api: AppApi }) {
           </button>
           <PhotoAsset
             photoId={current.id}
+            file={current.file}
             alt={current.alt}
             takenAt={current.takenAt}
             album={current.album}

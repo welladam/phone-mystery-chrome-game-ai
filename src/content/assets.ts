@@ -9,8 +9,14 @@
 export const PHOTO_DIR = "/assets/photos";
 export const AUDIO_DIR = "/assets/audio";
 
-export function photoSrc(photoId: string) {
-  return `${PHOTO_DIR}/${photoId}.jpg`;
+/**
+ * Carrega a imagem pelo nome de arquivo real da história (o campo `file` de
+ * cada foto — ex.: `IMG_20260308_1944.jpg`, `tribuna_barao.png`). Assim os
+ * arquivos gerados entram na pasta com o próprio nome, preservando a extensão
+ * original (jpg ou png), sem precisar renomear nem converter.
+ */
+export function photoSrc(fileName: string) {
+  return `${PHOTO_DIR}/${fileName}`;
 }
 
 export function audioSrc(voiceId: string) {

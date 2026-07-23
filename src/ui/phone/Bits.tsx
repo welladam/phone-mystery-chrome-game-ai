@@ -30,6 +30,7 @@ export function ClueMark({ clueId, found, examined, onExamine }: ClueMarkProps) 
 
 type PhotoAssetProps = {
   photoId: string;
+  file: string;
   alt: string;
   takenAt: string;
   album: string;
@@ -37,11 +38,12 @@ type PhotoAssetProps = {
 };
 
 /**
- * Tenta carregar `public/assets/photos/<ID>.jpg`. Se o arquivo ainda não
- * existir, desenha um placeholder com os metadados corretos. Trocar a imagem
- * é soltar o arquivo na pasta — nenhuma linha de código muda.
+ * Tenta carregar `public/assets/photos/<file>` (o nome real da foto na
+ * história). Se o arquivo ainda não existir, desenha um placeholder com os
+ * metadados corretos. Trocar a imagem é soltar o arquivo na pasta — nenhuma
+ * linha de código muda.
  */
-export function PhotoAsset({ photoId, alt, takenAt, album, className }: PhotoAssetProps) {
+export function PhotoAsset({ photoId, file, alt, takenAt, album, className }: PhotoAssetProps) {
   const [failed, setFailed] = useState(false);
   const tone = placeholderTone(photoId);
 
@@ -67,7 +69,7 @@ export function PhotoAsset({ photoId, alt, takenAt, album, className }: PhotoAss
   return (
     <img
       className={`photo-asset ${className ?? ""}`}
-      src={photoSrc(photoId)}
+      src={photoSrc(file)}
       alt={alt}
       loading="lazy"
       onError={() => setFailed(true)}

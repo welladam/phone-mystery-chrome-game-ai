@@ -162,7 +162,7 @@ export const PHOTOS: PhotoRecord[] = [
   },
   {
     id: "PHOTO_010",
-    file: "print_live_080326.png",
+    file: "print_live_diego_080326.png",
     takenAt: "08/03/2026 19:39",
     album: "Capturas de tela",
     caption: "",

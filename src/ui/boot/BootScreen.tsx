@@ -182,7 +182,7 @@ export default function BootScreen({
               {error.info.retryable && (
                 <button className="btn btn--primary" onClick={onRetry} type="button">
                   <RefreshCw size={17} aria-hidden />
-                  Tentar novamente
+                  Instalar
                 </button>
               )}
               <button className="btn" onClick={() => window.location.reload()} type="button">

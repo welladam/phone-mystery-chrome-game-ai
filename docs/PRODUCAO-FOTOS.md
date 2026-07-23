@@ -3,9 +3,11 @@
 Material de produção. **Este arquivo fica fora de `src/`**, portanto não é
 empacotado nem enviado ao navegador.
 
-Para usar uma foto no jogo, salve o arquivo gerado como
-`public/assets/photos/<ID>.jpg`. Enquanto o arquivo não existir, o jogo desenha
-um placeholder com os metadados corretos — nenhuma linha de código muda.
+Para usar uma foto no jogo, salve o arquivo gerado em
+`public/assets/photos/` com o **nome de arquivo indicado no título de cada
+item** abaixo (ex.: `IMG_20260308_1944.jpg`, `tribuna_barao.png`). É esse nome
+que o jogo procura. Enquanto o arquivo não existir, o jogo desenha um
+placeholder com os metadados corretos — nenhuma linha de código muda.
 
 ## Diretrizes gerais
 
