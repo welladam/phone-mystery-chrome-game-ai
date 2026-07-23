@@ -35,6 +35,7 @@ export default function PasscodeSheet({
   const attempts = state.lockAttempts[lockId] ?? 0;
   const offerHint = attempts >= 6;
   const hint = hintFor(lockId);
+  const showPasswordHints = state.difficulty === "normal";
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -64,9 +65,11 @@ export default function PasscodeSheet({
 
         {lock.priorAttempts && <p className="sheet__forensic">{lock.priorAttempts}</p>}
 
-        <p className="sheet__hint">
-          Dica definida pela própria titular: <strong>“{lock.hint}”</strong>
-        </p>
+        {showPasswordHints && (
+          <p className="sheet__hint">
+            Dica definida pela própria titular: <strong>“{lock.hint}”</strong>
+          </p>
+        )}
 
         <form onSubmit={submit} className="sheet__form">
           <label>
@@ -110,7 +113,7 @@ export default function PasscodeSheet({
           </div>
         </form>
 
-        {offerHint && hint && (
+        {showPasswordHints && offerHint && hint && (
           <div className="sheet__assist">
             {!showHint ? (
               <button type="button" className="btn btn--ghost" onClick={() => setShowHint(true)}>

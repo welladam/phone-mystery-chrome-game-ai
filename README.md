@@ -1,4 +1,4 @@
-# O que Clara guardou
+# O Mistério de Clara
 
 Jogo de investigação que roda **inteiramente no navegador**, sem servidor e sem
 chave de API. Você recebe o celular de uma jovem morta e precisa descobrir o que
@@ -32,15 +32,15 @@ pessoas com quem você pode falar, e **o código da tela do celular**.
 
 A pasta continua acessível durante toda a partida pelo botão **Material do
 caso**, no canto superior direito. O caderno da investigação fica aberto ao lado
-do celular e oferece notas livres, fichas de pessoas e uma linha do tempo manual
-com horário, título e descrição.
+do celular e oferece notas livres para o jogador organizar a investigação do
+próprio jeito. No modo Normal, ele também reúne deduções, pessoas e dicas.
 
 Quem retoma uma investigação salva entra direto no aparelho — a pasta fica ali
 na lateral, para consulta.
 
-- **20 aplicativos** no aparelho: chat, fotos, e-mail, contatos, agenda,
-  navegador, chamadas, gravador, notas, mapas, nuvem, lixeira, saúde, banco,
-  transporte, rede social, autenticador, tarefas, ajustes e notificações, além
+- **20 aplicativos**, todos visíveis desde o início: chat, fotos, e-mail, contatos, calendário,
+  navegador, telefone, gravador, notas, mapas, Drive, lixeira, saúde, banco,
+  corridas, rede social, autenticador, tarefas, ajustes e notificações, além
   do caderno externo ao telefone.
 - **69 pistas** com identificadores estáveis. O motor reconhece o conteúdo à
   medida que ele é consultado; o jogador registra suas próprias conclusões no
@@ -48,16 +48,17 @@ na lateral, para consulta.
 - **9 senhas**, todas solucionáveis com o que existe dentro do próprio aparelho.
   Nenhuma exige busca externa, força bruta ou trocadilho. Toda senha tem pelo
   menos duas rotas independentes de solução.
-- **Deduções** aparecem em avisos narrativos quando informações suficientes se
-  conectam. Ao mudar de ato, o jogo também mostra os novos aplicativos liberados.
+- **Dois modos de jogo**: Normal, com deduções, pessoas, dicas e destaques; e
+  Difícil, que registra a mesma progressão em silêncio e deixa a análise por
+  conta do jogador.
 - **Quatro atos**. O jogo avança quando você entende algo, não quando clica em
   determinada ordem. Cada transição de ato tem mais de uma porta de entrada.
-- No fim, um **painel de reconstrução** com nove nós e um **formulário de
-  acusação** com oito campos. Respostas parciais recebem retorno dirigido, não
-  uma recusa seca.
+- No fim, o caderno apresenta quatro pontos para reflexão — responsável,
+  motivo, método e oportunidade — e pede que o jogador escreva apenas o nome
+  do responsável. Uma resposta errada não revela suspeitos nem pistas extras.
 
-Dicas ficam disponíveis o tempo todo, em três degraus (direção, foco,
-resposta), e nunca penalizam nada.
+Dicas ficam disponíveis no modo Normal, em três degraus (direção, foco,
+resposta), e nunca penalizam nada. No modo Difícil, a aba permanece bloqueada.
 
 ## 3. Como a IA é utilizada
 
@@ -118,7 +119,7 @@ Nenhum serviço externo é usado. Nenhuma chave de API é pedida.
 | Onde | O que |
 |---|---|
 | IndexedDB `clara-caso-0447` | progresso da investigação e registro técnico |
-| localStorage | preferências, notas livres e linha do tempo manual do caderno |
+| localStorage | preferências e notas livres do caderno |
 
 O save guarda **somente identificadores e estados já alcançados**. Não há texto
 de solução, não há segredo bloqueado e nenhuma chave tem nome revelador. O save
@@ -203,14 +204,16 @@ fora do pacote enviado ao navegador. Os roteiros de gravação estão em
 
 Para apagar tudo e recomeçar, abra **Opções** no canto superior direito e use
 **Reiniciar o jogo do zero**. Isso remove o progresso, as conversas, as notas e
-a linha do tempo manual; os modelos locais do Chrome e as preferências de
+o modo escolhido; os modelos locais do Chrome e as preferências de
 acessibilidade permanecem instalados.
 
 O save tem versão. Ao subir de versão, `src/persistence/save.ts` decide o que
 fazer:
 
 - **v1 → v2**: o save da versão 1 pertence a um protótipo com outra história e é
-  descartado de propósito. O jogo avisa isso ao restaurar.
+  descartado de propósito.
+- **v2 → v3**: pistas, conversas e progresso são preservados; a investigação
+  restaurada assume o modo Normal e os dados antigos da linha do tempo são ignorados.
 - Formatos futuros devem ganhar uma função de migração no mesmo arquivo, em vez
   de invalidar o progresso existente.
 
@@ -225,8 +228,8 @@ finge o contrário.
 
 O que foi feito, como esforço razoável contra spoiler acidental:
 
-- o conteúdo é dividido por ato e carregado sob demanda — **o texto do desfecho
-  não está no pacote inicial**;
+- os registros dos atos iniciais ficam disponíveis desde o começo, mas **o texto
+  do desfecho não está no pacote inicial** e só é carregado no Ato 4;
 - o prompt do desfecho vive num módulo separado, carregado só no último ato;
 - identificadores são opacos (`CLUE_0xx`, `EVENT_0xx`), sem nomes como
   "assassino" ou "solução";
@@ -241,7 +244,7 @@ bloquear F12, interceptar atalhos, laços com `debugger`, detectar DevTools ou
 apagar o progresso de quem inspeciona.
 
 > **Proteção real exigiria um backend** que não enviasse os segredos ao
-> navegador — mantendo o texto do desfecho, o gabarito da acusação e a lógica de
+> navegador — mantendo o texto do desfecho e a lógica de
 > julgamento no servidor, e liberando cada trecho apenas quando o estado
 > validado do lado do servidor permitisse. Este projeto é intencionalmente
 > offline e local, então essa troca não foi feita.

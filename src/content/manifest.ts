@@ -14,32 +14,32 @@ export const CASE_DATE = "6 de maio de 2026";
 
 export const APPS: PhoneAppDescriptor[] = [
   { id: "APP_001", name: "Notificações", icon: "Bell", availableFrom: 1, tone: "ambar" },
-  { id: "APP_002", name: "Vínculo", icon: "MessageCircle", availableFrom: 1, tone: "verde" },
-  { id: "APP_003", name: "Galeria", icon: "Image", availableFrom: 1, tone: "rosa" },
+  { id: "APP_002", name: "Chat", icon: "MessageCircle", availableFrom: 1, tone: "verde" },
+  { id: "APP_003", name: "Fotos", icon: "Image", availableFrom: 1, tone: "rosa" },
   { id: "APP_005", name: "Contatos", icon: "Users", availableFrom: 1, tone: "azul" },
-  { id: "APP_006", name: "Agenda", icon: "CalendarDays", availableFrom: 1, tone: "roxo" },
+  { id: "APP_006", name: "Calendário", icon: "CalendarDays", availableFrom: 1, tone: "roxo" },
   { id: "APP_008", name: "Telefone", icon: "Phone", availableFrom: 1, tone: "verde" },
-  { id: "APP_014", name: "Pulso", icon: "Activity", availableFrom: 1, tone: "rosa" },
+  { id: "APP_014", name: "Saúde", icon: "Activity", availableFrom: 1, tone: "rosa" },
   { id: "APP_020", name: "Ajustes", icon: "Settings", availableFrom: 1, tone: "cinza" },
   { id: "APP_021", name: "Caderno do Caso", icon: "NotebookPen", availableFrom: 1, tone: "ambar" },
 
-  { id: "APP_004", name: "Correio", icon: "Mail", availableFrom: 2, tone: "azul" },
-  { id: "APP_007", name: "Órbita", icon: "Globe", availableFrom: 2, tone: "azul" },
-  { id: "APP_010", name: "Bloco", icon: "StickyNote", availableFrom: 2, tone: "ambar" },
-  { id: "APP_011", name: "Rumo", icon: "MapPin", availableFrom: 2, tone: "verde" },
-  { id: "APP_012", name: "Nimbo Drive", icon: "CloudUpload", availableFrom: 2, tone: "azul" },
-  { id: "APP_013", name: "Recuperados", icon: "Trash2", availableFrom: 2, tone: "cinza" },
-  { id: "APP_015", name: "Banco Aurora", icon: "Landmark", availableFrom: 2, tone: "verde", lock: "LOCK_007" },
-  { id: "APP_016", name: "Vello", icon: "Car", availableFrom: 2, tone: "cinza" },
-  { id: "APP_017", name: "Fluxo", icon: "Hash", availableFrom: 2, tone: "roxo", lock: "LOCK_009" },
-  { id: "APP_019", name: "Feito", icon: "ListChecks", availableFrom: 2, tone: "verde" },
+  { id: "APP_004", name: "E-mail", icon: "Mail", availableFrom: 2, tone: "azul" },
+  { id: "APP_007", name: "Navegador", icon: "Globe", availableFrom: 2, tone: "azul" },
+  { id: "APP_010", name: "Notas", icon: "StickyNote", availableFrom: 2, tone: "ambar" },
+  { id: "APP_011", name: "Mapas", icon: "MapPin", availableFrom: 2, tone: "verde" },
+  { id: "APP_012", name: "Drive", icon: "CloudUpload", availableFrom: 2, tone: "azul" },
+  { id: "APP_013", name: "Lixeira", icon: "Trash2", availableFrom: 2, tone: "cinza" },
+  { id: "APP_015", name: "Banco", icon: "Landmark", availableFrom: 2, tone: "verde", lock: "LOCK_007" },
+  { id: "APP_016", name: "Corridas", icon: "Car", availableFrom: 2, tone: "cinza" },
+  { id: "APP_017", name: "Rede Social", icon: "Hash", availableFrom: 2, tone: "roxo", lock: "LOCK_009" },
+  { id: "APP_019", name: "Tarefas", icon: "ListChecks", availableFrom: 2, tone: "verde" },
 
-  { id: "APP_009", name: "Voz Segura", icon: "Mic", availableFrom: 3, tone: "rosa", lock: "LOCK_004" },
-  { id: "APP_018", name: "Chave", icon: "KeyRound", availableFrom: 3, tone: "ambar" },
+  { id: "APP_009", name: "Gravador", icon: "Mic", availableFrom: 3, tone: "rosa", lock: "LOCK_004" },
+  { id: "APP_018", name: "Autenticador", icon: "KeyRound", availableFrom: 3, tone: "ambar" },
 ];
 
 /** Apps liberados assim que o aparelho é destravado. */
-export const INITIAL_APPS = APPS.filter((app) => app.availableFrom === 1).map((app) => app.id);
+export const INITIAL_APPS = APPS.map((app) => app.id);
 
 export function appsForAct(act: number) {
   return APPS.filter((app) => app.availableFrom <= act);

@@ -74,8 +74,8 @@ export const DOSSIER_ACCESS = {
 
 export const DOSSIER_METHOD = [
   "O caderno fica aberto ao lado do aparelho. Use Minhas notas para registrar livremente nomes, senhas, suspeitas e contradições.",
-  "Na aba Linha do tempo, você pode adicionar manualmente horário, título e descrição de cada acontecimento. Tudo fica salvo neste navegador.",
-  "As abas Pessoas, Acusação e Dicas continuam disponíveis no mesmo caderno durante a investigação.",
+  "No modo Normal, as abas Deduções, Pessoas e Dicas ajudam a organizar o que já foi encontrado. No modo Difícil, elas permanecem bloqueadas.",
+  "A aba Acusação só abre no ato final. Você precisará escrever por conta própria quem foi responsável pela morte de Clara.",
   "Você escreve às três pessoas pelo número da própria Clara. Elas foram avisadas, mas ver esse nome aparecer mexe com qualquer um.",
   "Você pode anexar uma prova a uma mensagem. É diferente de só perguntar.",
   "Nada do que você escrever sai deste computador.",
@@ -100,6 +100,6 @@ export const ACT_BRIEF: Record<ActNumber, { title: string; goal: string }> = {
   },
   4: {
     title: "Ato 4 — Você deixou eu dirigir",
-    goal: "Reconstruir a noite de 8 de março e sustentar a acusação com prova.",
+    goal: "Reconstruir a noite de 8 de março e apontar quem foi responsável pela morte de Clara.",
   },
 };

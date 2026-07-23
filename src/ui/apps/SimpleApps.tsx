@@ -30,7 +30,6 @@ function useClue(api: AppApi) {
 
 export function ContactsApp({ api }: { api: AppApi }) {
   const mark = useClue(api);
-  const dialed = api.state.cluesFound.includes("CLUE_028");
 
   return (
     <div className="list">
@@ -39,14 +38,12 @@ export function ContactsApp({ api }: { api: AppApi }) {
           {contact.note && <p className="muted">“{contact.note}”</p>}
         </Row>
       ))}
-      {dialed && (
-        <Row title={UNKNOWN_NUMBER} meta="sem cadastro" flag>
-          <p className="muted">
-            Este número não está na agenda. Ele aparece uma única vez no histórico de chamadas.
-          </p>
-          {mark("CLUE_028")}
-        </Row>
-      )}
+      <Row title={UNKNOWN_NUMBER} meta="sem cadastro" flag>
+        <p className="muted">
+          Este número não está na agenda. Ele aparece uma única vez no histórico de chamadas.
+        </p>
+        {mark("CLUE_028")}
+      </Row>
     </div>
   );
 }
@@ -91,7 +88,7 @@ export function CallsApp({ api }: { api: AppApi }) {
 
 export function CalendarApp({ api }: { api: AppApi }) {
   const mark = useClue(api);
-  const events = api.packs.act1?.CALENDAR.filter((event) => event.act <= api.state.act) ?? [];
+  const events = api.packs.act1?.CALENDAR ?? [];
 
   if (!events.length) return <Empty>Nada carregado ainda.</Empty>;
 
@@ -163,7 +160,7 @@ export function MailApp({ api }: { api: AppApi }) {
 
       {account === "arquivo" && !archiveUnlocked && (
         <Empty>
-          Esta conta pede a resposta de segurança e um código de verificação. O aplicativo Chave
+          Esta conta pede a resposta de segurança e um código de verificação. O Autenticador
           mostra que a conta existe.
         </Empty>
       )}
@@ -224,7 +221,6 @@ export function RidesApp({ api }: { api: AppApi }) {
   const mark = useClue(api);
   const own = api.packs.act3?.RIDES_OWN ?? [];
   const shared = api.packs.act3?.RIDES_SHARED;
-  const hasShared = api.state.cluesFound.includes("CLUE_019");
 
   return (
     <div className="list">
@@ -240,7 +236,7 @@ export function RidesApp({ api }: { api: AppApi }) {
       )}
 
       <h3 className="section-title">Compartilhado comigo</h3>
-      {!hasShared || !shared ? (
+      {!shared ? (
         <Empty>
           Nada aqui ainda. Capturas de tela enviadas por terceiros aparecem nesta aba quando você as
           recebe em conversa.

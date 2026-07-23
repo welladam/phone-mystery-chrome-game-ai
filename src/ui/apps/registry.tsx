@@ -33,14 +33,22 @@ type RenderArgs = {
   api: AppApi;
   conversation: ConversationApi;
   initialCharacter?: CharacterId;
+  chatRequestKey?: number;
 };
 
-export function renderApp({ appId, api, conversation, initialCharacter }: RenderArgs) {
+export function renderApp({ appId, api, conversation, initialCharacter, chatRequestKey }: RenderArgs) {
   switch (appId) {
     case "APP_001":
       return <NotificationsApp api={api} />;
     case "APP_002":
-      return <ChatApp api={api} conversation={conversation} initialCharacter={initialCharacter} />;
+      return (
+        <ChatApp
+          api={api}
+          conversation={conversation}
+          initialCharacter={initialCharacter}
+          requestKey={chatRequestKey}
+        />
+      );
     case "APP_003":
       return <PhotosApp api={api} />;
     case "APP_004":

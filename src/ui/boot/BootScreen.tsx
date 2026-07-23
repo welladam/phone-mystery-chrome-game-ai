@@ -83,7 +83,7 @@ export default function BootScreen({
           </div>
           <div>
             <p className="boot__eyebrow">Perícia digital independente · IP 0447/2026</p>
-            <h1>O que Clara guardou</h1>
+            <h1>O Mistério de Clara</h1>
           </div>
         </header>
 
@@ -95,8 +95,8 @@ export default function BootScreen({
             </p>
             <p>
               Você vai abrir os aplicativos, descobrir senhas, comparar horários e conversar — pelo
-              número dela — com as três pessoas mais próximas. No fim, vai precisar escrever a
-              acusação e provar cada parte dela.
+              número dela — com as três pessoas mais próximas. No fim, vai precisar apontar quem foi
+              responsável pela morte dela.
             </p>
 
             <div className="boot__explainer">

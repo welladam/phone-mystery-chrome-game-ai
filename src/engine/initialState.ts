@@ -1,7 +1,7 @@
 import { INITIAL_APPS } from "../content/manifest";
 import type { CharacterId, ChatState, GameState } from "./types";
 
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 
 export const PLAYABLE_CHARACTERS: CharacterId[] = ["CHAR_002", "CHAR_003", "CHAR_004"];
 export const LATE_CHARACTER: CharacterId = "CHAR_005";
@@ -14,6 +14,8 @@ export function createInitialState(): GameState {
   const now = new Date().toISOString();
   return {
     saveVersion: SAVE_VERSION,
+    difficulty: "normal",
+    difficultyChosen: false,
     act: 1,
     phoneUnlocked: false,
     unlockedApps: [...INITIAL_APPS],
@@ -34,8 +36,7 @@ export function createInitialState(): GameState {
     notificationsSeen: [],
     zoomed: [],
     playedVoices: [],
-    timeline: {},
-    accusation: { sequencia: [], evidencias: [] },
+    accusation: {},
     accusationAttempts: [],
     hintsUsed: {},
     metaAttempts: 0,

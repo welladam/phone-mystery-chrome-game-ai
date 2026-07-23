@@ -40,11 +40,12 @@ export function loadAct4() {
   return act4;
 }
 
-/** Pré-carrega o que o ato atual precisa, sem trazer o que ainda não é hora. */
+/**
+ * Os aplicativos e seus registros ficam disponíveis desde o início. O pacote
+ * do desfecho continua isolado até o motor confirmar o Ato 4.
+ */
 export function preloadForAct(act: ActNumber) {
-  const jobs: Array<Promise<unknown>> = [loadAct1()];
-  if (act >= 2) jobs.push(loadAct2());
-  if (act >= 3) jobs.push(loadAct3());
+  const jobs: Array<Promise<unknown>> = [loadAct1(), loadAct2(), loadAct3()];
   if (act >= 4) jobs.push(loadAct4());
   return Promise.all(jobs);
 }

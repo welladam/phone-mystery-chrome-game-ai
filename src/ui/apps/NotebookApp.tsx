@@ -1,24 +1,15 @@
-import { useState, type FormEvent, type ReactElement } from "react";
-import { Gavel, Lightbulb, PencilLine, Plus, Scale, Sparkles, Trash2, Users } from "lucide-react";
-import { CLUES, getClue } from "../../content/manifest";
-import { missingBlocks } from "../../engine/accusation";
+import { useState, type ReactElement } from "react";
+import { Gavel, Lightbulb, Lock, PencilLine, Sparkles, Users } from "lucide-react";
 import { hintFor, hintLevel, suggestObstacle } from "../../engine/hints";
 import { canAccuse, deriveContradictions } from "../../engine/rules";
-import { evidenceCoverage, knownMemories } from "../../engine/selectors";
+import { knownMemories } from "../../engine/selectors";
 import type { AppApi } from "./types";
 import { Empty, Row } from "../phone/Bits";
 
-type Tab = "notas" | "deducoes" | "pessoas" | "linha" | "acusacao" | "dicas";
-
-type ManualTimelineEntry = {
-  id: string;
-  time: string;
-  title: string;
-  description: string;
-};
+type Tab = "notas" | "deducoes" | "pessoas" | "acusacao" | "dicas";
 
 const NOTES_KEY = "clara.case-notes.v1";
-const TIMELINE_KEY = "clara.case-timeline.v1";
+const LEGACY_TIMELINE_KEY = "clara.case-timeline.v1";
 
 function loadNotes() {
   try {
@@ -32,45 +23,16 @@ function storeNotes(value: string) {
   try {
     localStorage.setItem(NOTES_KEY, value);
   } catch {
-    // Se o navegador bloquear armazenamento, o texto continua disponível
-    // durante esta sessão e a investigação segue normalmente.
-  }
-}
-
-function loadTimeline(): ManualTimelineEntry[] {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(TIMELINE_KEY) ?? "[]") as unknown;
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (entry): entry is ManualTimelineEntry =>
-        typeof entry === "object" &&
-        entry !== null &&
-        typeof entry.id === "string" &&
-        typeof entry.time === "string" &&
-        typeof entry.title === "string" &&
-        typeof entry.description === "string",
-    );
-  } catch {
-    return [];
-  }
-}
-
-function storeTimeline(entries: ManualTimelineEntry[]) {
-  try {
-    localStorage.setItem(TIMELINE_KEY, JSON.stringify(entries));
-  } catch {
-    // A linha do tempo continua disponível nesta sessão se o armazenamento
-    // estiver bloqueado pelo navegador.
+    // O texto continua disponível durante a sessão se o armazenamento falhar.
   }
 }
 
 export function clearNotebookStorage() {
   try {
     localStorage.removeItem(NOTES_KEY);
-    localStorage.removeItem(TIMELINE_KEY);
+    localStorage.removeItem(LEGACY_TIMELINE_KEY);
   } catch {
-    // O save principal ainda será limpo mesmo se o navegador bloquear o
-    // armazenamento auxiliar do caderno.
+    // O save principal ainda é limpo separadamente.
   }
 }
 
@@ -115,23 +77,32 @@ const PEOPLE = [
 export default function NotebookApp({ api }: { api: AppApi }) {
   const [tab, setTab] = useState<Tab>("notas");
   const [notes, setNotes] = useState(loadNotes);
+  const hard = api.state.difficulty === "hard";
+  const accusationLocked = !canAccuse(api.state);
+
+  const tabs: Array<[Tab, string, ReactElement, boolean, string | undefined]> = [
+    ["notas", "Minhas notas", <PencilLine key="n" size={15} />, false, undefined],
+    ["deducoes", "Deduções", <Sparkles key="d" size={15} />, hard, "Indisponível no modo Difícil"],
+    ["pessoas", "Pessoas", <Users key="p" size={15} />, hard, "Indisponível no modo Difícil"],
+    ["acusacao", "Acusação", <Gavel key="a" size={15} />, accusationLocked, "Disponível no Ato 4"],
+    ["dicas", "Dicas", <Lightbulb key="h" size={15} />, hard, "Indisponível no modo Difícil"],
+  ];
 
   return (
     <div className="notebook">
       <nav className="notebook__tabs" aria-label="Seções do caderno">
-        {(
-          [
-            ["notas", "Minhas notas", <PencilLine key="n" size={15} />],
-            ["deducoes", "Deduções", <Sparkles key="d" size={15} />],
-            ["pessoas", "Pessoas", <Users key="b" size={15} />],
-            ["linha", "Linha do tempo", <Scale key="c" size={15} />],
-            ["acusacao", "Acusação", <Gavel key="e" size={15} />],
-            ["dicas", "Dicas", <Lightbulb key="f" size={15} />],
-          ] as Array<[Tab, string, ReactElement]>
-        ).map(([id, label, icon]) => (
-          <button key={id} type="button" className={tab === id ? "is-active" : ""} onClick={() => setTab(id)}>
-            {icon}
+        {tabs.map(([id, label, icon, locked, reason]) => (
+          <button
+            key={id}
+            type="button"
+            className={tab === id ? "is-active" : ""}
+            onClick={() => setTab(id)}
+            disabled={locked}
+            title={locked ? reason : undefined}
+          >
+            {locked ? <Lock size={14} aria-hidden /> : icon}
             {label}
+            {locked && <span className="sr-only"> — {reason}</span>}
           </button>
         ))}
       </nav>
@@ -142,349 +113,114 @@ export default function NotebookApp({ api }: { api: AppApi }) {
             <h3>Caderno do investigador</h3>
             <p>Anote nomes, horários, senhas e suspeitas do seu jeito.</p>
           </div>
-          <textarea
-            value={notes}
-            onChange={(event) => {
-              const next = event.target.value;
-              setNotes(next);
-              storeNotes(next);
-            }}
-            placeholder={"Ex.: 19h58 — última leitura cardíaca\nQuem tinha acesso ao carro?\nSenha possível: ..."}
-            aria-label="Anotações pessoais sobre o caso"
-            spellCheck
-          />
+          <div className="manual-notes__sheet">
+            <textarea
+              value={notes}
+              onChange={(event) => {
+                const next = event.target.value;
+                setNotes(next);
+                storeNotes(next);
+              }}
+              placeholder={"Ex.: 19h58 — última leitura cardíaca\nQuem tinha acesso ao carro?\nSenha possível: ..."}
+              aria-label="Anotações pessoais sobre o caso"
+              spellCheck
+            />
+          </div>
           <p className="manual-notes__saved">Salvo automaticamente neste navegador.</p>
         </section>
       )}
 
       {tab === "deducoes" && <DeductionsPanel api={api} />}
-
-      {tab === "pessoas" && (
-        <div className="list notebook-page">
-          {PEOPLE.map((person) => (
-            <Row key={person.id} title={person.name} meta={person.role}>
-              <p className="muted">
-                <strong>O que disse:</strong> {person.said}
-              </p>
-              <p className="muted">
-                <strong>O que os dados dizem:</strong> {person.data}
-              </p>
-            </Row>
-          ))}
-        </div>
-      )}
-
-      {tab === "linha" && <TimelinePanel />}
-
+      {tab === "pessoas" && <PeoplePanel />}
       {tab === "acusacao" && <AccusationPanel api={api} />}
-
       {tab === "dicas" && <HintPanel api={api} />}
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-
 function DeductionsPanel({ api }: { api: AppApi }) {
   const memories = knownMemories(api.state);
   const contradictions = deriveContradictions(api.state);
-
   if (memories.length === 0 && contradictions.length === 0) {
-    return (
-      <div className="list notebook-page">
-        <Empty>
-          Nenhuma dedução ainda. Conforme você cruza informações do aparelho, as conclusões que se
-          sustentam e as versões que não fecham aparecem aqui automaticamente.
-        </Empty>
-      </div>
-    );
+    return <div className="list notebook-page"><Empty>Nenhuma dedução estabelecida até agora.</Empty></div>;
   }
-
   return (
     <div className="list notebook-page">
-      {memories.length > 0 && (
-        <section className="panel">
-          <h3>O que já está estabelecido</h3>
-          {memories.map((memory) => (
-            <Row key={memory.id} title={memory.label}>
-              <p>{memory.text}</p>
-            </Row>
-          ))}
-        </section>
-      )}
-
-      {contradictions.length > 0 && (
-        <section className="panel panel--warn">
-          <h3>Versões que não fecham</h3>
-          {contradictions.map((item) => (
-            <Row key={item.id} title="Contradição">
-              <p>{item.text}</p>
-            </Row>
-          ))}
-        </section>
-      )}
+      {memories.length > 0 && <section className="panel"><h3>O que já está estabelecido</h3>{memories.map((memory) => <Row key={memory.id} title={memory.label}><p>{memory.text}</p></Row>)}</section>}
+      {contradictions.length > 0 && <section className="panel panel--warn"><h3>Versões que não fecham</h3>{contradictions.map((item) => <Row key={item.id} title="Contradição"><p>{item.text}</p></Row>)}</section>}
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-
-function TimelinePanel() {
-  const [entries, setEntries] = useState(loadTimeline);
-  const [time, setTime] = useState("");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-
-  function submit(event: FormEvent) {
-    event.preventDefault();
-    if (!time || !title.trim()) return;
-
-    const next = [
-      ...entries,
-      {
-        id: typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `tl-${Date.now()}`,
-        time,
-        title: title.trim(),
-        description: description.trim(),
-      },
-    ];
-
-    setEntries(next);
-    storeTimeline(next);
-    setTime("");
-    setTitle("");
-    setDescription("");
-  }
-
-  function remove(id: string) {
-    const next = entries.filter((entry) => entry.id !== id);
-    setEntries(next);
-    storeTimeline(next);
-  }
-
+function PeoplePanel() {
   return (
-    <section className="manual-timeline notebook-page">
-      <div className="manual-timeline__intro">
-        <h3>Linha do tempo do investigador</h3>
-        <p>Organize os acontecimentos com seus próprios horários e conclusões.</p>
-      </div>
-
-      <form className="manual-timeline__form" onSubmit={submit}>
-        <label>
-          <span>Horário</span>
-          <input
-            type="text"
-            value={time}
-            onChange={(event) => setTime(event.target.value)}
-            placeholder="19h58"
-            maxLength={12}
-            required
-          />
-        </label>
-        <label>
-          <span>Título</span>
-          <input
-            type="text"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder="Ex.: Última leitura cardíaca"
-            required
-          />
-        </label>
-        <label className="manual-timeline__description">
-          <span>Descrição</span>
-          <textarea
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="O que aconteceu e por que isso importa?"
-          />
-        </label>
-        <button type="submit" className="manual-timeline__add">
-          <Plus size={16} aria-hidden /> Adicionar à linha do tempo
-        </button>
-      </form>
-
-      <div className="manual-timeline__entries" aria-live="polite">
-        {entries.length === 0 && (
-          <p className="manual-timeline__empty">Nenhum acontecimento anotado ainda.</p>
-        )}
-        {entries.map((entry) => (
-          <article key={entry.id} className="manual-timeline__entry">
-            <time>{entry.time}</time>
-            <div>
-              <h4>{entry.title}</h4>
-              {entry.description && <p>{entry.description}</p>}
-            </div>
-            <button type="button" onClick={() => remove(entry.id)} aria-label={`Remover ${entry.title}`}>
-              <Trash2 size={15} aria-hidden />
-            </button>
-          </article>
-        ))}
-      </div>
-      <p className="manual-notes__saved">Salvo automaticamente neste navegador.</p>
-    </section>
+    <div className="list notebook-page">
+      {PEOPLE.map((person) => <Row key={person.id} title={person.name} meta={person.role}>
+        <p className="muted"><strong>O que disse:</strong> {person.said}</p>
+        <p className="muted"><strong>O que os dados dizem:</strong> {person.data}</p>
+      </Row>)}
+    </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-
 function AccusationPanel({ api }: { api: AppApi }) {
-  const pack = api.packs.act4;
-  const unlocked = canAccuse(api.state);
   const draft = api.state.accusation;
-  const coverage = evidenceCoverage(draft.evidencias);
-  const missing = missingBlocks(draft.evidencias);
-  const found = CLUES.filter((clue) => api.state.cluesFound.includes(clue.id));
   const lastAttempt = api.state.accusationAttempts[api.state.accusationAttempts.length - 1];
-  const feedback = lastAttempt && pack ? pack.FEEDBACK[lastAttempt.feedbackId] : undefined;
-
-  if (!unlocked) {
-    return (
-      <div className="list notebook-page">
-        <Empty>
-          O formulário abre quando a investigação chegar ao ato final e a gravação do mirante estiver
-          em mãos.
-        </Empty>
-      </div>
-    );
-  }
-
-  if (!pack) return <div className="notebook-page"><Empty>Carregando o material final…</Empty></div>;
-
   return (
-    <div className="list accusation notebook-page">
+    <div className="list accusation accusation--simple notebook-page">
       <section className="panel">
-        <h3>Pedido de reabertura — IP 0447/2026</h3>
-        <p className="muted">
-          Preencha. Isto vai ser lido pela Dra. Yara Trindade antes de qualquer autoridade.
-        </p>
+        <h3>Conclusão da investigação</h3>
+        <p className="muted">Antes de apontar um nome, tenha uma resposta própria para cada ponto.</p>
+        <ol className="accusation-points">
+          <li><strong>Responsável</strong><span>Quem causou a morte de Clara?</span></li>
+          <li><strong>Motivo</strong><span>O que essa pessoa precisava impedir ou esconder?</span></li>
+          <li><strong>Método</strong><span>Como a morte aconteceu e o aparelho foi manipulado?</span></li>
+          <li><strong>Oportunidade</strong><span>Como a pessoa chegou até Clara sem levantar suspeita?</span></li>
+        </ol>
       </section>
 
-      {pack.ACCUSATION_FIELDS.map((field) => (
-        <fieldset key={field.id} className="panel">
-          <legend>{field.legend}</legend>
-          {field.options.map((option) => (
-            <label key={option.id} className="choice">
-              <input
-                type="radio"
-                name={field.id}
-                checked={(draft as Record<string, unknown>)[field.id] === option.id}
-                onChange={() => api.setAccusation({ [field.id]: option.id })}
-              />
-              <span>{option.label}</span>
-            </label>
-          ))}
-        </fieldset>
-      ))}
+      <label className="accusation-answer">
+        <span>Responsável pela morte de Clara</span>
+        <input
+          type="text"
+          value={draft.responsavel ?? ""}
+          onChange={(event) => api.setAccusation({ responsavel: event.target.value })}
+          placeholder="Digite o nome"
+          autoComplete="off"
+        />
+      </label>
 
-      <fieldset className="panel">
-        <legend>5. Sequência dos acontecimentos</legend>
-        <p className="muted">Toque nas cartas na ordem correta.</p>
-        <div className="sequence">
-          {pack.SEQUENCE_CARDS.map((card) => {
-            const index = draft.sequencia.indexOf(card.id);
-            return (
-              <button
-                key={card.id}
-                type="button"
-                className={index >= 0 ? "is-picked" : ""}
-                onClick={() => api.toggleSequence(card.id)}
-              >
-                {index >= 0 && <span className="sequence__n">{index + 1}</span>}
-                {card.label}
-              </button>
-            );
-          })}
-        </div>
-      </fieldset>
-
-      <fieldset className="panel">
-        <legend>6. Evidências fundamentais</legend>
-        <p className="muted">
-          Mínimo de três, cobrindo os três blocos: presença, horário e motivo.
-          {missing.length > 0 && ` Ainda falta provar ${missing.join(" e ")}.`}
-        </p>
-        <p className="muted">Blocos cobertos: {coverage.blocks.join(", ") || "nenhum"}</p>
-        <div className="evidence">
-          {found.map((clue) => {
-            const picked = draft.evidencias.includes(clue.id);
-            return (
-              <button
-                key={clue.id}
-                type="button"
-                className={picked ? "is-picked" : ""}
-                onClick={() => api.toggleEvidence(clue.id)}
-              >
-                {clue.label}
-                {clue.block && <span className="evidence__block">bloco {clue.block}</span>}
-              </button>
-            );
-          })}
-        </div>
-      </fieldset>
-
-      <fieldset className="panel">
-        <legend>{pack.DESCONHECIDA_FIELD.legend}</legend>
-        {pack.DESCONHECIDA_FIELD.options.map((option) => (
-          <label key={option.id} className="choice">
-            <input
-              type="radio"
-              name="desconhecida"
-              checked={draft.desconhecida === option.id}
-              onChange={() => api.setAccusation({ desconhecida: option.id })}
-            />
-            <span>{option.label}</span>
-          </label>
-        ))}
-      </fieldset>
-
-      {feedback && lastAttempt?.outcome !== "aceita" && (
+      {lastAttempt?.outcome === "rejeitada" && (
         <section className="panel panel--warn" role="alert">
-          <h3>{feedback.title}</h3>
-          <pre className="feedback">{feedback.body}</pre>
-          {feedback.highlight && (
-            <p className="muted">
-              Reveja no caderno: <strong>{getClue(feedback.highlight)?.label}</strong>
-            </p>
-          )}
+          <h3>A conclusão ainda não se sustenta</h3>
+          <p>Esse nome não fecha o caso com o que foi encontrado. Revise os registros e tente novamente.</p>
         </section>
       )}
 
-      <button type="button" className="btn btn--primary btn--wide" onClick={api.submitAccusation}>
-        <Gavel size={17} aria-hidden />
-        Protocolar acusação
+      <button
+        type="button"
+        className="btn btn--primary btn--wide"
+        onClick={api.submitAccusation}
+        disabled={!draft.responsavel?.trim()}
+      >
+        <Gavel size={17} aria-hidden /> Confirmar responsável
       </button>
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-
 function HintPanel({ api }: { api: AppApi }) {
   const obstacle = suggestObstacle(api.state);
   const hint = hintFor(obstacle);
   const level = hintLevel(api.state, obstacle);
-
   if (!hint) return <Empty>Nada travado no momento.</Empty>;
-
   return (
     <div className="list notebook-page">
       <section className="panel">
         <h3>{hint.title}</h3>
-        <p className="muted">
-          As dicas vêm em três degraus: direção, foco e resposta. Cada degrau precisa de um novo
-          pedido. Usar dica não penaliza nada.
-        </p>
-        {hint.steps.slice(0, level).map((step, index) => (
-          <p key={index} className="hint">
-            <strong>Degrau {index + 1}:</strong> {step}
-          </p>
-        ))}
-        {level < 3 && (
-          <button type="button" className="btn" onClick={() => api.useHint(obstacle)}>
-            {level === 0 ? "Pedir uma direção" : level === 1 ? "Pedir mais foco" : "Pedir a resposta"}
-          </button>
-        )}
+        <p className="muted">Cada novo pedido aprofunda a orientação.</p>
+        {hint.steps.slice(0, level).map((step, index) => <p key={index} className="hint"><strong>Degrau {index + 1}:</strong> {step}</p>)}
+        {level < 3 && <button type="button" className="btn" onClick={() => api.useHint(obstacle)}>{level === 0 ? "Pedir uma direção" : level === 1 ? "Pedir mais foco" : "Pedir a resposta"}</button>}
       </section>
     </div>
   );

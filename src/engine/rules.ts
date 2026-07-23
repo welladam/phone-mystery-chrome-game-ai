@@ -120,43 +120,8 @@ export function evaluateUnknownGate(state: GameState, nowMs: number): UnknownGat
   return { ready: waited, variant: "fallback" };
 }
 
-/* ------------------------------------------------------------------ */
-/* Painel de reconstrução e acusação                                   */
-/* ------------------------------------------------------------------ */
-
-export const TIMELINE_NODES = [
-  { id: "NODE_1", time: "15h48", label: "Clara marca o encontro", accepts: ["CLUE_038", "CLUE_023", "CLUE_034"] },
-  { id: "NODE_2", time: "16h02", label: "A resposta chega", accepts: ["CLUE_001", "CLUE_034"] },
-  { id: "NODE_3", time: "18h27", label: '"me espera lá em cima"', accepts: ["CLUE_002", "CLUE_034"] },
-  { id: "NODE_4", time: "19h31", label: "Clara chega ao mirante", accepts: ["CLUE_006"] },
-  { id: "NODE_5", time: "19h44", label: "Um carro sobe a estrada", accepts: ["CLUE_009", "CLUE_031"] },
-  { id: "NODE_6", time: "19h46", label: "A gravação começa", accepts: ["CLUE_010"], required: true },
-  { id: "NODE_7", time: "19h58", label: "A queda", accepts: ["CLUE_004", "CLUE_004B"], required: true },
-  {
-    id: "NODE_8",
-    time: "20h11",
-    label: "O aparelho é desbloqueado",
-    accepts: ["CLUE_005", "CLUE_051", "CLUE_053", "CLUE_066"],
-  },
-  { id: "NODE_9", time: "21h18", label: "A ligação de três segundos", accepts: ["CLUE_028", "CLUE_069"] },
-] as const;
-
-export const TIMELINE_MIN_NODES = 7;
-
-export function timelineProgress(state: GameState) {
-  const filled = TIMELINE_NODES.filter((node) => {
-    const placed = state.timeline[node.id];
-    return placed !== undefined && (node.accepts as readonly string[]).includes(placed);
-  });
-  const requiredOk = TIMELINE_NODES.filter((node) => "required" in node && node.required).every((node) =>
-    filled.some((item) => item.id === node.id),
-  );
-  return { filled: filled.length, requiredOk, total: TIMELINE_NODES.length };
-}
-
 export function canAccuse(state: GameState) {
-  if (state.act < 4) return false;
-  return state.cluesFound.includes("CLUE_010");
+  return state.act >= 4;
 }
 
 /* ------------------------------------------------------------------ */
@@ -166,7 +131,7 @@ export function canAccuse(state: GameState) {
 export function clueIsReachable(state: GameState, clueId: string) {
   const clue = CLUES.find((item) => item.id === clueId);
   if (!clue) return false;
-  return state.act >= clue.act && state.unlockedApps.includes(clue.app);
+  return state.unlockedApps.includes(clue.app);
 }
 
 export function hasEvent(state: GameState, eventId: EventId) {

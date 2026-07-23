@@ -79,9 +79,9 @@ export const ACCUSATION_FIELDS: ChoiceField[] = [
   {
     id: "responsavel",
     legend: "1. Responsável",
-    correct: "R_AMIGA",
+    correct: "Alice",
     options: [
-      { id: "R_AMIGA", label: "Alice Bittencourt Fontoura — a melhor amiga" },
+      { id: "Alice", label: "Alice Bittencourt Fontoura — a melhor amiga" },
       { id: "R_NAMORADO", label: "Théo Barcellos Ramalho — o namorado" },
       { id: "R_MAE", label: "Regina Aparecida Mendonça — a mãe" },
       { id: "R_IRMAO", label: "Diego Andrade da Silva — o irmão da vítima do atropelamento" },

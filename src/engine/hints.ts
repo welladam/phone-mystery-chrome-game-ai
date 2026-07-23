@@ -15,7 +15,7 @@ export const HINTS: Hint[] = [
     title: "Não sei por onde começar",
     steps: [
       "Você tem duas fontes que não mentem porque não sabem mentir: o relógio de pulso e o próprio sistema do aparelho.",
-      "Compare a última leitura de frequência cardíaca no Pulso com o relatório de tempo de tela nos Ajustes.",
+      "Compare a última leitura de frequência cardíaca no Saúde com o relatório de tempo de tela nos Ajustes.",
       "19h58 e 20h11. Examine as duas pistas no caderno.",
     ],
   },
@@ -52,7 +52,7 @@ export const HINTS: Hint[] = [
     steps: [
       "Pergunta de segurança padrão. A resposta está fixada nos Favoritos da galeria.",
       "Ela guardou uma foto de um cachorro com plaquinha na coleira. Amplie a plaquinha.",
-      "fumaça — e o código de seis dígitos está no aplicativo Chave.",
+      "fumaça — e o código de seis dígitos está no aplicativo Autenticador.",
     ],
   },
   {
@@ -106,7 +106,7 @@ export const HINTS: Hint[] = [
     steps: [
       "Ela não vai ceder. Pare de tentar por conversa.",
       "O único caminho é o arquivo trancado no gravador.",
-      "Abra o Voz Segura e envie a ela o trecho de 02:19.",
+      "Abra o Gravador e envie a ela o trecho de 02:19.",
     ],
   },
   {
@@ -124,7 +124,7 @@ export const HINTS: Hint[] = [
     steps: [
       "Faltam os nós obrigatórios: a gravação e o horário da parada cardíaca.",
       "19h46 e 19h58.",
-      "Arraste a gravação do mirante e a última leitura do Pulso.",
+      "Compare a gravação do mirante e a última leitura do Saúde.",
     ],
   },
 ];

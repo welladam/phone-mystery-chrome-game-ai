@@ -18,6 +18,7 @@ import {
 } from "../../content/shared";
 import { audioSrc } from "../../content/assets";
 import { ClueMark, Empty, PhotoAsset, Row, ZoomBlock } from "../phone/Bits";
+import PhotoViewerModal from "../phone/PhotoViewerModal";
 import type { AppApi } from "./types";
 
 function marker(api: AppApi) {
@@ -91,11 +92,11 @@ export function PhotosApp({ api }: { api: AppApi }) {
   const mark = marker(api);
   const [album, setAlbum] = useState("Recentes");
   const [selected, setSelected] = useState<string>();
+  const [viewer, setViewer] = useState<string>();
 
   const hiddenUnlocked = api.state.solvedLocks.includes("LOCK_006");
 
   const visible = PHOTOS.filter((photo) => {
-    if (photo.act > api.state.act) return false;
     if (photo.hidden && !hiddenUnlocked) return false;
     if (album === "Recentes") return !photo.hidden && !photo.deleted;
     if (album === "Oculto") return photo.hidden === true;
@@ -127,13 +128,22 @@ export function PhotosApp({ api }: { api: AppApi }) {
       </div>
 
       {album === "Oculto" && !hiddenUnlocked && (
-        <Empty>Álbum protegido. A dica pede “o dia mais importante do ano”.</Empty>
+        <Empty>
+          {api.state.difficulty === "hard"
+            ? "Álbum protegido. Insira o código para acessar."
+            : "Álbum protegido. A dica pede “o dia mais importante do ano”."}
+        </Empty>
       )}
 
       {!current ? (
         <div className="photos__grid">
           {visible.map((photo) => (
-            <button key={photo.id} type="button" onClick={() => setSelected(photo.id)}>
+            <button
+              key={photo.id}
+              type="button"
+              onClick={() => setSelected(photo.id)}
+              aria-label={`Abrir detalhes de ${photo.file}`}
+            >
               <PhotoAsset
                 photoId={photo.id}
                 file={photo.file}
@@ -152,21 +162,20 @@ export function PhotosApp({ api }: { api: AppApi }) {
           <button type="button" className="btn btn--ghost" onClick={() => setSelected(undefined)}>
             ← Voltar para o álbum
           </button>
-          <PhotoAsset
-            photoId={current.id}
-            file={current.file}
-            alt={current.alt}
-            takenAt={current.takenAt}
-            album={current.album}
-          />
+          <button type="button" className="photo-detail__open" onClick={() => setViewer(current.id)}>
+            <PhotoAsset
+              photoId={current.id}
+              file={current.file}
+              alt={current.alt}
+              takenAt={current.takenAt}
+              album={current.album}
+            />
+            <span>Toque para ampliar</span>
+          </button>
           {current.caption && <p className="photo-detail__caption">“{current.caption}”</p>}
           <p className="photo-detail__alt">{current.alt}</p>
 
           <dl className="meta-grid">
-            <div>
-              <dt>Arquivo</dt>
-              <dd>{current.file}</dd>
-            </div>
             <div>
               <dt>Data e hora</dt>
               <dd>{current.takenAt}</dd>
@@ -175,21 +184,18 @@ export function PhotosApp({ api }: { api: AppApi }) {
               <dt>Álbum</dt>
               <dd>{current.album}</dd>
             </div>
-            {current.gps && (
-              <div>
-                <dt>Localização</dt>
-                <dd>{current.gps}</dd>
-              </div>
-            )}
-            {current.device && (
-              <div>
-                <dt>Origem</dt>
-                <dd>{current.device}</dd>
-              </div>
-            )}
+            <div>
+              <dt>Arquivo</dt>
+              <dd>{current.file}</dd>
+            </div>
+            <div>
+              <dt>Origem</dt>
+              <dd>{current.device ?? "Câmera do aparelho"}</dd>
+            </div>
+            {current.gps && <div className="meta-grid__wide"><dt>Localização</dt><dd>{current.gps}</dd></div>}
           </dl>
 
-          {current.zoom && (
+          {current.zoom && api.state.difficulty === "normal" && (
             <ZoomBlock
               label={current.zoom.label}
               text={current.zoom.text}
@@ -205,6 +211,21 @@ export function PhotosApp({ api }: { api: AppApi }) {
           {api.state.zoomed.includes(current.id) && current.zoom?.clueId && mark(current.zoom.clueId)}
         </article>
       )}
+
+      {viewer && (() => {
+        const photo = PHOTOS.find((item) => item.id === viewer);
+        if (!photo) return null;
+        return (
+          <PhotoViewerModal
+            photo={photo}
+            onClose={() => setViewer(undefined)}
+            onExplore={() => {
+              api.zoom(photo.id);
+              if (photo.zoom?.clueId) api.find(photo.zoom.clueId);
+            }}
+          />
+        );
+      })()}
     </div>
   );
 }
@@ -216,7 +237,7 @@ export function PhotosApp({ api }: { api: AppApi }) {
 export function NotesApp({ api }: { api: AppApi }) {
   const mark = marker(api);
   const [open, setOpen] = useState<string>();
-  const notes = api.packs.act1?.NOTES_OPEN.filter((note) => note.act <= api.state.act) ?? [];
+  const notes = api.packs.act1?.NOTES_OPEN ?? [];
   const locked = api.packs.act2?.NOTE_LOCKED;
   const endnote = api.packs.act2?.NOTE_LOCKED_ENDNOTE;
   const unlocked = api.state.solvedLocks.includes("LOCK_002");
@@ -287,7 +308,9 @@ export function RecorderApp({ api }: { api: AppApi }) {
           <h3>
             <Lock size={16} aria-hidden /> Este aplicativo está protegido
           </h3>
-          <p className="muted">Dica definida pela titular: “a data que eu devia ter respeitado”.</p>
+          {api.state.difficulty === "normal" && (
+            <p className="muted">Dica definida pela titular: “a data que eu devia ter respeitado”.</p>
+          )}
           <p className="muted">Tentativas registradas: 2 falhas em 08/03/2026, 20h29.</p>
           {mark("CLUE_051")}
           <button type="button" className="btn btn--primary" onClick={() => api.requestLock("LOCK_004")}>
@@ -496,7 +519,7 @@ export function SettingsApp({ api }: { api: AppApi }) {
         <h3>Redes memorizadas</h3>
         {WIFI_NETWORKS.map((net) => {
           // A rede com sobrenome só vira pista quando há a quem associá-la.
-          const registrable = net.clueId ? api.state.act >= 3 : false;
+          const registrable = Boolean(net.clueId);
           return (
             <Row key={net.ssid} title={net.ssid} meta={net.note} flag={registrable}>
               {registrable ? mark(net.clueId) : null}
@@ -579,7 +602,7 @@ export function FilesApp({ api }: { api: AppApi }) {
 
   const vaultOpen = api.state.solvedLocks.includes("LOCK_003");
   const zipOpen = api.state.solvedLocks.includes("LOCK_008");
-  const nodes = pack2.DRIVE.filter((node) => node.act <= api.state.act);
+  const nodes = pack2.DRIVE;
 
   const docs: Record<string, string | undefined> = {
     DR_CASO_1: pack2.DOC_DESPACHO,
@@ -589,7 +612,7 @@ export function FilesApp({ api }: { api: AppApi }) {
 
   return (
     <div className="list">
-      <p className="muted">Nimbo Drive · 14,6 GB de 15 GB</p>
+      <p className="muted">Drive · 14,6 GB de 15 GB</p>
 
       {nodes
         .filter((node) => !node.parent)

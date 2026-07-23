@@ -55,6 +55,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case "RESTORE":
       return settle(action.state);
 
+    case "SET_DIFFICULTY":
+      if (state.difficultyChosen) return state;
+      return { ...state, difficulty: action.difficulty, difficultyChosen: true };
+
     case "UNLOCK_PHONE":
       if (state.phoneUnlocked) return state;
       return settle({
@@ -194,38 +198,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return settle(base);
     }
 
-    case "PLACE_NODE": {
-      if (!state.cluesFound.includes(action.clueId)) return state;
-      return { ...state, timeline: { ...state.timeline, [action.node]: action.clueId } };
-    }
-
-    case "CLEAR_NODE": {
-      const timeline = { ...state.timeline };
-      delete timeline[action.node];
-      return { ...state, timeline };
-    }
-
     case "SET_ACCUSATION":
       return { ...state, accusation: { ...state.accusation, ...action.patch } };
-
-    // As alternâncias são calculadas aqui, e não na interface, para que
-    // cliques rápidos em sequência não percam nada por ler um estado antigo.
-    case "TOGGLE_SEQUENCE": {
-      const current = state.accusation.sequencia;
-      const sequencia = current.includes(action.cardId)
-        ? current.filter((item) => item !== action.cardId)
-        : [...current, action.cardId];
-      return { ...state, accusation: { ...state.accusation, sequencia } };
-    }
-
-    case "TOGGLE_EVIDENCE": {
-      if (!state.cluesFound.includes(action.clueId)) return state;
-      const current = state.accusation.evidencias;
-      const evidencias = current.includes(action.clueId)
-        ? current.filter((item) => item !== action.clueId)
-        : [...current, action.clueId];
-      return { ...state, accusation: { ...state.accusation, evidencias } };
-    }
 
     case "RECORD_ACCUSATION": {
       const next: GameState = {

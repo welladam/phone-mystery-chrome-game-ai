@@ -1,10 +1,11 @@
 import { Accessibility, AlertTriangle, Bug, RotateCcw, Settings, X } from "lucide-react";
 import { useState } from "react";
-import type { Preferences } from "../../engine/types";
+import type { Difficulty, Preferences } from "../../engine/types";
 import { useEscape, useFocusTrap } from "../a11y/hooks";
 
 type Props = {
   prefs: Preferences;
+  difficulty: Difficulty;
   act: number;
   clues: number;
   events: number;
@@ -16,6 +17,7 @@ type Props = {
 
 export default function SiteSettingsModal({
   prefs,
+  difficulty,
   act,
   clues,
   events,
@@ -76,6 +78,14 @@ export default function SiteSettingsModal({
               />
               Efeitos sonoros
             </label>
+          </section>
+
+          <section className="site-modal__section">
+            <h3>Modo de jogo</h3>
+            <p>
+              <strong>{difficulty === "hard" ? "Difícil" : "Normal"}</strong> · para trocar o modo,
+              reinicie a investigação.
+            </p>
           </section>
 
           {import.meta.env.DEV && (

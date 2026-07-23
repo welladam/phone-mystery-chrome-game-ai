@@ -381,11 +381,11 @@ export const RIDES_SHARED = {
 /* ------------------------------------------------------------------ */
 
 export const AUTH_CODES = [
-  { account: "Correio — clara.mendonca.vasques", code: "448 219" },
-  { account: "Correio — clara.vsq.arquivo", code: "903 774", highlight: true },
-  { account: "Banco Aurora", code: "118 402" },
+  { account: "E-mail — clara.mendonca.vasques", code: "448 219" },
+  { account: "E-mail — clara.vsq.arquivo", code: "903 774", highlight: true },
+  { account: "Banco", code: "118 402" },
   { account: "Nimbo", code: "662 015" },
-  { account: "Fluxo", code: "240 887" },
+  { account: "Rede Social", code: "240 887" },
 ];
 
 /* ------------------------------------------------------------------ */

@@ -3,15 +3,16 @@ import { inspect, initialSteps, prepare, type BootRuntime, type BootStep } from 
 import { CharacterSessions } from "./ai/characterSessions";
 import { AiError, toAiError } from "./ai/errors";
 import { FolderClosed, Lock, Settings } from "lucide-react";
+import { CHARACTERS } from "./content/characters/base";
 import { getApp, getLock, MEMORIES } from "./content/manifest";
-import { loadAct1, loadAct3, loadAct4, preloadForAct } from "./content/registry";
+import { loadAct1, loadAct2, loadAct3, loadAct4, preloadForAct } from "./content/registry";
 import type { Act1Pack, Act2Pack, Act3Pack, Act4Pack } from "./content/registry";
 import { evaluate } from "./engine/accusation";
 import { createInitialState } from "./engine/initialState";
 import { gameReducer } from "./engine/reducer";
 import { EVENTS, canAccuse, evaluateUnknownGate } from "./engine/rules";
 import { appIsLocked } from "./engine/selectors";
-import type { AppId, CharacterId, GameState, LockId, TimelineNodeId } from "./engine/types";
+import type { AppId, CharacterId, GameState, LockId } from "./engine/types";
 import { exportDiagnostics, logDiagnostic } from "./persistence/diagnostics";
 import { loadPrefs, savePrefs } from "./persistence/prefs";
 import { clearSave, createAutoSaver, loadSave } from "./persistence/save";
@@ -24,6 +25,7 @@ import { renderApp, appTitle } from "./ui/apps/registry";
 import type { ContentPacks } from "./ui/apps/types";
 import { useConversation } from "./ui/apps/useConversation";
 import BootScreen, { type BootPhase } from "./ui/boot/BootScreen";
+import DifficultyScreen from "./ui/boot/DifficultyScreen";
 import { playSound, primeSound, setSoundEnabled } from "./ui/sound";
 import AppShell from "./ui/phone/AppShell";
 import HomeScreen from "./ui/phone/HomeScreen";
@@ -53,7 +55,15 @@ const ACT_NOTICES: Record<number, { title: string; text: string }> = {
  * não for aceita pelo motor. A verificação fica aqui, na casca, e não dentro
  * de cada tela — assim nenhum aplicativo novo pode esquecer de fazê-la.
  */
-function AppLocked({ appId, onUnlock }: { appId: AppId; onUnlock: (lockId: LockId) => void }) {
+function AppLocked({
+  appId,
+  showHint,
+  onUnlock,
+}: {
+  appId: AppId;
+  showHint: boolean;
+  onUnlock: (lockId: LockId) => void;
+}) {
   const app = getApp(appId);
   const lock = app?.lock ? getLock(app.lock) : undefined;
   if (!app?.lock || !lock) return null;
@@ -64,7 +74,7 @@ function AppLocked({ appId, onUnlock }: { appId: AppId; onUnlock: (lockId: LockI
         <h3>
           <Lock size={16} aria-hidden /> Este aplicativo está protegido
         </h3>
-        <p className="muted">Dica definida pela titular: “{lock.hint}”</p>
+        {showHint && <p className="muted">Dica definida pela titular: “{lock.hint}”</p>}
         <button type="button" className="btn btn--primary" onClick={() => onUnlock(app.lock!)}>
           Inserir código
         </button>
@@ -91,14 +101,25 @@ export default function App() {
   const reducedMotion = useReducedMotion(prefs.reducedMotion);
 
   const [openAppId, setOpenAppId] = useState<AppId>();
-  const [openChat, setOpenChat] = useState<CharacterId>();
+  const [openChat, setOpenChat] = useState<{ id: CharacterId; request: number }>();
   const [lockRequest, setLockRequest] = useState<LockId>();
   const [showReveal, setShowReveal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [notebookOpen, setNotebookOpen] = useState(true);
+  const [booted, setBooted] = useState(false);
+  const [activeChat, setActiveChat] = useState<CharacterId>();
+  const [phoneNotification, setPhoneNotification] = useState<{
+    characterId: CharacterId;
+    title: string;
+    text: string;
+  }>();
   const [toast, setToast] = useState<string>();
   const [narrativeNotices, setNarrativeNotices] = useState<NarrativeNotice[]>([]);
   const progressReadyRef = useRef(false);
+  const incomingReadyRef = useRef(false);
+  const incomingCountsRef = useRef<Record<string, number>>({});
+  const lastNotificationRef = useRef<{ characterId: CharacterId; at: number } | undefined>(undefined);
+  const notificationTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const progressSnapshotRef = useRef({
     act: state.act,
     memories: [...state.memories],
@@ -114,6 +135,7 @@ export default function App() {
 
   const autoSaver = useMemo(() => createAutoSaver(), []);
   const conversation = useConversation({ state, dispatch, sessions });
+  const handleActiveChat = useCallback((characterId?: CharacterId) => setActiveChat(characterId), []);
 
   const report = useMemo(
     () => ({
@@ -145,8 +167,8 @@ export default function App() {
       if (!el) return;
       primeSound();
       const cls = el.getAttribute("class") ?? "";
+      if (/composer__send/.test(cls)) return;
       if (/back/.test(cls)) playSound("back");
-      else if (/send/.test(cls)) playSound("send");
       else playSound("tap");
     };
     document.addEventListener("pointerdown", handler);
@@ -164,7 +186,7 @@ export default function App() {
   }, [autoSaver]);
 
   useEffect(() => {
-    if (!state.phoneUnlocked) return;
+    if (!state.difficultyChosen) return;
     autoSaver.schedule(state);
   }, [state, autoSaver]);
 
@@ -184,9 +206,11 @@ export default function App() {
     let alive = true;
     void preloadForAct(state.act).then(async () => {
       if (!alive) return;
-      const next: ContentPacks = { act1: await loadAct1() };
-      if (state.act >= 2) next.act2 = (await import("./content/act2")) as Act2Pack;
-      if (state.act >= 3) next.act3 = (await loadAct3()) as Act3Pack;
+      const next: ContentPacks = {
+        act1: await loadAct1(),
+        act2: (await loadAct2()) as Act2Pack,
+        act3: (await loadAct3()) as Act3Pack,
+      };
       if (state.act >= 4) next.act4 = (await loadAct4()) as Act4Pack;
       setPacks(next as { act1: Act1Pack } & ContentPacks);
     });
@@ -210,8 +234,6 @@ export default function App() {
       const lines =
         gate.variant === "informado" ? pack.UNKNOWN_ENTRY_INFORMED : pack.UNKNOWN_ENTRY_FALLBACK;
 
-      setToast("Uma conversa nova apareceu no Vínculo.");
-      playSound("notify");
       if (!reducedMotion && typeof navigator.vibrate === "function") navigator.vibrate(220);
 
       for (const line of lines) {
@@ -316,9 +338,11 @@ export default function App() {
     setPhase("restaurando");
 
     let jaComecou = false;
+    let restoredState: GameState | undefined;
     try {
       const save = await loadSave();
-      if (save.kind === "ok") {
+      if (save.kind === "ok" || save.kind === "migrado") {
+        restoredState = save.state;
         progressSnapshotRef.current = {
           act: save.state.act,
           memories: [...save.state.memories],
@@ -326,10 +350,6 @@ export default function App() {
         };
         dispatch({ type: "RESTORE", state: save.state });
         jaComecou = save.state.phoneUnlocked;
-      } else if (save.kind === "migrado") {
-        setRestoredNote(
-          "Havia um progresso de uma versão anterior do jogo, com outro caso. Ele foi descartado e esta investigação começa do início.",
-        );
       } else if (save.kind === "recusado") {
         setRestoredNote(
           "O progresso salvo não pôde ser lido e foi ignorado. Nenhum outro dado do navegador foi afetado.",
@@ -352,11 +372,14 @@ export default function App() {
     // dela que sai o código da tela. Quem já estava no meio do caso entra
     // direto e consulta a pasta quando quiser.
     setCaseFile(jaComecou ? undefined : "entrada");
+    const baseline = restoredState ?? createInitialState();
+    incomingCountsRef.current = Object.fromEntries(
+      Object.entries(baseline.chats).map(([id, chat]) => [id, chat.messages.length]),
+    );
+    incomingReadyRef.current = true;
     progressReadyRef.current = true;
     setBooted(true);
   }, [report]);
-
-  const [booted, setBooted] = useState(false);
 
   // Recursos nativos do Chrome sobrevivem durante toda a partida e são
   // encerrados apenas quando o aplicativo realmente sai da página.
@@ -381,14 +404,15 @@ export default function App() {
       requestLock: (lockId: LockId) => setLockRequest(lockId),
       openApp: (appId: AppId) => setOpenAppId(appId),
       openChat: (characterId: CharacterId) => {
-        setOpenChat(characterId);
+        setOpenChat({ id: characterId, request: Date.now() });
         setOpenAppId("APP_002");
       },
+      setActiveChat: handleActiveChat,
       sendExcerptToFriend: () => {
         void (async () => {
           const pack = await loadAct3();
           const excerpt = pack.DECISIVE_EXCERPT;
-          setOpenChat("CHAR_004");
+          setOpenChat({ id: "CHAR_004", request: Date.now() });
           setOpenAppId("APP_002");
           dispatch({
             type: "CHAT_APPEND",
@@ -408,33 +432,25 @@ export default function App() {
         dispatch({ type: "SEND_AUDIO_TO_DIEGO" });
         setToast("Áudio enviado.");
       },
-      placeNode: (node: string, clueId: string) =>
-        dispatch({ type: "PLACE_NODE", node: node as TimelineNodeId, clueId }),
-      clearNode: (node: string) => dispatch({ type: "CLEAR_NODE", node: node as TimelineNodeId }),
       setAccusation: (patch: Record<string, unknown>) =>
         dispatch({ type: "SET_ACCUSATION", patch: patch as never }),
-      toggleSequence: (cardId: string) => dispatch({ type: "TOGGLE_SEQUENCE", cardId }),
-      toggleEvidence: (clueId: string) => dispatch({ type: "TOGGLE_EVIDENCE", clueId }),
       submitAccusation: () => {
-        void (async () => {
-          if (!canAccuse(state)) return;
-          const pack = await loadAct4();
-          const verdict = evaluate(pack, state.accusation, state);
-          dispatch({
-            type: "RECORD_ACCUSATION",
-            attempt: {
-              at: new Date().toISOString(),
-              outcome: verdict.outcome,
-              feedbackId: verdict.feedbackId,
-            },
-          });
-          void logDiagnostic({ category: "game", code: `ACCUSATION_${verdict.outcome}` });
-        })();
+        if (!canAccuse(state)) return;
+        const verdict = evaluate(state.accusation);
+        dispatch({
+          type: "RECORD_ACCUSATION",
+          attempt: {
+            at: new Date().toISOString(),
+            outcome: verdict.outcome,
+            feedbackId: verdict.feedbackId,
+          },
+        });
+        void logDiagnostic({ category: "game", code: `ACCUSATION_${verdict.outcome}` });
       },
       useHint: (obstacleId: string) => dispatch({ type: "USE_HINT", obstacleId }),
       markUnknownRead: () => dispatch({ type: "MARK_UNKNOWN_READ" }),
     }),
-    [state, packs, reducedMotion, conversation],
+    [state, packs, reducedMotion, conversation, handleActiveChat],
   );
 
   useEffect(() => {
@@ -443,12 +459,62 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [toast]);
 
+  /* ---------------- notificações de mensagens ---------------- */
+
+  useEffect(() => {
+    if (!incomingReadyRef.current) return;
+
+    let latest: { characterId: CharacterId; text: string } | undefined;
+    (Object.entries(state.chats) as Array<[CharacterId, GameState["chats"][string]]>).forEach(
+      ([characterId, chat]) => {
+        const previous = incomingCountsRef.current[characterId] ?? 0;
+        const additions = chat.messages.slice(previous).filter((message) => message.role === "character");
+        incomingCountsRef.current[characterId] = chat.messages.length;
+        if (additions.length && activeChat !== characterId) {
+          latest = { characterId, text: additions[additions.length - 1].text };
+        }
+      },
+    );
+
+    if (!latest) return;
+    const incoming = latest as { characterId: CharacterId; text: string };
+    const profile = CHARACTERS[incoming.characterId];
+    setPhoneNotification({
+      characterId: incoming.characterId,
+      title: profile.displayName,
+      text: incoming.text.slice(0, 88),
+    });
+
+    const now = Date.now();
+    const last = lastNotificationRef.current;
+    if (!last || last.characterId !== incoming.characterId || now - last.at > 3500) {
+      playSound("notify");
+    }
+    lastNotificationRef.current = { characterId: incoming.characterId, at: now };
+
+    if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
+    notificationTimerRef.current = setTimeout(() => setPhoneNotification(undefined), 4600);
+  }, [activeChat, state.chats]);
+
+  useEffect(() => () => {
+    if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
+  }, []);
+
   /* ---------------- feedback narrativo de progressão ---------------- */
 
   useEffect(() => {
     if (!booted || !progressReadyRef.current) return;
 
     const previous = progressSnapshotRef.current;
+    if (state.difficulty === "hard") {
+      progressSnapshotRef.current = {
+        act: state.act,
+        memories: [...state.memories],
+        unlockedApps: [...state.unlockedApps],
+      };
+      setNarrativeNotices([]);
+      return;
+    }
     const newMemoryIds = state.memories.filter((id) => !previous.memories.includes(id));
     const newApps = state.unlockedApps
       .filter((id) => !previous.unlockedApps.includes(id))
@@ -487,7 +553,7 @@ export default function App() {
       playSound(additions.some((item) => item.kind === "act") ? "unlock" : "clue");
       if (!reducedMotion && typeof navigator.vibrate === "function") navigator.vibrate([90, 70, 140]);
     }
-  }, [booted, reducedMotion, state.act, state.actEnteredAt, state.memories, state.unlockedApps]);
+  }, [booted, reducedMotion, state.act, state.actEnteredAt, state.difficulty, state.memories, state.unlockedApps]);
 
   const restartInvestigation = useCallback(async () => {
     autoSaver.cancel();
@@ -515,6 +581,11 @@ export default function App() {
     setShowReveal(false);
     setRestoredNote(undefined);
     setToast(undefined);
+    setPhoneNotification(undefined);
+    incomingCountsRef.current = {};
+    incomingReadyRef.current = true;
+    lastNotificationRef.current = undefined;
+    if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
     setNarrativeNotices([]);
     setNotebookOpen(true);
     setShowSettings(false);
@@ -549,6 +620,10 @@ export default function App() {
     );
   }
 
+  if (!state.difficultyChosen) {
+    return <DifficultyScreen onChoose={(difficulty) => dispatch({ type: "SET_DIFFICULTY", difficulty })} />;
+  }
+
   if (showReveal && packs.act4) {
     return (
       <Revelation
@@ -561,13 +636,24 @@ export default function App() {
   }
 
   const badges: Partial<Record<AppId, number>> = {
-    // O aviso fica no ícone do Vínculo até o jogador abrir a conversa nova.
+    // O aviso fica no ícone do Chat até o jogador abrir a conversa nova.
     APP_002: state.unknownEntered && !state.unknownRead ? 1 : 0,
   };
 
   return (
-    <div className={`stage${prefs.largeText ? " stage--large" : ""}`}>
-      <PhoneFrame clock="14:07" battery={38}>
+    <div className={`stage${prefs.largeText ? " stage--large" : ""}${state.difficulty === "hard" ? " stage--hard" : ""}`}>
+      <PhoneFrame
+        clock="14:07"
+        battery={38}
+        notification={phoneNotification}
+        onDismissNotification={() => setPhoneNotification(undefined)}
+        onOpenNotification={() => {
+          if (!phoneNotification) return;
+          setOpenChat({ id: phoneNotification.characterId, request: Date.now() });
+          setOpenAppId("APP_002");
+          setPhoneNotification(undefined);
+        }}
+      >
         {!state.phoneUnlocked ? (
           <LockScreen reducedMotion={reducedMotion} onUnlock={() => dispatch({ type: "UNLOCK_PHONE" })} />
         ) : openAppId ? (
@@ -580,9 +666,19 @@ export default function App() {
             }}
           >
             {appIsLocked(state, openAppId) ? (
-              <AppLocked appId={openAppId} onUnlock={setLockRequest} />
+              <AppLocked
+                appId={openAppId}
+                showHint={state.difficulty === "normal"}
+                onUnlock={setLockRequest}
+              />
             ) : (
-              renderApp({ appId: openAppId, api, conversation, initialCharacter: openChat })
+              renderApp({
+                appId: openAppId,
+                api,
+                conversation,
+                initialCharacter: openChat?.id,
+                chatRequestKey: openChat?.request,
+              })
             )}
           </AppShell>
         ) : (
@@ -635,7 +731,7 @@ export default function App() {
         </p>
       )}
 
-      {narrativeNotices[0] && (
+      {state.difficulty === "normal" && narrativeNotices[0] && (
         <ProgressNotice
           key={narrativeNotices[0].id}
           notice={narrativeNotices[0]}
@@ -661,6 +757,7 @@ export default function App() {
       {showSettings && (
         <SiteSettingsModal
           prefs={prefs}
+          difficulty={state.difficulty}
           act={state.act}
           clues={state.cluesFound.length}
           events={state.eventsFired.length}

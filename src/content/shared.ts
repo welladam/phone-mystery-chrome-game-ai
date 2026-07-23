@@ -415,7 +415,7 @@ export type NotificationRecord = {
 };
 
 export const NOTIFICATIONS: NotificationRecord[] = [
-  { id: "NT_01", at: "08/03 08:29", app: "Vínculo", from: "Mãe ❤️", preview: "Recebi seu áudio. Resolve o quê, Clara?" },
+  { id: "NT_01", at: "08/03 08:29", app: "Chat", from: "Mãe ❤️", preview: "Recebi seu áudio. Resolve o quê, Clara?" },
   {
     id: "NT_02",
     at: "08/03 09:51",
@@ -424,18 +424,18 @@ export const NOTIFICATIONS: NotificationRecord[] = [
     preview: "declaracao_final.pdf enviado para PESSOAL/22",
     clueId: "CLUE_037",
   },
-  { id: "NT_03", at: "08/03 13:28", app: "Vínculo", from: "Théo", preview: "a gente conversa hj?" },
+  { id: "NT_03", at: "08/03 13:28", app: "Chat", from: "Théo", preview: "a gente conversa hj?" },
   {
     id: "NT_04",
     at: "08/03 14:02",
-    app: "Fluxo",
+    app: "Rede Social",
     from: "Sistema",
     preview: "diego.andrade.silva começou uma transmissão ao vivo",
   },
   {
     id: "NT_05",
     at: "08/03 15:48",
-    app: "Vínculo",
+    app: "Chat",
     from: "enviada",
     preview: "preciso te falar hoje. pessoalmente. pedra lasc…",
     clueId: "CLUE_038",
@@ -444,7 +444,7 @@ export const NOTIFICATIONS: NotificationRecord[] = [
   {
     id: "NT_06",
     at: "08/03 16:02",
-    app: "Vínculo",
+    app: "Chat",
     from: "Alice ❤️ (Lice)",
     preview: "ai clara…. tá bom. 19h30",
     clueId: "CLUE_001",
@@ -453,14 +453,14 @@ export const NOTIFICATIONS: NotificationRecord[] = [
   {
     id: "NT_07",
     at: "08/03 16:44",
-    app: "Órbita",
+    app: "Navegador",
     from: "Sistema",
     preview: "Download concluído: tribuna_barao.png",
   },
   {
     id: "NT_08",
     at: "08/03 17:30",
-    app: "Feito",
+    app: "Tarefas",
     from: "Sistema",
     preview: "Amanhã: SEG 9h — Dra. Yara — LEVAR O ÁUDIO E A NOTA",
     clueId: "CLUE_016",
@@ -468,7 +468,7 @@ export const NOTIFICATIONS: NotificationRecord[] = [
   {
     id: "NT_09",
     at: "08/03 18:27",
-    app: "Vínculo",
+    app: "Chat",
     from: "Alice ❤️ (Lice)",
     preview: "to saindo daqui a pouco. me espera lá em cima",
     clueId: "CLUE_002",
@@ -477,14 +477,14 @@ export const NOTIFICATIONS: NotificationRecord[] = [
   {
     id: "NT_10",
     at: "08/03 18:51",
-    app: "Banco Aurora",
+    app: "Banco",
     from: "Sistema",
     preview: "Você está saindo da sua região habitual",
   },
   {
     id: "NT_11",
     at: "08/03 20:47",
-    app: "Vínculo",
+    app: "Chat",
     from: "enviada",
     preview: "mãe, tô bem. só preciso ficar sozinha hoje. am…",
     clueId: "CLUE_007B",
@@ -492,7 +492,7 @@ export const NOTIFICATIONS: NotificationRecord[] = [
   {
     id: "NT_12",
     at: "08/03 21:13",
-    app: "Vínculo",
+    app: "Chat",
     from: "enviada",
     preview: "não vem aqui hj. amanhã eu te explico tudo",
     clueId: "CLUE_007C",
@@ -500,18 +500,18 @@ export const NOTIFICATIONS: NotificationRecord[] = [
   { id: "NT_13", at: "08/03 21:35", app: "Telefone", from: "Mãe ❤️", preview: "Chamada perdida", clueId: "CLUE_008" },
   { id: "NT_14", at: "08/03 22:02", app: "Telefone", from: "Mãe ❤️", preview: "Chamada perdida" },
   { id: "NT_15", at: "08/03 22:40", app: "Telefone", from: "Mãe ❤️", preview: "Chamada perdida" },
-  { id: "NT_16", at: "09/03 07:41", app: "Vínculo", from: "Mãe ❤️", preview: "CLARA ATENDE O TELEFONE" },
-  { id: "NT_17", at: "09/03 07:44", app: "Vínculo", from: "Mãe ❤️", preview: "CLARA" },
-  { id: "NT_18", at: "09/03 07:58", app: "Vínculo", from: "Théo", preview: "clara" },
-  { id: "NT_19", at: "09/03 08:02", app: "Vínculo", from: "Alice ❤️ (Lice)", preview: "não pode ser" },
+  { id: "NT_16", at: "09/03 07:41", app: "Chat", from: "Mãe ❤️", preview: "CLARA ATENDE O TELEFONE" },
+  { id: "NT_17", at: "09/03 07:44", app: "Chat", from: "Mãe ❤️", preview: "CLARA" },
+  { id: "NT_18", at: "09/03 07:58", app: "Chat", from: "Théo", preview: "clara" },
+  { id: "NT_19", at: "09/03 08:02", app: "Chat", from: "Alice ❤️ (Lice)", preview: "não pode ser" },
   {
     id: "NT_20",
     at: "09/03 08:03",
-    app: "Vínculo",
+    app: "Chat",
     from: "Alice ❤️ (Lice)",
     preview: "não pode ser, não pode ser",
   },
-  { id: "NT_21", at: "09/03 11:00", app: "Vínculo", from: "Pai", preview: "me ligaram agora. eu não sei o que dizer" },
+  { id: "NT_21", at: "09/03 11:00", app: "Chat", from: "Pai", preview: "me ligaram agora. eu não sei o que dizer" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -519,7 +519,7 @@ export const NOTIFICATIONS: NotificationRecord[] = [
 /* ------------------------------------------------------------------ */
 
 export const HEALTH_DAY = {
-  device: "Pulso Band 4",
+  device: "Pulseira Fit 4",
   lastSync: "08/03/2026, 19h58",
   steps: 3418,
   lastHeartRate: "19h58 — 71 bpm",
@@ -567,14 +567,14 @@ export const HEALTH_TREND = [
 /* ------------------------------------------------------------------ */
 
 export const SCREEN_TIME = [
-  { period: "18h44–18h52", state: "desbloqueado", app: "Rumo, Vínculo" },
-  { period: "19h39–19h45", state: "desbloqueado", app: "Fluxo, Câmera" },
-  { period: "19h46–19h52", state: "tela apagada", app: "Voz Segura (gravação em segundo plano)" },
+  { period: "18h44–18h52", state: "desbloqueado", app: "Mapas, Chat" },
+  { period: "19h39–19h45", state: "desbloqueado", app: "Rede Social, Câmera" },
+  { period: "19h46–19h52", state: "tela apagada", app: "Gravador (gravação em segundo plano)" },
   { period: "19h52–20h11", state: "bloqueado", app: "—" },
-  { period: "20h11–20h19", state: "desbloqueado", app: "Vínculo (8 min)", flag: true },
+  { period: "20h11–20h19", state: "desbloqueado", app: "Chat (8 min)", flag: true },
   { period: "20h24–20h26", state: "desbloqueado", app: "Bloco — 3 falhas de autenticação", flag: true },
-  { period: "20h29–20h30", state: "desbloqueado", app: "Voz Segura — 2 falhas de autenticação", flag: true },
-  { period: "20h41 / 20h47 / 21h13", state: "desbloqueado", app: "Vínculo (picos de menos de 1 min)", flag: true },
+  { period: "20h29–20h30", state: "desbloqueado", app: "Gravador — 2 falhas de autenticação", flag: true },
+  { period: "20h41 / 20h47 / 21h13", state: "desbloqueado", app: "Chat (picos de menos de 1 min)", flag: true },
   { period: "21h18", state: "desbloqueado", app: "Telefone", flag: true },
   { period: "21h20–06h32", state: "bloqueado, sem interação", app: "—" },
 ];
@@ -600,6 +600,6 @@ export const SETTINGS_SECURITY = [
     value: "Retenção estendida ATIVADA em 14/10/2025 — 120 dias",
     note: "É por isso que as prévias de 08/03 ainda existem em maio.",
   },
-  { label: "Backup do Vínculo", value: "Automático, diário, 19h30" },
+  { label: "Backup do Chat", value: "Automático, diário, 19h30" },
   { label: "Localização", value: "Sempre ativa. Dados móveis desligados em 08/03 às 20h12." },
 ];

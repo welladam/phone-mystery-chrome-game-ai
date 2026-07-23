@@ -6,6 +6,7 @@ import { activeCharacters, presentableClues } from "../../engine/selectors";
 import type { CharacterId } from "../../engine/types";
 import { useAutoScroll } from "../a11y/hooks";
 import { Empty } from "../phone/Bits";
+import { playSound, primeSound } from "../sound";
 import type { AppApi } from "./types";
 import type { ConversationApi } from "./useConversation";
 
@@ -13,9 +14,10 @@ type Props = {
   api: AppApi;
   conversation: ConversationApi;
   initialCharacter?: CharacterId;
+  requestKey?: number;
 };
 
-export default function ChatApp({ api, conversation, initialCharacter }: Props) {
+export default function ChatApp({ api, conversation, initialCharacter, requestKey }: Props) {
   const [openId, setOpenId] = useState<CharacterId | undefined>(initialCharacter);
   const [archived, setArchived] = useState<string>();
   const [draft, setDraft] = useState("");
@@ -27,9 +29,18 @@ export default function ChatApp({ api, conversation, initialCharacter }: Props) 
 
   useEffect(() => {
     if (openId) void conversation.greet(openId);
-    // Abrir a conversa do contato anônimo limpa o aviso do ícone do Vínculo.
+    // Abrir a conversa do contato anônimo limpa o aviso do ícone do Chat.
     if (openId === "CHAR_005") api.markUnknownRead();
   }, [openId, conversation, api]);
+
+  useEffect(() => {
+    api.setActiveChat(openId);
+    return () => api.setActiveChat(undefined);
+  }, [api.setActiveChat, openId]);
+
+  useEffect(() => {
+    if (initialCharacter) setOpenId(initialCharacter);
+  }, [initialCharacter, requestKey]);
 
   useEffect(() => {
     if (!archived) return;
@@ -50,6 +61,8 @@ export default function ChatApp({ api, conversation, initialCharacter }: Props) 
     if (!openId || (!draft.trim() && !attached)) return;
     const text = draft.trim() || `Quero que você olhe isto: ${getClue(attached ?? "")?.label ?? ""}`;
     void conversation.send(openId, text, attached);
+    primeSound();
+    playSound("send");
     setDraft("");
     setAttached(undefined);
   }

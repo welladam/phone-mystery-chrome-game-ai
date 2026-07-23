@@ -34,6 +34,8 @@ const VALID_LOCKS = new Set<string>(LOCKS.map((lock) => lock.id));
 function checksumInput(state: GameState) {
   return [
     state.saveVersion,
+    state.difficulty,
+    state.difficultyChosen ? 1 : 0,
     state.act,
     state.phoneUnlocked ? 1 : 0,
     [...state.unlockedApps].sort().join(","),
@@ -49,6 +51,27 @@ function checksumInput(state: GameState) {
 
 export function signState(state: GameState) {
   return fnv1a(checksumInput(state));
+}
+
+/** Assinatura usada pelos saves v2, antes de existir modo de dificuldade. */
+function signLegacyV2(raw: unknown) {
+  if (!raw || typeof raw !== "object") return "";
+  const state = raw as Partial<GameState>;
+  const list = (value: unknown) =>
+    Array.isArray(value) ? value.filter((item) => typeof item === "string").sort().join(",") : "";
+  return fnv1a([
+    2,
+    state.act,
+    state.phoneUnlocked ? 1 : 0,
+    list(state.unlockedApps),
+    list(state.solvedLocks),
+    list(state.cluesFound),
+    list(state.cluesExamined),
+    list(state.memories),
+    list(state.eventsFired),
+    state.unknownEntered ? 1 : 0,
+    state.revealShown ? 1 : 0,
+  ].join("|"));
 }
 
 function sanitizeChat(raw: unknown): ChatState {
@@ -111,17 +134,17 @@ export function sanitizeState(raw: unknown): GameState | undefined {
     chats[id] = sanitizeChat(rawChats[id]);
   });
 
-  const timeline: GameState["timeline"] = {};
-  const rawTimeline = (input.timeline ?? {}) as Record<string, unknown>;
-  Object.entries(rawTimeline).forEach(([node, clue]) => {
-    if (typeof clue === "string" && isKnownClue(clue) && cluesFound.includes(clue)) {
-      timeline[node as keyof GameState["timeline"]] = clue;
-    }
-  });
+  const savedResponsible =
+    typeof input.accusation?.responsavel === "string" ? input.accusation.responsavel : undefined;
+  const responsible = savedResponsible?.startsWith("R_") ? undefined : savedResponsible;
 
   return {
     ...fresh,
     saveVersion: SAVE_VERSION,
+    difficulty: input.difficulty === "hard" ? "hard" : "normal",
+    difficultyChosen:
+      input.difficultyChosen === true ||
+      (typeof input.saveVersion === "number" && input.saveVersion < SAVE_VERSION),
     act,
     phoneUnlocked: input.phoneUnlocked === true,
     unlockedApps: [...new Set([...fresh.unlockedApps, ...unlockedApps])],
@@ -145,23 +168,8 @@ export function sanitizeState(raw: unknown): GameState | undefined {
     playedVoices: Array.isArray(input.playedVoices)
       ? input.playedVoices.filter((id) => typeof id === "string")
       : [],
-    timeline,
     accusation: {
-      responsavel: typeof input.accusation?.responsavel === "string" ? input.accusation.responsavel : undefined,
-      motivo: typeof input.accusation?.motivo === "string" ? input.accusation.motivo : undefined,
-      metodo: typeof input.accusation?.metodo === "string" ? input.accusation.metodo : undefined,
-      oportunidade:
-        typeof input.accusation?.oportunidade === "string" ? input.accusation.oportunidade : undefined,
-      sequencia: Array.isArray(input.accusation?.sequencia)
-        ? input.accusation.sequencia.filter((id) => typeof id === "string")
-        : [],
-      evidencias: Array.isArray(input.accusation?.evidencias)
-        ? input.accusation.evidencias.filter((id) => isKnownClue(id) && cluesFound.includes(id))
-        : [],
-      contradicao:
-        typeof input.accusation?.contradicao === "string" ? input.accusation.contradicao : undefined,
-      desconhecida:
-        typeof input.accusation?.desconhecida === "string" ? input.accusation.desconhecida : undefined,
+      responsavel: responsible,
     },
     accusationAttempts: Array.isArray(input.accusationAttempts)
       ? input.accusationAttempts.slice(-20)
@@ -182,14 +190,6 @@ export function sanitizeState(raw: unknown): GameState | undefined {
  * Ele é descartado de propósito — manter aquele progresso significaria
  * ressuscitar um caso que contradiz este.
  */
-function migrate(envelope: SaveEnvelope): { state: GameState; from: number } | undefined {
-  if (envelope.v === SAVE_VERSION) return undefined;
-  if (envelope.v < SAVE_VERSION) {
-    return { state: createInitialState(), from: envelope.v };
-  }
-  return undefined;
-}
-
 export async function loadSave(): Promise<LoadResult> {
   let envelope: SaveEnvelope | undefined;
   try {
@@ -204,15 +204,28 @@ export async function loadSave(): Promise<LoadResult> {
     return { kind: "recusado", reason: "formato" };
   }
 
-  const migrated = migrate(envelope);
-  if (migrated) {
+  if (envelope.v === 2) {
+    if (signLegacyV2(envelope.state) !== envelope.checksum) {
+      return { kind: "recusado", reason: "checksum" };
+    }
+    const state = sanitizeState(envelope.state);
+    if (!state) return { kind: "recusado", reason: "formato" };
     return {
       kind: "migrado",
-      state: migrated.state,
+      state,
       savedAt: envelope.savedAt ?? new Date().toISOString(),
-      from: migrated.from,
+      from: 2,
     };
   }
+  if (envelope.v < 2) {
+    return {
+      kind: "migrado",
+      state: createInitialState(),
+      savedAt: envelope.savedAt ?? new Date().toISOString(),
+      from: envelope.v,
+    };
+  }
+  if (envelope.v > SAVE_VERSION) return { kind: "recusado", reason: "versao" };
 
   const sanitized = sanitizeState(envelope.state);
   if (!sanitized) return { kind: "recusado", reason: "formato" };

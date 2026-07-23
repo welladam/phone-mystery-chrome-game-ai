@@ -6,6 +6,7 @@
  */
 
 export type ActNumber = 1 | 2 | 3 | 4;
+export type Difficulty = "normal" | "hard";
 
 export type AppId =
   | "APP_001" // Notificações
@@ -147,14 +148,6 @@ export type ChatState = {
 
 export type AccusationDraft = {
   responsavel?: string;
-  motivo?: string;
-  metodo?: string;
-  oportunidade?: string;
-  sequencia: string[];
-  evidencias: ClueId[];
-  contradicao?: string;
-  contradicaoExplicacao?: string;
-  desconhecida?: string;
 };
 
 export type AccusationAttempt = {
@@ -162,17 +155,6 @@ export type AccusationAttempt = {
   outcome: "aceita" | "parcial" | "rejeitada";
   feedbackId: string;
 };
-
-export type TimelineNodeId =
-  | "NODE_1"
-  | "NODE_2"
-  | "NODE_3"
-  | "NODE_4"
-  | "NODE_5"
-  | "NODE_6"
-  | "NODE_7"
-  | "NODE_8"
-  | "NODE_9";
 
 export type Preferences = {
   reducedMotion: boolean;
@@ -183,6 +165,9 @@ export type Preferences = {
 
 export type GameState = {
   saveVersion: number;
+  difficulty: Difficulty;
+  /** A escolha é feita antes de ligar o aparelho e só muda ao reiniciar. */
+  difficultyChosen: boolean;
   act: ActNumber;
   /** Aparelho já destravado com o PIN da tela. */
   phoneUnlocked: boolean;
@@ -204,7 +189,6 @@ export type GameState = {
   notificationsSeen: string[];
   zoomed: PhotoId[];
   playedVoices: VoiceId[];
-  timeline: Partial<Record<TimelineNodeId, ClueId>>;
   accusation: AccusationDraft;
   accusationAttempts: AccusationAttempt[];
   hintsUsed: Record<string, number>;
@@ -219,6 +203,7 @@ export type GameState = {
 
 export type GameAction =
   | { type: "RESTORE"; state: GameState }
+  | { type: "SET_DIFFICULTY"; difficulty: Difficulty }
   | { type: "UNLOCK_PHONE" }
   | { type: "OPEN_APP"; appId: AppId }
   | { type: "FIND_CLUE"; clueId: ClueId }
@@ -239,11 +224,7 @@ export type GameAction =
   | { type: "MARK_UNKNOWN_READ" }
   | { type: "LEAK"; token: string }
   | { type: "FIRE_EVENT"; eventId: EventId }
-  | { type: "PLACE_NODE"; node: TimelineNodeId; clueId: ClueId }
-  | { type: "CLEAR_NODE"; node: TimelineNodeId }
   | { type: "SET_ACCUSATION"; patch: Partial<AccusationDraft> }
-  | { type: "TOGGLE_SEQUENCE"; cardId: string }
-  | { type: "TOGGLE_EVIDENCE"; clueId: ClueId }
   | { type: "RECORD_ACCUSATION"; attempt: AccusationAttempt }
   | { type: "SHOW_REVEAL" }
   | { type: "SEND_AUDIO_TO_DIEGO" }

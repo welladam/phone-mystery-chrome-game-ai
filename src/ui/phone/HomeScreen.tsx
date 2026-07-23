@@ -10,23 +10,11 @@ type Props = {
   onOpen: (appId: AppId) => void;
 };
 
-const ACT_LABEL: Record<number, string> = {
-  1: "Ato 1 — Morte a esclarecer",
-  2: "Ato 2 — O que ela estava pagando",
-  3: "Ato 3 — Alguém está te escrevendo",
-  4: "Ato 4 — Você deixou eu dirigir",
-};
-
 export default function HomeScreen({ state, badges, onOpen }: Props) {
   const apps = APPS.filter((app) => state.unlockedApps.includes(app.id) && app.id !== "APP_021");
 
   return (
     <div className="home">
-      <header className="home__header">
-        <p className="home__act">{ACT_LABEL[state.act]}</p>
-        <p className="home__owner">Clara Mendonça Vasques · (32) 99114-2087</p>
-      </header>
-
       <div className="home__grid" role="list">
         {apps.map((app) => {
           const locked = appIsLocked(state, app.id);
@@ -57,11 +45,6 @@ export default function HomeScreen({ state, badges, onOpen }: Props) {
           );
         })}
       </div>
-
-      <footer className="home__footer">
-        <span>{state.cluesFound.length} descobertas</span>
-        <span>{state.memories.length} deduções</span>
-      </footer>
     </div>
   );
 }

@@ -35,6 +35,7 @@ type PhotoAssetProps = {
   takenAt: string;
   album: string;
   className?: string;
+  onLoad?: (size: { width: number; height: number }) => void;
 };
 
 /**
@@ -43,7 +44,7 @@ type PhotoAssetProps = {
  * metadados corretos. Trocar a imagem é soltar o arquivo na pasta — nenhuma
  * linha de código muda.
  */
-export function PhotoAsset({ photoId, file, alt, takenAt, album, className }: PhotoAssetProps) {
+export function PhotoAsset({ photoId, file, alt, takenAt, album, className, onLoad }: PhotoAssetProps) {
   const [failed, setFailed] = useState(false);
   const tone = placeholderTone(photoId);
 
@@ -72,6 +73,12 @@ export function PhotoAsset({ photoId, file, alt, takenAt, album, className }: Ph
       src={photoSrc(file)}
       alt={alt}
       loading="lazy"
+      onLoad={(event) =>
+        onLoad?.({
+          width: event.currentTarget.naturalWidth,
+          height: event.currentTarget.naturalHeight,
+        })
+      }
       onError={() => setFailed(true)}
     />
   );

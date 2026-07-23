@@ -34,11 +34,11 @@ export const MAIL_MAIN: MailRecord[] = [
     id: "MAIL_02",
     account: "principal",
     at: "04/03/2026 09:18",
-    from: "Nimbo Drive",
+    from: "Drive",
     subject: "Seu espaço está quase cheio (14,6 GB de 15 GB)",
     clueId: "CLUE_042",
     body:
-      "Olá, Clara.\n\nSua conta está usando 14,6 GB dos 15 GB disponíveis. Para continuar sincronizando conversas e fotos automaticamente, libere espaço ou amplie seu plano.\n\nO backup diário do Vínculo continuará sendo criado às 19h30, mas versões antigas serão descartadas.",
+      "Olá, Clara.\n\nSua conta está usando 14,6 GB dos 15 GB disponíveis. Para continuar sincronizando conversas e fotos automaticamente, libere espaço ou amplie seu plano.\n\nO backup diário do Chat continuará sendo criado às 19h30, mas versões antigas serão descartadas.",
   },
   {
     id: "MAIL_03",
@@ -52,7 +52,7 @@ export const MAIL_MAIN: MailRecord[] = [
     id: "MAIL_04",
     account: "principal",
     at: "28/02/2026 08:00",
-    from: "Banco Aurora",
+    from: "Banco",
     subject: "Extrato mensal disponível",
     body: "Seu extrato de fevereiro já está disponível no aplicativo. Acesso com os últimos 4 dígitos do CPF da titular.",
   },
@@ -60,7 +60,7 @@ export const MAIL_MAIN: MailRecord[] = [
     id: "MAIL_05",
     account: "principal",
     at: "19/01/2026 22:14",
-    from: "Fluxo",
+    from: "Rede Social",
     subject: "Alguém tentou entrar na sua conta",
     body:
       "Detectamos uma tentativa de acesso a partir de um dispositivo desconhecido em Juiz de Fora. Se não foi você, troque sua senha.",
