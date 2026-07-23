@@ -170,7 +170,7 @@ button:disabled {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--app-accent, var(--accent));
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -263,15 +263,32 @@ pre {
   display: grid;
   place-items: center;
   padding: 2rem 1rem;
+  background:
+    radial-gradient(circle at 50% -6%, rgba(241, 191, 106, 0.14), transparent 34rem),
+    radial-gradient(circle at 84% 100%, rgba(138, 209, 160, 0.1), transparent 30rem),
+    radial-gradient(circle at 6% 84%, rgba(131, 181, 223, 0.08), transparent 26rem);
 }
 
 .boot__panel {
+  position: relative;
   width: min(100%, 640px);
-  background: var(--panel);
+  background: linear-gradient(175deg, var(--panel-2) 0%, var(--panel) 45%, #131917 100%);
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 22px;
   padding: 1.8rem;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.05),
+    0 30px 80px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.boot__panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--blue), var(--amber), var(--rose));
+  opacity: 0.75;
 }
 
 .boot__header {
@@ -282,14 +299,19 @@ pre {
 }
 
 .boot__mark {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
-  background: rgba(138, 209, 160, 0.14);
-  color: var(--accent);
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #cdeed9 0%, var(--accent) 42%, #2f6e42 100%);
+  color: #0c1310;
   flex-shrink: 0;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.55),
+    inset 0 -6px 10px rgba(0, 0, 0, 0.25),
+    0 0 0 6px rgba(138, 209, 160, 0.1),
+    0 10px 20px rgba(0, 0, 0, 0.35);
 }
 
 .boot__eyebrow {
@@ -779,6 +801,11 @@ pre {
   flex-direction: column;
   padding: 0.8rem 1rem 0.65rem;
   overflow-y: auto;
+  background:
+    radial-gradient(circle at 78% 6%, rgba(169, 154, 222, 0.16), transparent 15rem),
+    radial-gradient(circle at 14% 30%, rgba(131, 181, 223, 0.14), transparent 16rem),
+    radial-gradient(circle at 60% 90%, rgba(138, 209, 160, 0.12), transparent 18rem),
+    linear-gradient(180deg, #14201c 0%, #0c1512 55%, #070c0a 100%);
 }
 
 .lockscreen__clock {
@@ -807,12 +834,14 @@ pre {
 }
 
 .lockscreen__notifications li {
-  background: rgba(255, 255, 255, 0.07);
-  border-radius: 12px;
-  padding: 0.4rem 0.65rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 0.45rem 0.7rem;
   display: grid;
   gap: 0.15rem;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.1), 0 6px 14px rgba(0, 0, 0, 0.25);
 }
 
 .lockscreen__from {
@@ -878,15 +907,22 @@ pre {
   width: 66px;
   height: 66px;
   border-radius: 50%;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.06);
-  font-size: 1.05rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 60%);
+  font-size: 1.1rem;
+  font-weight: 500;
   display: grid;
   place-items: center;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.15), 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.12s ease, background 0.12s ease;
 }
 
 .keypad button:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08) 60%);
+}
+
+.keypad button:active {
+  transform: scale(0.92);
 }
 
 .lockscreen__error {
@@ -904,9 +940,10 @@ pre {
   padding: 1.1rem 1rem 0.75rem;
   min-height: 0;
   background:
-    radial-gradient(circle at 84% 12%, rgba(131, 181, 223, 0.18), transparent 13rem),
-    radial-gradient(circle at 16% 74%, rgba(138, 209, 160, 0.14), transparent 15rem),
-    linear-gradient(165deg, #111b18, #0a100e 68%);
+    radial-gradient(circle at 84% 8%, rgba(168, 107, 242, 0.16), transparent 15rem),
+    radial-gradient(circle at 12% 20%, rgba(131, 181, 223, 0.16), transparent 14rem),
+    radial-gradient(circle at 50% 92%, rgba(138, 209, 160, 0.12), transparent 16rem),
+    linear-gradient(180deg, #141f1b 0%, #0d1512 55%, #08100d 100%);
 }
 
 .home__header {
@@ -953,27 +990,53 @@ pre {
 
 .app-tile__icon {
   position: relative;
-  width: 52px;
-  height: 52px;
-  border-radius: 15px;
+  width: 54px;
+  height: 54px;
+  border-radius: 28%;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.08);
-  transition: transform 0.16s ease;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.08), 0 7px 15px rgba(0, 0, 0, 0.18);
+  color: #fff;
+  overflow: hidden;
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.16s ease;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.35),
+    inset 0 -6px 10px rgba(0, 0, 0, 0.22),
+    0 8px 16px rgba(0, 0, 0, 0.35);
 }
 
-.app-tile:hover .app-tile__icon {
-  transform: translateY(-2px);
+.app-tile__icon svg {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
 }
 
-.app-tile--verde .app-tile__icon { background: rgba(138, 209, 160, 0.18); color: var(--accent); }
-.app-tile--azul .app-tile__icon { background: rgba(131, 181, 223, 0.18); color: var(--blue); }
-.app-tile--ambar .app-tile__icon { background: rgba(241, 191, 106, 0.18); color: var(--amber); }
-.app-tile--rosa .app-tile__icon { background: rgba(221, 155, 181, 0.18); color: var(--rose); }
-.app-tile--roxo .app-tile__icon { background: rgba(169, 154, 222, 0.18); color: var(--violet); }
-.app-tile--cinza .app-tile__icon { background: rgba(255, 255, 255, 0.09); color: #cad6cf; }
+/* Brilho de vidro no topo do ícone, tipo squircle de iOS. */
+.app-tile__gloss {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.06) 38%, transparent 60%);
+  pointer-events: none;
+}
+
+.app-tile:hover .app-tile__icon,
+.app-tile:focus-visible .app-tile__icon {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.4),
+    inset 0 -6px 10px rgba(0, 0, 0, 0.22),
+    0 12px 20px rgba(0, 0, 0, 0.4);
+}
+
+.app-tile:active .app-tile__icon {
+  transform: translateY(0) scale(0.94);
+}
+
+/* Fallback: só entra em jogo se o gradiente inline (por app) não estiver presente. */
+.app-tile--verde .app-tile__icon:not([style]) { background: linear-gradient(160deg, #8ad1a0, #4f9e63); }
+.app-tile--azul .app-tile__icon:not([style]) { background: linear-gradient(160deg, #83b5df, #3d6fa8); }
+.app-tile--ambar .app-tile__icon:not([style]) { background: linear-gradient(160deg, #f1bf6a, #c98d2e); }
+.app-tile--rosa .app-tile__icon:not([style]) { background: linear-gradient(160deg, #dd9bb5, #b5567e); }
+.app-tile--roxo .app-tile__icon:not([style]) { background: linear-gradient(160deg, #a99ade, #6f5cb8); }
+.app-tile--cinza .app-tile__icon:not([style]) { background: linear-gradient(160deg, #c2cbc6, #5c6660); }
 
 .app-tile__name {
   font-size: 0.7rem;
@@ -1033,29 +1096,53 @@ pre {
   animation: app-open 0.2s ease both;
 }
 
+/* Cada app abre com sua própria identidade: --app-accent e --app-grad vêm de
+   appVisuals.ts via AppShell (data-app + style inline). Tudo aqui cai de volta
+   ao verde padrão quando essas variáveis não existem (ex. fora do appshell). */
 .appshell__bar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.6rem;
   padding: 0.7rem 0.8rem;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid color-mix(in srgb, var(--app-accent, var(--accent)) 30%, var(--line));
   background: rgba(19, 27, 23, 0.92);
   backdrop-filter: blur(12px);
   flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.appshell__bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--app-grad, none);
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.appshell__bar::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: var(--app-grad, var(--app-accent, var(--accent)));
 }
 
 .appshell__back {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.15rem;
   background: none;
   border: 0;
-  color: var(--accent);
+  color: var(--app-accent, var(--accent));
   font-size: 0.84rem;
   padding: 0.2rem;
 }
 
 .appshell__title {
+  position: relative;
   flex: 1;
   min-width: 0;
 }
@@ -1071,10 +1158,15 @@ pre {
   color: var(--muted);
 }
 
+.appshell__actions {
+  position: relative;
+}
+
 .appshell__body {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  background: radial-gradient(circle at 85% -10%, color-mix(in srgb, var(--app-accent, var(--accent)) 8%, transparent), transparent 22rem);
   min-width: 0;
 }
 
@@ -1104,8 +1196,8 @@ pre {
 }
 
 .row--flag {
-  border-color: rgba(241, 191, 106, 0.4);
-  background: rgba(241, 191, 106, 0.07);
+  border-color: color-mix(in srgb, var(--app-accent, var(--amber)) 45%, transparent);
+  background: color-mix(in srgb, var(--app-accent, var(--amber)) 9%, transparent);
 }
 
 .row__head {
@@ -1201,6 +1293,28 @@ pre {
   font-size: 0.9rem;
 }
 
+/* ---------------- banco ---------------- */
+
+[data-app="APP_015"] .row .amount {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--app-accent);
+}
+
+/* O primeiro painel da lista é o cartão de recorrência — vira um "cartão" de banco. */
+[data-app="APP_015"] .list > .panel:first-child {
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--app-accent) 22%, transparent), transparent 65%),
+    linear-gradient(155deg, var(--panel-2) 0%, var(--panel) 70%);
+  border-color: color-mix(in srgb, var(--app-accent) 30%, var(--line));
+}
+
+[data-app="APP_015"] .list > .panel:first-child .panel__big {
+  font-size: 1.3rem;
+  color: var(--app-accent);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+
 .code {
   margin: 0;
   font-family: ui-monospace, Menlo, Consolas, monospace;
@@ -1231,7 +1345,7 @@ pre {
 }
 
 .tabs .is-active {
-  background: var(--accent);
+  background: var(--app-accent, var(--accent));
   color: #0c1310;
   border-color: transparent;
   font-weight: 600;
@@ -1321,8 +1435,8 @@ pre {
 .photos__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 3px;
-  padding: 0.5rem 0.8rem 1rem;
+  gap: 2px;
+  padding: 2px;
 }
 
 .photos__grid button {
@@ -1332,7 +1446,7 @@ pre {
   background: none;
   aspect-ratio: 1;
   overflow: hidden;
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 .photos__thumb,
@@ -1341,16 +1455,42 @@ pre {
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.2s ease;
+}
+
+.photos__grid button:hover .photos__thumb {
+  transform: scale(1.06);
 }
 
 .photos__stamp {
   position: absolute;
-  left: 3px;
-  bottom: 3px;
-  font-size: 0.55rem;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 1px 4px;
-  border-radius: 3px;
+  inset: auto 0 0 0;
+  text-align: left;
+  font-size: 0.56rem;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.75));
+  padding: 12px 6px 3px;
+  border-radius: 0;
+}
+
+/* Galeria: abas de álbum viram um seletor segmentado, cabeçalho denso tipo carretel. */
+[data-app="APP_003"] .tabs {
+  margin: 0.7rem 0.8rem 0;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  width: fit-content;
+  max-width: calc(100% - 1.6rem);
+}
+
+[data-app="APP_003"] .tabs button {
+  border: 0;
+  background: none;
+  border-radius: 999px;
+}
+
+[data-app="APP_003"] .tabs .is-active {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
 }
 
 .photo-placeholder {
@@ -1766,8 +1906,9 @@ pre {
 .chart__bar {
   width: 100%;
   border-radius: 3px 3px 0 0;
-  background: linear-gradient(180deg, var(--rose), rgba(221, 155, 181, 0.35));
+  background: linear-gradient(180deg, var(--app-accent, var(--rose)), transparent);
   min-height: 3px;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--app-accent, var(--rose)) 55%, transparent);
 }
 
 .chart__bar--none {
@@ -1777,6 +1918,7 @@ pre {
     rgba(239, 142, 142, 0.6) 0 3px,
     transparent 3px 6px
   );
+  box-shadow: none;
 }
 
 .chart__label {
@@ -1785,6 +1927,27 @@ pre {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   height: 22px;
+}
+
+/* Saúde: painel-resumo vira tiles coloridos, tendências ganham lombada de acento. */
+[data-app="APP_014"] .panel > .meta-grid > div {
+  background: color-mix(in srgb, var(--app-accent) 9%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--app-accent) 22%, var(--line));
+  border-radius: 12px;
+  padding: 0.55rem 0.7rem;
+}
+
+[data-app="APP_014"] .meta-grid dt {
+  color: var(--app-accent);
+}
+
+[data-app="APP_014"] .meta-grid dd {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+[data-app="APP_014"] .row {
+  border-left: 3px solid color-mix(in srgb, var(--app-accent) 45%, transparent);
 }
 
 /* ---------------- mapas ---------------- */
@@ -1809,6 +1972,62 @@ pre {
 .timeline .is-flag {
   border-left-color: var(--amber);
   background: rgba(241, 191, 106, 0.09);
+}
+
+/* Mapas: o trajeto vira uma linha de trajeto com paradas, tipo app de rotas. */
+[data-app="APP_011"] .panel:has(.timeline) {
+  background:
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--app-accent) 5%, transparent) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--app-accent) 5%, transparent) 0 1px, transparent 1px 26px),
+    var(--panel);
+}
+
+[data-app="APP_011"] .timeline {
+  position: relative;
+  padding-left: 22px;
+  gap: 14px;
+}
+
+[data-app="APP_011"] .timeline::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: color-mix(in srgb, var(--app-accent) 45%, var(--line));
+}
+
+[data-app="APP_011"] .timeline li {
+  position: relative;
+  background: none;
+  border-left: 0;
+  border-radius: 0;
+  padding: 0.15rem 0;
+}
+
+[data-app="APP_011"] .timeline li::before {
+  content: "";
+  position: absolute;
+  left: -18px;
+  top: 0.3rem;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--app-accent);
+  box-shadow: 0 0 0 3px var(--panel);
+}
+
+[data-app="APP_011"] .timeline .is-flag {
+  background: none;
+}
+
+[data-app="APP_011"] .timeline .is-flag::before {
+  background: var(--amber);
+}
+
+[data-app="APP_011"] .row {
+  border-left: 3px solid color-mix(in srgb, var(--app-accent) 40%, transparent);
 }
 
 .timeline__when {
@@ -1838,13 +2057,13 @@ pre {
   align-items: center;
   padding: 0.65rem 0.7rem;
   border-radius: var(--radius);
-  border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--line);
+  background: none;
   text-align: left;
 }
 
 .chatlist__row:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .chatlist__row--muted {
@@ -1852,14 +2071,15 @@ pre {
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: grid;
   place-items: center;
   font-weight: 700;
   font-size: 0.95rem;
   flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .avatar--verde { background: rgba(138, 209, 160, 0.2); color: var(--accent); }
@@ -1924,7 +2144,8 @@ pre {
   padding: 0.6rem 0.8rem;
   background: rgba(255, 255, 255, 0.03);
   border: 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid color-mix(in srgb, var(--app-accent, var(--accent)) 25%, var(--line));
+  color: var(--app-accent, var(--ink));
   font-size: 0.85rem;
   font-weight: 600;
 }
@@ -1937,6 +2158,14 @@ pre {
   flex-direction: column;
   gap: 0.4rem;
   min-height: 0;
+  /* Papel de parede de conversa: pontilhado sutil na cor do app. */
+  background-color: #0d1412;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--app-accent, var(--accent)) 35%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+  background-position: -4px -4px;
 }
 
 .thread__history {
@@ -1986,12 +2215,14 @@ pre {
 .bubble--them {
   align-self: flex-start;
   background: var(--panel-2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-bottom-left-radius: 4px;
 }
 
 .bubble--self {
   align-self: flex-end;
-  background: rgba(138, 209, 160, 0.18);
+  background: color-mix(in srgb, var(--app-accent, var(--accent)) 24%, var(--panel-2));
+  border: 1px solid color-mix(in srgb, var(--app-accent, var(--accent)) 30%, transparent);
   border-bottom-right-radius: 4px;
 }
 
@@ -2088,6 +2319,12 @@ pre {
   border-radius: 999px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.05);
+  transition: border-color 0.15s ease;
+}
+
+.composer input:focus {
+  border-color: color-mix(in srgb, var(--app-accent, var(--accent)) 55%, var(--line));
+  outline: none;
 }
 
 .composer__clip,
@@ -2103,9 +2340,14 @@ pre {
 }
 
 .composer__send {
-  background: var(--accent);
+  background: var(--app-accent, var(--accent));
   color: #0c1310;
   border-color: transparent;
+}
+
+.composer__send:disabled {
+  background: var(--panel-2);
+  color: var(--muted);
 }
 
 .composer__attached {
@@ -2155,6 +2397,304 @@ pre {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+/* ---------------- rede social ---------------- */
+
+.social__header {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.social__header h3 {
+  font-size: 1rem;
+}
+
+.social__avatar-ring {
+  flex-shrink: 0;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  padding: 3px;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(
+    from 210deg,
+    var(--app-accent),
+    color-mix(in srgb, var(--app-accent) 45%, #f2874a),
+    var(--app-accent)
+  );
+}
+
+.social__avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--screen);
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.social__dms .row {
+  border-left: 3px solid color-mix(in srgb, var(--app-accent) 40%, transparent);
+}
+
+.social__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.social__grid .row {
+  margin: 0;
+}
+
+/* ==================================================================
+   TEMAS LEVES — os 14 apps restantes ganham um detalhe de assinatura
+   cada, quase tudo escopado por [data-app] sobre as classes genéricas
+   (.row, .panel, .mail__item...) que eles já compartilham.
+   ================================================================== */
+
+/* Notificações — cards empilhados de central de notificações. */
+[data-app="APP_001"] .row {
+  border-left: 3px solid var(--app-accent);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
+}
+
+/* E-mail — linhas de inbox: ícone e remetente puxam o azul do app. */
+[data-app="APP_004"] .mail__head svg {
+  color: var(--app-accent);
+}
+
+[data-app="APP_004"] .mail__from {
+  color: var(--app-accent);
+}
+
+[data-app="APP_004"] .mail__item {
+  border-left: 3px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+[data-app="APP_004"] .mail__item:has(.mail__head:hover) {
+  border-left-color: var(--app-accent);
+}
+
+/* Contatos — avatar circular com inicial, agenda clássica. */
+.contactrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.contactrow__avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--app-accent, var(--accent)) 20%, transparent);
+  color: var(--app-accent, var(--accent));
+}
+
+/* Calendário — vermelho de folhinha, lombada nas datas. */
+[data-app="APP_006"] .row {
+  border-left: 3px solid var(--app-accent);
+}
+
+[data-app="APP_006"] .row__meta {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  color: var(--app-accent);
+}
+
+/* Navegador — histórico como barra de endereço: título monoespaçado. */
+[data-app="APP_007"] .row__head h4 {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--app-accent);
+}
+
+/* Telefone — ícone de chamada colorido por tipo (perdida = vermelho). */
+.callrow__icon {
+  display: inline-flex;
+  color: var(--app-accent, var(--muted));
+}
+
+.callrow__icon--perdida {
+  color: var(--danger);
+}
+
+/* Gravador — luz de gravação pulsante no botão de play. */
+[data-app="APP_009"] .voice__play {
+  background: color-mix(in srgb, var(--app-accent) 18%, transparent);
+  color: var(--app-accent);
+  position: relative;
+}
+
+[data-app="APP_009"] .voice__play::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--app-accent) 45%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-app="APP_009"] .voice__play::after {
+    animation: rec-pulse 2.2s ease-out infinite;
+  }
+}
+
+@keyframes rec-pulse {
+  from { transform: scale(1); opacity: 0.7; }
+  to { transform: scale(1.4); opacity: 0; }
+}
+
+/* Notas — bloquinho de papel amarelo, levemente torto, tipo post-it. */
+[data-app="APP_010"] .note {
+  background: linear-gradient(180deg, #fff3b0, #ffe066);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #35290a;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+[data-app="APP_010"] .note:nth-child(odd) { transform: rotate(-0.6deg); }
+[data-app="APP_010"] .note:nth-child(even) { transform: rotate(0.5deg); }
+[data-app="APP_010"] .note:focus-within,
+[data-app="APP_010"] .note:hover { transform: none; }
+
+[data-app="APP_010"] .note .muted {
+  color: rgba(53, 41, 10, 0.62);
+}
+
+[data-app="APP_010"] .note__endnote {
+  color: #8a4a00;
+}
+
+[data-app="APP_010"] .note--locked {
+  background: linear-gradient(180deg, #2a2620, #1c1a15);
+  color: var(--ink);
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--app-accent) 45%, transparent);
+}
+
+[data-app="APP_010"] .note--locked .muted {
+  color: var(--muted);
+}
+
+[data-app="APP_010"] .panel--warn {
+  background: rgba(241, 191, 106, 0.07);
+  color: var(--ink);
+}
+
+/* Drive — barra de armazenamento da nuvem. */
+.drive__storage {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0 0.2rem;
+}
+
+.drive__bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.drive__bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--app-accent), color-mix(in srgb, var(--app-accent) 60%, white));
+  border-radius: inherit;
+}
+
+/* Lixeira — itens fantasmas, esmaecidos e tracejados. */
+[data-app="APP_013"] .mail__item {
+  border-style: dashed;
+  opacity: 0.9;
+}
+
+[data-app="APP_013"] .mail__head svg {
+  color: var(--app-accent);
+}
+
+/* Corridas — recibo de app de transporte: canhoto tracejado. */
+[data-app="APP_016"] .row__body {
+  border-top: 1px dashed var(--line);
+  margin-top: 0.5rem;
+  padding-top: 0.45rem;
+}
+
+[data-app="APP_016"] .section-title {
+  color: var(--app-accent);
+}
+
+/* Autenticador — código com barra de expiração animada. */
+[data-app="APP_018"] .code {
+  color: var(--app-accent);
+  font-size: 1.3rem;
+}
+
+[data-app="APP_018"] .row {
+  overflow: hidden;
+}
+
+[data-app="APP_018"] .row__body::after {
+  content: "";
+  display: block;
+  height: 2px;
+  margin-top: 0.5rem;
+  background: var(--app-accent);
+  transform-origin: left;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-app="APP_018"] .row__body::after {
+    animation: authbar 21s linear infinite;
+  }
+}
+
+@keyframes authbar {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* Tarefas — caixa de seleção ganha cor ao concluir. */
+.task-check {
+  display: inline-block;
+  font-size: 1.05rem;
+  margin-right: 0.15rem;
+  color: var(--muted);
+}
+
+.task-check.is-done {
+  color: var(--app-accent, var(--accent));
+}
+
+/* Ajustes — lista agrupada estilo iOS: linhas planas com divisórias. */
+[data-app="APP_020"] .panel {
+  padding: 0.3rem 0.9rem;
+}
+
+[data-app="APP_020"] .panel h3 {
+  padding: 0.6rem 0 0.3rem;
+}
+
+[data-app="APP_020"] .panel .row {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 0;
+}
+
+[data-app="APP_020"] .panel .row:last-child {
+  border-bottom: 0;
 }
 
 /* ==================================================================

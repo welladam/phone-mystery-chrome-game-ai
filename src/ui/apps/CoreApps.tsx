@@ -612,7 +612,12 @@ export function FilesApp({ api }: { api: AppApi }) {
 
   return (
     <div className="list">
-      <p className="muted">Drive · 14,6 GB de 15 GB</p>
+      <div className="drive__storage">
+        <p className="muted">Drive · 14,6 GB de 15 GB</p>
+        <div className="drive__bar">
+          <span style={{ width: "97%" }} />
+        </div>
+      </div>
 
       {nodes
         .filter((node) => !node.parent)

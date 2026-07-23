@@ -34,7 +34,18 @@ export function ContactsApp({ api }: { api: AppApi }) {
   return (
     <div className="list">
       {CONTACTS.map((contact) => (
-        <Row key={contact.id} title={contact.name} meta={contact.phone}>
+        <Row
+          key={contact.id}
+          title={
+            <span className="contactrow">
+              <span className="contactrow__avatar" aria-hidden>
+                {contact.name[0]?.toUpperCase()}
+              </span>
+              {contact.name}
+            </span>
+          }
+          meta={contact.phone}
+        >
           {contact.note && <p className="muted">“{contact.note}”</p>}
         </Row>
       ))}
@@ -65,7 +76,7 @@ export function CallsApp({ api }: { api: AppApi }) {
           key={call.id}
           title={
             <span className="callrow">
-              {icons[call.kind]}
+              <span className={`callrow__icon callrow__icon--${call.kind}`}>{icons[call.kind]}</span>
               {call.who}
             </span>
           }
@@ -206,8 +217,13 @@ export function BankApp({ api }: { api: AppApi }) {
       </section>
 
       {pack.BANK_STATEMENT.map((tx) => (
-        <Row key={tx.id} title={tx.label} meta={tx.at} flag={"flag" in tx && Boolean(tx.flag)}>
-          <p className="amount">{tx.amount}</p>
+        <Row
+          key={tx.id}
+          title={tx.label}
+          meta={<span className="amount">{tx.amount}</span>}
+          flag={"flag" in tx && Boolean(tx.flag)}
+        >
+          <p className="muted">{tx.at}</p>
           {mark(tx.clueId)}
         </Row>
       ))}
@@ -267,36 +283,47 @@ export function SocialApp({ api }: { api: AppApi }) {
   if (!pack) return <Empty>Carregando…</Empty>;
 
   return (
-    <div className="list">
-      <section className="panel">
-        <h3>@{pack.SOCIAL_PROFILE.handle}</h3>
-        <p className="muted">
-          Última publicação em {pack.SOCIAL_PROFILE.lastPost} · {pack.SOCIAL_PROFILE.silence}
-        </p>
+    <div className="list social">
+      <section className="panel social__header">
+        <span className="social__avatar-ring">
+          <span className="social__avatar">{pack.SOCIAL_PROFILE.handle[0]?.toUpperCase()}</span>
+        </span>
+        <div>
+          <h3>@{pack.SOCIAL_PROFILE.handle}</h3>
+          <p className="muted">
+            Última publicação em {pack.SOCIAL_PROFILE.lastPost} · {pack.SOCIAL_PROFILE.silence}
+          </p>
+        </div>
       </section>
 
       <h3 className="section-title">Mensagens diretas · diego.andrade.silva</h3>
-      {pack.DM_DIEGO.map((dm, index) => (
-        <Row key={dm.at} title={`Mensagem ${index + 1}`} meta={dm.at}>
-          <p className="quote">{dm.text}</p>
-        </Row>
-      ))}
+      <div className="social__dms">
+        {pack.DM_DIEGO.map((dm, index) => (
+          <Row key={dm.at} title={`Mensagem ${index + 1}`} meta={dm.at}>
+            <p className="quote">{dm.text}</p>
+          </Row>
+        ))}
+      </div>
       {mark("CLUE_018")}
 
       <h3 className="section-title">Salvos</h3>
-      {pack.SOCIAL_PROFILE.saved.map((item) => (
-        <Row key={item.id} title={item.label} meta="captura de tela" flag>
-          <p className="muted">{item.note}</p>
-          {mark(item.clueId)}
-        </Row>
-      ))}
+      <div className="social__grid">
+        {pack.SOCIAL_PROFILE.saved.map((item) => (
+          <Row key={item.id} title={item.label} meta="captura de tela" flag>
+            <p className="muted">{item.note}</p>
+            {mark(item.clueId)}
+          </Row>
+        ))}
+      </div>
 
       <h3 className="section-title">Stories arquivados</h3>
-      {pack.SOCIAL_PROFILE.archivedStories.map((item) => (
-        <Row key={item.id} title={item.note} meta={item.at}>
-          {mark(item.clueId)}
-        </Row>
-      ))}
+      <div className="social__grid">
+        {pack.SOCIAL_PROFILE.archivedStories.map((item) => (
+          <Row key={item.id} title={item.note} meta={item.at}>
+            {mark(item.clueId)}
+          </Row>
+        ))}
+      </div>
     </div>
   );
 }
@@ -314,7 +341,9 @@ export function TasksApp({ api }: { api: AppApi }) {
           key={task.id}
           title={
             <span className={"struck" in task && task.struck ? "is-struck" : ""}>
-              {task.done ? "☑ " : "☐ "}
+              <span className={`task-check${task.done ? " is-done" : ""}`} aria-hidden>
+                {task.done ? "☑" : "☐"}
+              </span>{" "}
               {task.text}
             </span>
           }

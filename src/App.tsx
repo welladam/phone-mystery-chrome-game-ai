@@ -658,6 +658,7 @@ export default function App() {
           <LockScreen reducedMotion={reducedMotion} onUnlock={() => dispatch({ type: "UNLOCK_PHONE" })} />
         ) : openAppId ? (
           <AppShell
+            appId={openAppId}
             title={appTitle(openAppId)}
             contained={openAppId === "APP_002"}
             onBack={() => {

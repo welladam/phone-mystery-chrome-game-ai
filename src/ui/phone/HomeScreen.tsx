@@ -2,6 +2,7 @@ import { Lock } from "lucide-react";
 import { APPS } from "../../content/manifest";
 import { appIsLocked } from "../../engine/selectors";
 import type { AppId, GameState } from "../../engine/types";
+import { getAppVisual } from "./appVisuals";
 import { AppIcon } from "./icons";
 
 type Props = {
@@ -19,6 +20,7 @@ export default function HomeScreen({ state, badges, onOpen }: Props) {
         {apps.map((app) => {
           const locked = appIsLocked(state, app.id);
           const badge = badges[app.id] ?? 0;
+          const visual = getAppVisual(app.id, app.tone);
           return (
             <button
               key={app.id}
@@ -27,8 +29,9 @@ export default function HomeScreen({ state, badges, onOpen }: Props) {
               className={`app-tile app-tile--${app.tone}`}
               onClick={() => onOpen(app.id)}
             >
-              <span className="app-tile__icon">
-                <AppIcon name={app.icon} />
+              <span className="app-tile__icon" style={{ background: visual.gradient }}>
+                <span className="app-tile__gloss" aria-hidden />
+                <AppIcon name={visual.glyph} />
                 {locked && (
                   <span className="app-tile__lock" aria-label="protegido por senha">
                     <Lock size={11} aria-hidden />
