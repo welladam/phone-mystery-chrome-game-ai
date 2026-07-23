@@ -28,16 +28,16 @@ export default function CaseFile({ mode, reducedMotion, onClose }: Props) {
         <div className="casefile__stage">
           <button
             type="button"
-            className={`folder${reducedMotion ? "" : " folder--breathe"}`}
+            className={`case-folder${reducedMotion ? "" : " case-folder--breathe"}`}
             onClick={() => setOpened(true)}
             aria-label="Abrir a pasta reservada do caso"
           >
-            <span className="folder__tab" />
-            <span className="folder__front">
-              <span className="folder__stamp">{DOSSIER_HEADER.stamp}</span>
-              <span className="folder__ref">{DOSSIER_HEADER.reference}</span>
-              <span className="folder__office">{DOSSIER_HEADER.office}</span>
-              <span className="folder__hint">
+            <span className="case-folder__tab" />
+            <span className="case-folder__front">
+              <span className="case-folder__stamp">{DOSSIER_HEADER.stamp}</span>
+              <span className="case-folder__ref">{DOSSIER_HEADER.reference}</span>
+              <span className="case-folder__office">{DOSSIER_HEADER.office}</span>
+              <span className="case-folder__hint">
                 <FolderClosed size={15} aria-hidden />
                 Toque para abrir
               </span>

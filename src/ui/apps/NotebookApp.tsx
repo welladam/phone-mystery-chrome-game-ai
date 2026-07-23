@@ -1,14 +1,14 @@
 import { useState, type FormEvent, type ReactElement } from "react";
-import { Gavel, Lightbulb, PencilLine, Plus, Scale, Trash2, Users } from "lucide-react";
+import { Gavel, Lightbulb, PencilLine, Plus, Scale, Sparkles, Trash2, Users } from "lucide-react";
 import { CLUES, getClue } from "../../content/manifest";
 import { missingBlocks } from "../../engine/accusation";
 import { hintFor, hintLevel, suggestObstacle } from "../../engine/hints";
-import { canAccuse } from "../../engine/rules";
-import { evidenceCoverage } from "../../engine/selectors";
+import { canAccuse, deriveContradictions } from "../../engine/rules";
+import { evidenceCoverage, knownMemories } from "../../engine/selectors";
 import type { AppApi } from "./types";
 import { Empty, Row } from "../phone/Bits";
 
-type Tab = "notas" | "pessoas" | "linha" | "acusacao" | "dicas";
+type Tab = "notas" | "deducoes" | "pessoas" | "linha" | "acusacao" | "dicas";
 
 type ManualTimelineEntry = {
   id: string;
@@ -122,6 +122,7 @@ export default function NotebookApp({ api }: { api: AppApi }) {
         {(
           [
             ["notas", "Minhas notas", <PencilLine key="n" size={15} />],
+            ["deducoes", "Deduções", <Sparkles key="d" size={15} />],
             ["pessoas", "Pessoas", <Users key="b" size={15} />],
             ["linha", "Linha do tempo", <Scale key="c" size={15} />],
             ["acusacao", "Acusação", <Gavel key="e" size={15} />],
@@ -156,6 +157,8 @@ export default function NotebookApp({ api }: { api: AppApi }) {
         </section>
       )}
 
+      {tab === "deducoes" && <DeductionsPanel api={api} />}
+
       {tab === "pessoas" && (
         <div className="list notebook-page">
           {PEOPLE.map((person) => (
@@ -176,6 +179,50 @@ export default function NotebookApp({ api }: { api: AppApi }) {
       {tab === "acusacao" && <AccusationPanel api={api} />}
 
       {tab === "dicas" && <HintPanel api={api} />}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+function DeductionsPanel({ api }: { api: AppApi }) {
+  const memories = knownMemories(api.state);
+  const contradictions = deriveContradictions(api.state);
+
+  if (memories.length === 0 && contradictions.length === 0) {
+    return (
+      <div className="list notebook-page">
+        <Empty>
+          Nenhuma dedução ainda. Conforme você cruza informações do aparelho, as conclusões que se
+          sustentam e as versões que não fecham aparecem aqui automaticamente.
+        </Empty>
+      </div>
+    );
+  }
+
+  return (
+    <div className="list notebook-page">
+      {memories.length > 0 && (
+        <section className="panel">
+          <h3>O que já está estabelecido</h3>
+          {memories.map((memory) => (
+            <Row key={memory.id} title={memory.label}>
+              <p>{memory.text}</p>
+            </Row>
+          ))}
+        </section>
+      )}
+
+      {contradictions.length > 0 && (
+        <section className="panel panel--warn">
+          <h3>Versões que não fecham</h3>
+          {contradictions.map((item) => (
+            <Row key={item.id} title="Contradição">
+              <p>{item.text}</p>
+            </Row>
+          ))}
+        </section>
+      )}
     </div>
   );
 }

@@ -165,7 +165,7 @@ export const ACCUSATION_FIELDS: ChoiceField[] = [
 export const CONTRADICTION_ALL_VALID = true;
 
 export const DESCONHECIDA_FIELD = {
-  legend: "8. Papel da “Desconhecida”",
+  legend: "8. Papel do “Desconhecido”",
   correct: "D_MESMA",
   options: [
     {
@@ -290,7 +290,7 @@ export const REVEAL_CARDS = [
   },
   {
     id: "RC_6",
-    title: "A Desconhecida",
+    title: "O “Desconhecido”",
     body:
       "Era Alice. O chip foi comprado em 12 de fevereiro de 2026 — três semanas antes de haver um crime a esconder, e no dia seguinte àquele em que Clara mencionou pela primeira vez ter procurado uma advogada.\n\nEla precisou te contar metade da verdade para você acusar a pessoa errada. Foi assim que você chegou nela.",
   },

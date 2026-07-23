@@ -16,8 +16,10 @@ import { AiError } from "../../ai/errors";
 import { getCharacter } from "../../content/characters/base";
 import { getClue } from "../../content/manifest";
 import { loadAct3, loadAct4 } from "../../content/registry";
+import { logDiagnostic } from "../../persistence/diagnostics";
 import { allowedFacts } from "../../engine/disclosure";
 import { classifyAll, classifyIntent, HOSTILE_INTENTS, type IntentId } from "../../engine/intents";
+import { guardedNameReply, guardPersonMention } from "../../engine/nameGuard";
 import {
   collapseBeat,
   leakWarning,
@@ -203,6 +205,22 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
         // 3. Fatos permitidos agora. Nada além disto chega à sessão.
         const { ids, facts } = allowedFacts(current, characterId, chat, intents as IntentId[]);
 
+        // Nomes afirmados pelo jogador não viram memórias do personagem. Se o
+        // nome não existe no caso, ainda não pode ser conhecido ou precisa ser
+        // ocultado, a resposta sai do motor e a alegação nem chega ao modelo.
+        const guardedName = guardPersonMention(trimmed, characterId, current.act, facts);
+        if (guardedName) {
+          await deliverBeat(
+            characterId,
+            {
+              id: `NAME_GUARD_${guardedName.reason}_${guardedName.name}`,
+              lines: guardedNameReply(characterId, guardedName.name),
+            },
+            false,
+          );
+          return;
+        }
+
         if (!sessions) {
           throw new AiError("SESSION_FAILED");
         }
@@ -240,15 +258,30 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
         // A intenção principal fica registrada para as dicas.
         dispatch({ type: "CHAT_INTENT", characterId, intent: primary.id });
       } catch (caught) {
-        const mapped = caught instanceof AiError ? caught : new AiError("SESSION_FAILED");
+        const mapped =
+          caught instanceof AiError
+            ? caught
+            : new AiError("SESSION_FAILED", caught instanceof Error ? `${caught.name}: ${caught.message}` : String(caught));
         setError(mapped);
+
+        // Sem isto, uma falha real de IA não deixa rastro nenhum — nem no
+        // painel de diagnóstico. O código e o detalhe técnico vão só para lá;
+        // o jogador continua vendo apenas a explicação em português.
+        void logDiagnostic({
+          category: "chat",
+          code: mapped.code,
+          details: { characterId, technical: mapped.technical },
+        });
+
+        const base =
+          "A conversa falhou por um instante. Nada do que você descobriu foi perdido — tente enviar de novo.";
+        const detail = mapped.technical ?? mapped.info.cause;
+        const withCause = detail ? `${base} [${mapped.code}: ${detail}]` : `${base} [${mapped.code}]`;
+
         dispatch({
           type: "CHAT_APPEND",
           characterId,
-          message: makeMessage(
-            "system",
-            "A conversa falhou por um instante. Nada do que você descobriu foi perdido — tente enviar de novo.",
-          ),
+          message: makeMessage("system", import.meta.env.DEV ? withCause : base),
         });
       } finally {
         setTyping(undefined);

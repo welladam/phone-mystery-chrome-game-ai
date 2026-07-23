@@ -1316,6 +1316,19 @@ pre {
 
 /* ---------------- notas, e-mail, arquivos ---------------- */
 
+/* Correio: margens horizontais e respiro entre as mensagens. */
+.mail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.8rem;
+}
+
+.mail > .tabs {
+  padding: 0;
+  margin-bottom: 0.2rem;
+}
+
 .note,
 .mail__item,
 .folder,
@@ -2433,7 +2446,9 @@ pre {
 
 /* ---- pasta fechada ---- */
 
-.folder {
+/* A pasta-manila do dossiê. Classe própria para não colidir com o navegador
+   de arquivos do Nimbo Drive, que também usa ".folder". */
+.case-folder {
   position: relative;
   width: min(86vw, 380px);
   aspect-ratio: 4 / 3;
@@ -2444,15 +2459,15 @@ pre {
   transition: transform 0.22s ease;
 }
 
-.folder:hover {
+.case-folder:hover {
   transform: translateY(-5px) rotate(-0.4deg);
 }
 
-.folder--breathe {
-  animation: folder-breathe 3.4s ease-in-out infinite;
+.case-folder--breathe {
+  animation: case-folder-breathe 3.4s ease-in-out infinite;
 }
 
-.folder__tab {
+.case-folder__tab {
   position: absolute;
   top: 0;
   left: 8%;
@@ -2462,7 +2477,7 @@ pre {
   background: linear-gradient(180deg, #b9a271, #9d8757);
 }
 
-.folder__front {
+.case-folder__front {
   position: absolute;
   inset: 10% 0 0;
   border-radius: 6px 12px 12px 12px;
@@ -2478,7 +2493,7 @@ pre {
   color: #2c2412;
 }
 
-.folder__stamp {
+.case-folder__stamp {
   border: 2px solid #8f2f2f;
   color: #8f2f2f;
   padding: 0.25rem 0.9rem;
@@ -2490,19 +2505,19 @@ pre {
   opacity: 0.85;
 }
 
-.folder__ref {
+.case-folder__ref {
   font-family: ui-monospace, Menlo, Consolas, monospace;
   font-size: 0.82rem;
   font-weight: 600;
 }
 
-.folder__office {
+.case-folder__office {
   font-size: 0.74rem;
   opacity: 0.75;
   letter-spacing: 0.04em;
 }
 
-.folder__hint {
+.case-folder__hint {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -2802,7 +2817,7 @@ pre {
   line-height: 1.35;
 }
 
-@keyframes folder-breathe {
+@keyframes case-folder-breathe {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-6px) rotate(-0.5deg); }
 }

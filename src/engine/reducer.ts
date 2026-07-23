@@ -170,6 +170,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case "SET_TYPING":
       return { ...state, typingLock: action.characterId };
 
+    case "MARK_UNKNOWN_READ":
+      if (state.unknownRead) return state;
+      return { ...state, unknownRead: true };
+
     case "LEAK":
       if (state.sharedLeak.includes(action.token)) return state;
       return { ...state, sharedLeak: [...state.sharedLeak, action.token] };

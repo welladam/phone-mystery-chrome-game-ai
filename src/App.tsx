@@ -24,6 +24,7 @@ import { renderApp, appTitle } from "./ui/apps/registry";
 import type { ContentPacks } from "./ui/apps/types";
 import { useConversation } from "./ui/apps/useConversation";
 import BootScreen, { type BootPhase } from "./ui/boot/BootScreen";
+import { playSound, primeSound, setSoundEnabled } from "./ui/sound";
 import AppShell from "./ui/phone/AppShell";
 import HomeScreen from "./ui/phone/HomeScreen";
 import LockScreen from "./ui/phone/LockScreen";
@@ -80,6 +81,7 @@ export default function App() {
   const [pending, setPending] = useState<string[]>([]);
   const [restoredNote, setRestoredNote] = useState<string>();
   const runtimeRef = useRef<BootRuntime | undefined>(undefined);
+  const sessionsRef = useRef<CharacterSessions | undefined>(undefined);
   const [sessions, setSessions] = useState<CharacterSessions>();
 
   /* ---------------- estado do jogo ---------------- */
@@ -125,6 +127,31 @@ export default function App() {
     }),
     [],
   );
+
+  /* ---------------- som ---------------- */
+
+  useEffect(() => {
+    setSoundEnabled(prefs.sound);
+  }, [prefs.sound]);
+
+  // Toque discreto ao clicar em qualquer elemento interativo. O primeiro
+  // gesto também "acorda" o áudio (política de autoplay do navegador).
+  useEffect(() => {
+    const handler = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null;
+      const el = target?.closest?.(
+        "button, [role='button'], summary, label.choice, label.toggle, .app-tile, .chatlist__row, .folder__head, .file__head, .mail__head, .note__head, .voice__head",
+      );
+      if (!el) return;
+      primeSound();
+      const cls = el.getAttribute("class") ?? "";
+      if (/back/.test(cls)) playSound("back");
+      else if (/send/.test(cls)) playSound("send");
+      else playSound("tap");
+    };
+    document.addEventListener("pointerdown", handler);
+    return () => document.removeEventListener("pointerdown", handler);
+  }, []);
 
   /* ---------------- persistência ---------------- */
 
@@ -184,6 +211,7 @@ export default function App() {
         gate.variant === "informado" ? pack.UNKNOWN_ENTRY_INFORMED : pack.UNKNOWN_ENTRY_FALLBACK;
 
       setToast("Uma conversa nova apareceu no Vínculo.");
+      playSound("notify");
       if (!reducedMotion && typeof navigator.vibrate === "function") navigator.vibrate(220);
 
       for (const line of lines) {
@@ -272,8 +300,17 @@ export default function App() {
       return;
     }
 
+    // Uma nova preparação substitui os recursos anteriores de forma explícita.
+    // Eles não podem ficar presos ao cleanup de um efeito dependente de
+    // `sessions`: esse cleanup também roda quando o estado recebe a primeira
+    // sessão e acabaria destruindo os tradutores recém-criados.
+    sessionsRef.current?.destroy();
+    runtimeRef.current?.destroy();
+
+    const nextSessions = new CharacterSessions(outcome.runtime);
     runtimeRef.current = outcome.runtime;
-    setSessions(new CharacterSessions(outcome.runtime));
+    sessionsRef.current = nextSessions;
+    setSessions(nextSessions);
 
     report.step("progresso", "correndo");
     setPhase("restaurando");
@@ -321,10 +358,14 @@ export default function App() {
 
   const [booted, setBooted] = useState(false);
 
+  // Recursos nativos do Chrome sobrevivem durante toda a partida e são
+  // encerrados apenas quando o aplicativo realmente sai da página.
   useEffect(() => () => {
-    sessions?.destroy();
+    sessionsRef.current?.destroy();
     runtimeRef.current?.destroy();
-  }, [sessions]);
+    sessionsRef.current = undefined;
+    runtimeRef.current = undefined;
+  }, []);
 
   /* ---------------- API dos aplicativos ---------------- */
 
@@ -391,6 +432,7 @@ export default function App() {
         })();
       },
       useHint: (obstacleId: string) => dispatch({ type: "USE_HINT", obstacleId }),
+      markUnknownRead: () => dispatch({ type: "MARK_UNKNOWN_READ" }),
     }),
     [state, packs, reducedMotion, conversation],
   );
@@ -442,6 +484,7 @@ export default function App() {
 
     if (additions.length > 0) {
       setNarrativeNotices((current) => [...current, ...additions]);
+      playSound(additions.some((item) => item.kind === "act") ? "unlock" : "clue");
       if (!reducedMotion && typeof navigator.vibrate === "function") navigator.vibrate([90, 70, 140]);
     }
   }, [booted, reducedMotion, state.act, state.actEnteredAt, state.memories, state.unlockedApps]);
@@ -518,7 +561,8 @@ export default function App() {
   }
 
   const badges: Partial<Record<AppId, number>> = {
-    APP_002: state.unknownEntered && !state.chats.CHAR_005?.messages.length ? 1 : 0,
+    // O aviso fica no ícone do Vínculo até o jogador abrir a conversa nova.
+    APP_002: state.unknownEntered && !state.unknownRead ? 1 : 0,
   };
 
   return (
@@ -578,6 +622,7 @@ export default function App() {
             dispatch({ type: "SOLVE_LOCK", lockId: lockRequest });
             setLockRequest(undefined);
             setToast("Conteúdo destravado.");
+            playSound("unlock");
           }}
           onFail={() => dispatch({ type: "FAIL_LOCK", lockId: lockRequest })}
           onClose={() => setLockRequest(undefined)}

@@ -27,7 +27,9 @@ export default function ChatApp({ api, conversation, initialCharacter }: Props) 
 
   useEffect(() => {
     if (openId) void conversation.greet(openId);
-  }, [openId, conversation]);
+    // Abrir a conversa do contato anônimo limpa o aviso do ícone do Vínculo.
+    if (openId === "CHAR_005") api.markUnknownRead();
+  }, [openId, conversation, api]);
 
   useEffect(() => {
     if (!archived) return;

@@ -137,6 +137,7 @@ export function sanitizeState(raw: unknown): GameState | undefined {
     chats,
     sharedLeak: Array.isArray(input.sharedLeak) ? input.sharedLeak.filter((id) => typeof id === "string") : [],
     unknownEntered: input.unknownEntered === true,
+    unknownRead: input.unknownRead === true,
     notificationsSeen: Array.isArray(input.notificationsSeen)
       ? input.notificationsSeen.filter((id) => typeof id === "string")
       : [],

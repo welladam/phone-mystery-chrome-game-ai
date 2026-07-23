@@ -68,6 +68,14 @@ export default function SiteSettingsModal({
               />
               Usar texto maior
             </label>
+            <label className="toggle">
+              <input
+                type="checkbox"
+                checked={prefs.sound}
+                onChange={(event) => onChange({ ...prefs, sound: event.target.checked })}
+              />
+              Efeitos sonoros
+            </label>
           </section>
 
           {import.meta.env.DEV && (

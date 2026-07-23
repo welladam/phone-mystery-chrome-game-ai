@@ -177,6 +177,7 @@ export type TimelineNodeId =
 export type Preferences = {
   reducedMotion: boolean;
   largeText: boolean;
+  sound: boolean;
   lastApp?: AppId;
 };
 
@@ -196,6 +197,8 @@ export type GameState = {
   /** Conhecimento compartilhado entre CHAR_004 e CHAR_005 (mesma pessoa). */
   sharedLeak: string[];
   unknownEntered: boolean;
+  /** O jogador já abriu a conversa do contato anônimo? Controla o aviso no ícone. */
+  unknownRead: boolean;
   /** Registro de qual janela está "digitando" — nunca duas ao mesmo tempo. */
   typingLock?: CharacterId;
   notificationsSeen: string[];
@@ -233,6 +236,7 @@ export type GameAction =
   | { type: "CHAT_SILENCE"; characterId: CharacterId; untilMs: number }
   | { type: "CHAT_COLLAPSE"; characterId: CharacterId }
   | { type: "SET_TYPING"; characterId?: CharacterId }
+  | { type: "MARK_UNKNOWN_READ" }
   | { type: "LEAK"; token: string }
   | { type: "FIRE_EVENT"; eventId: EventId }
   | { type: "PLACE_NODE"; node: TimelineNodeId; clueId: ClueId }

@@ -243,23 +243,30 @@ export function toAiError(error: unknown, fallback: AiErrorCode = "UNKNOWN"): Ai
   if (error instanceof AiError) return error;
 
   if (typeof DOMException !== "undefined" && error instanceof DOMException) {
+    // A mensagem costuma ter o detalhe real ("model execution failed",
+    // "session destroyed", etc.) — guardamos junto do nome, não só o nome.
+    const detail = `${error.name}${error.message ? `: ${error.message}` : ""}`;
     switch (error.name) {
       case "NotAllowedError":
-        return new AiError("ACTIVATION_REQUIRED", error.name);
+        return new AiError("ACTIVATION_REQUIRED", detail);
       case "NotSupportedError":
-        return new AiError("MODEL_UNAVAILABLE", error.name);
+        return new AiError("MODEL_UNAVAILABLE", detail);
       case "NotReadableError":
-        return new AiError("DOWNLOAD_INTERRUPTED", error.name);
+        return new AiError("DOWNLOAD_INTERRUPTED", detail);
       case "QuotaExceededError":
-        return new AiError("CONTEXT_OVERFLOW", error.name);
+        return new AiError("CONTEXT_OVERFLOW", detail);
       case "AbortError":
-        return new AiError("DOWNLOAD_INTERRUPTED", error.name);
+        // AbortError também é usado por tradução e geração. O chamador sabe
+        // qual operação estava em curso; durante o boot ele passa
+        // DOWNLOAD_INTERRUPTED, e durante o chat passa o erro específico da
+        // tradução ou da sessão.
+        return new AiError(fallback, detail);
       case "NetworkError":
-        return new AiError("NETWORK_LOST", error.name);
+        return new AiError("NETWORK_LOST", detail);
       case "InvalidStateError":
-        return new AiError("COMPONENT_EVICTED", error.name);
+        return new AiError("COMPONENT_EVICTED", detail);
       default:
-        return new AiError(fallback, error.name);
+        return new AiError(fallback, detail);
     }
   }
 

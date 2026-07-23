@@ -163,19 +163,33 @@ export async function createTranslator(
   const [sourceLanguage, targetLanguage] = direction === "pt-en" ? ["pt", "en"] : ["en", "pt"];
   const failCode = direction === "pt-en" ? "TRANSLATE_PT_EN_FAILED" : "TRANSLATE_EN_PT_FAILED";
 
-  let instance: TranslatorInstance;
-  try {
-    instance = await self.Translator.create({
-      sourceLanguage,
-      targetLanguage,
-      monitor(monitor) {
-        monitor.addEventListener("downloadprogress", (event) => {
-          onProgress?.(readProgress(event));
-        });
-      },
-    });
-  } catch (error) {
-    throw toAiError(error, failCode);
+  const build = async (): Promise<TranslatorInstance> => {
+    try {
+      return await self.Translator!.create({
+        sourceLanguage,
+        targetLanguage,
+        monitor(monitor) {
+          monitor.addEventListener("downloadprogress", (event) => {
+            onProgress?.(readProgress(event));
+          });
+        },
+      });
+    } catch (error) {
+      throw toAiError(error, failCode);
+    }
+  };
+
+  let instance = await build();
+
+  /**
+   * Uma única tentativa de tradução, sem recriação. `withTimeout` não cancela
+   * a chamada real — ela continua rodando no navegador mesmo depois que o JS
+   * para de esperar. Isso é aceitável: o resultado tardio é só descartado.
+   */
+  async function attempt(text: string): Promise<string> {
+    const raced = await withTimeout(instance.translate(text), 20_000);
+    if (raced === TIMED_OUT) throw new AiError(failCode, "translate-timeout");
+    return raced;
   }
 
   async function translateLine(line: string): Promise<string> {
@@ -192,9 +206,24 @@ export async function createTranslator(
     const guarded = shield(body);
     let translated: string;
     try {
-      translated = await instance.translate(guarded.text);
+      translated = await attempt(guarded.text);
     } catch (error) {
-      throw toAiError(error, failCode);
+      // A tradução pode falhar porque o motor on-device foi reciclado pelo
+      // navegador no meio do turno (já observado: AbortError espontâneo,
+      // sem relação com o nosso próprio teto de tempo). Uma única
+      // recriação + nova tentativa resolve isso sem perder a conversa —
+      // o mesmo tratamento que a sessão de conversa já recebe.
+      try {
+        instance.destroy?.();
+      } catch {
+        /* já encerrada */
+      }
+      try {
+        instance = await build();
+        translated = await attempt(guarded.text);
+      } catch (retryError) {
+        throw toAiError(retryError, failCode);
+      }
     }
 
     const result = `${lead}${guarded.restore(translated).trim()}${emoji}${tail}`;

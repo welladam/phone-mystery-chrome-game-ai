@@ -29,4 +29,5 @@ export type AppApi = {
   toggleEvidence: (clueId: string) => void;
   submitAccusation: () => void;
   useHint: (obstacleId: string) => void;
+  markUnknownRead: () => void;
 };

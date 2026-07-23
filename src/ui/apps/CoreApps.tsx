@@ -569,7 +569,10 @@ export function MapsApp({ api }: { api: AppApi }) {
 
 export function FilesApp({ api }: { api: AppApi }) {
   const mark = marker(api);
-  const [open, setOpen] = useState<string>();
+  // Pasta aberta e arquivo aberto são estados independentes: abrir um arquivo
+  // não pode fechar a pasta que o contém.
+  const [openFolder, setOpenFolder] = useState<string>();
+  const [openFile, setOpenFile] = useState<string>();
   const pack2 = api.packs.act2;
   const pack3 = api.packs.act3;
   if (!pack2) return <Empty>Carregando…</Empty>;
@@ -600,13 +603,17 @@ export function FilesApp({ api }: { api: AppApi }) {
               <button
                 type="button"
                 className="folder__head"
-                onClick={() => (locked ? api.requestLock("LOCK_003") : setOpen(open === folder.id ? undefined : folder.id))}
+                onClick={() =>
+                  locked
+                    ? api.requestLock("LOCK_003")
+                    : setOpenFolder(openFolder === folder.id ? undefined : folder.id)
+                }
               >
                 {locked && <Lock size={13} aria-hidden />} 📁 {folder.name}
                 {folder.meta && <span className="muted"> · {folder.meta}</span>}
               </button>
 
-              {open === folder.id && !locked && (
+              {openFolder === folder.id && !locked && (
                 <div className="folder__body">
                   {children.map((file) => {
                     const isZip = file.lock === "LOCK_008";
@@ -619,13 +626,15 @@ export function FilesApp({ api }: { api: AppApi }) {
                           type="button"
                           className="file__head"
                           onClick={() =>
-                            zipLocked ? api.requestLock("LOCK_008") : setOpen(open === file.id ? folder.id : file.id)
+                            zipLocked
+                              ? api.requestLock("LOCK_008")
+                              : setOpenFile(openFile === file.id ? undefined : file.id)
                           }
                         >
                           {zipLocked && <Lock size={12} aria-hidden />} {file.name}
                         </button>
 
-                        {open === file.id && doc && (
+                        {openFile === file.id && doc && (
                           <div className="file__body">
                             <pre>{doc}</pre>
                             {file.id === "DR_CASO_1" && (
@@ -643,7 +652,7 @@ export function FilesApp({ api }: { api: AppApi }) {
                           </div>
                         )}
 
-                        {open === file.id && !doc && !zipLocked && (
+                        {openFile === file.id && !doc && !zipLocked && (
                           <div className="file__body">
                             {isZip ? (
                               <>

@@ -30,6 +30,7 @@ export function createInitialState(): GameState {
     },
     sharedLeak: [],
     unknownEntered: false,
+    unknownRead: false,
     notificationsSeen: [],
     zoomed: [],
     playedVoices: [],

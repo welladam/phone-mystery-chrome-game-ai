@@ -24,6 +24,42 @@ const MODEL_OPTIONS: LanguageModelCreateOptions = {
   expectedOutputs: [{ type: "text", languages: ["en"] }],
 };
 
+/**
+ * Teto de tempo para uma resposta do modelo. Sem isto, uma chamada que nunca
+ * resolve (já observado com estas APIs experimentais) deixa a conversa
+ * travada para sempre, e o jogador não consegue mais falar com ninguém. Com o
+ * teto, a chamada vira um erro recuperável e o jogador pode tentar de novo.
+ * A primeira resposta pode ser lenta porque o modelo carrega na memória.
+ */
+const PROMPT_TIMEOUT_MS = 55_000;
+
+async function promptWithDeadline(
+  session: LanguageModelSession,
+  text: string,
+  signal?: AbortSignal,
+): Promise<string> {
+  const controller = new AbortController();
+  const onAbort = () => controller.abort();
+  if (signal) {
+    if (signal.aborted) controller.abort();
+    else signal.addEventListener("abort", onAbort, { once: true });
+  }
+
+  const raced = await withTimeout(
+    session.prompt(text, { signal: controller.signal }),
+    PROMPT_TIMEOUT_MS,
+  );
+
+  if (signal) signal.removeEventListener("abort", onAbort);
+
+  if (raced === TIMED_OUT) {
+    // Encerra a chamada pendente para não vazar trabalho em segundo plano.
+    controller.abort();
+    throw new AiError("SESSION_FAILED", "prompt-timeout");
+  }
+  return raced;
+}
+
 export async function modelAvailability(): Promise<Availability | "timeout"> {
   if (!self.LanguageModel) return "unavailable";
   try {
@@ -88,7 +124,7 @@ export async function createSession(
   return {
     async prompt(text: string, signal?: AbortSignal) {
       try {
-        const answer = await session.prompt(text, signal ? { signal } : undefined);
+        const answer = await promptWithDeadline(session, text, signal);
         return answer;
       } catch (error) {
         const mapped = toAiError(error, "SESSION_FAILED");
@@ -103,7 +139,7 @@ export async function createSession(
           session = await build();
           attachOverflow(session);
           overflowed = false;
-          return session.prompt(text, signal ? { signal } : undefined);
+          return promptWithDeadline(session, text, signal);
         }
         throw mapped;
       }

@@ -7,7 +7,7 @@ import type { Preferences } from "../engine/types";
 
 const KEY = "clara.prefs.v1";
 
-const DEFAULTS: Preferences = { reducedMotion: false, largeText: false };
+const DEFAULTS: Preferences = { reducedMotion: false, largeText: false, sound: true };
 
 export function loadPrefs(): Preferences {
   try {
@@ -17,6 +17,8 @@ export function loadPrefs(): Preferences {
     return {
       reducedMotion: parsed.reducedMotion === true,
       largeText: parsed.largeText === true,
+      // Som ligado por padrão; só desligado se o jogador tiver escolhido isso.
+      sound: parsed.sound !== false,
       lastApp: typeof parsed.lastApp === "string" ? (parsed.lastApp as Preferences["lastApp"]) : undefined,
     };
   } catch {
