@@ -1,8 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
 import { ChevronLeft } from "lucide-react";
-import { getApp } from "../../content/manifest";
 import type { AppId } from "../../engine/types";
 import { getAppVisual } from "./appVisuals";
+import { useLocale } from "../../i18n/LocaleContext";
+import { getLocaleContent } from "../../locales/contentRegistry";
 
 type Props = {
   appId: AppId;
@@ -15,7 +16,8 @@ type Props = {
 };
 
 export default function AppShell({ appId, title, subtitle, contained = false, onBack, actions, children }: Props) {
-  const visual = getAppVisual(appId, getApp(appId)?.tone ?? "cinza");
+  const { localeId, t } = useLocale();
+  const visual = getAppVisual(appId, getLocaleContent(localeId).manifest.getApp(appId)?.tone ?? "cinza");
   const themeVars = {
     "--app-accent": visual.accent,
     "--app-grad": visual.gradient,
@@ -26,7 +28,7 @@ export default function AppShell({ appId, title, subtitle, contained = false, on
       <header className="appshell__bar">
         <button type="button" className="appshell__back" onClick={onBack}>
           <ChevronLeft size={20} aria-hidden />
-          <span>Voltar</span>
+          <span>{t("app.back")}</span>
         </button>
         <div className="appshell__title">
           <h2>{title}</h2>

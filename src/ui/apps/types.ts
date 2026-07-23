@@ -1,5 +1,6 @@
 import type { Act1Pack, Act2Pack, Act3Pack, Act4Pack } from "../../content/registry";
 import type { AppId, CharacterId, GameState, LockId } from "../../engine/types";
+import type { LocaleId } from "../../locales/types";
 
 export type ContentPacks = {
   act1?: Act1Pack;
@@ -13,6 +14,7 @@ export type AppApi = {
   state: GameState;
   packs: ContentPacks;
   reducedMotion: boolean;
+  localeId: LocaleId;
   examine: (clueId: string) => void;
   find: (clueId: string) => void;
   zoom: (photoId: string) => void;

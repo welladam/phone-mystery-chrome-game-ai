@@ -160,6 +160,8 @@ export type Preferences = {
   reducedMotion: boolean;
   largeText: boolean;
   sound: boolean;
+  locale: import("../locales/types").LocaleId;
+  localeChosen: boolean;
   lastApp?: AppId;
 };
 

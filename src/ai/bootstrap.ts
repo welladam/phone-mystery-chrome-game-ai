@@ -11,6 +11,7 @@ import { hasLanguageModel, hasTranslator, inspectBrowser, isSecure } from "./ava
 import { AiError, toAiError, type AiErrorCode } from "./errors";
 import { createSession, modelAvailability, type ModelSession } from "./languageModel";
 import { createTranslator, translatorAvailability, type TranslatorPair } from "./translator";
+import type { LocaleBundle } from "../locales/types";
 
 export type BootStepId =
   | "contexto"
@@ -18,8 +19,8 @@ export type BootStepId =
   | "conversa"
   | "traducao"
   | "modelo"
-  | "pt-en"
-  | "en-pt"
+  | "to-model"
+  | "from-model"
   | "autorizacao"
   | "download"
   | "instalacao"
@@ -38,21 +39,31 @@ export type BootStep = {
   detail?: string;
 };
 
-export const BOOT_STEPS: Array<{ id: BootStepId; label: string }> = [
-  { id: "contexto", label: "Verificando conexão segura..." },
-  { id: "navegador", label: "Verificando compatibilidade do navegador..." },
-  { id: "conversa", label: "Verificando o modelo de conversa..." },
-  { id: "traducao", label: "Verificando os pacotes de tradução..." },
-  { id: "modelo", label: "Consultando disponibilidade do modelo..." },
-  { id: "pt-en", label: "Verificando tradução para inglês..." },
-  { id: "en-pt", label: "Verificando tradução para português..." },
-  { id: "autorizacao", label: "Aguardando sua autorização..." },
-  { id: "download", label: "Preparando componentes locais..." },
-  { id: "instalacao", label: "Instalando componentes..." },
-  { id: "verificacao", label: "Verificando comunicação..." },
-  { id: "progresso", label: "Restaurando dados da investigação..." },
-  { id: "pronto", label: "Celular pronto." },
-];
+function message(locale: LocaleBundle, key: string, values?: Record<string, string>) {
+  let text = locale.messages[key] ?? key;
+  Object.entries(values ?? {}).forEach(([name, value]) => {
+    text = text.replaceAll(`{${name}}`, value);
+  });
+  return text;
+}
+
+export function bootSteps(locale: LocaleBundle): Array<{ id: BootStepId; label: string }> {
+  return [
+  { id: "contexto", label: message(locale, "boot.step.secure") },
+  { id: "navegador", label: message(locale, "boot.step.browser") },
+  { id: "conversa", label: message(locale, "boot.step.chat") },
+  { id: "traducao", label: message(locale, "boot.step.translation") },
+  { id: "modelo", label: message(locale, "boot.step.model") },
+  { id: "to-model", label: message(locale, "boot.step.toModel", { language: locale.meta.nativeName }) },
+  { id: "from-model", label: message(locale, "boot.step.fromModel", { language: locale.meta.nativeName }) },
+  { id: "autorizacao", label: message(locale, "boot.step.authorization") },
+  { id: "download", label: message(locale, "boot.step.download") },
+  { id: "instalacao", label: message(locale, "boot.step.installation") },
+  { id: "verificacao", label: message(locale, "boot.step.verification") },
+  { id: "progresso", label: message(locale, "boot.step.progress") },
+  { id: "pronto", label: message(locale, "boot.step.ready") },
+  ];
+}
 
 /**
  * O que sobrevive ao boot: apenas os tradutores, que são compartilhados por
@@ -60,8 +71,8 @@ export const BOOT_STEPS: Array<{ id: BootStepId; label: string }> = [
  * conversa, cada uma com o próprio prompt de sistema e o próprio histórico.
  */
 export type BootRuntime = {
-  ptToEn: TranslatorPair;
-  enToPt: TranslatorPair;
+  toModel: TranslatorPair;
+  fromModel: TranslatorPair;
   destroy(): void;
 };
 
@@ -78,10 +89,10 @@ export type BootReporter = {
 const PROBE_PROMPT =
   "You are a diagnostic endpoint. Answer every message with exactly one word: ready.";
 
-type ProgressParts = Record<"modelo" | "pt-en" | "en-pt", number | undefined>;
+type ProgressParts = Record<"modelo" | "to-model" | "from-model", number | undefined>;
 
-function makeProgressAggregator(report: BootReporter) {
-  const parts: ProgressParts = { modelo: undefined, "pt-en": undefined, "en-pt": undefined };
+function makeProgressAggregator(report: BootReporter, locale: LocaleBundle) {
+  const parts: ProgressParts = { modelo: undefined, "to-model": undefined, "from-model": undefined };
 
   return (part: keyof ProgressParts, value: number | undefined) => {
     parts[part] = value;
@@ -89,19 +100,19 @@ function makeProgressAggregator(report: BootReporter) {
 
     if (known.length === 0) {
       // O navegador não deu porcentagem. Indeterminado, sem inventar número.
-      report.step("download", "correndo", { progress: undefined, detail: "Baixando/validando componentes pelo Chrome..." });
+      report.step("download", "correndo", { progress: undefined, detail: message(locale, "boot.detail.processing") });
       return;
     }
 
     const total = known.reduce((sum, item) => sum + item, 0) / 3;
     const labels: Record<keyof ProgressParts, string> = {
-      modelo: "modelo de conversa",
-      "pt-en": "pacote português → inglês",
-      "en-pt": "pacote inglês → português",
+      modelo: message(locale, "boot.detail.model"),
+      "to-model": message(locale, "boot.detail.toModel", { language: locale.meta.nativeName }),
+      "from-model": message(locale, "boot.detail.fromModel", { language: locale.meta.nativeName }),
     };
     report.step("download", "correndo", {
       progress: Math.min(0.999, total),
-      detail: `Baixando ${labels[part]}`,
+      detail: message(locale, "boot.detail.downloading", { component: labels[part] }),
     });
   };
 }
@@ -110,7 +121,7 @@ function makeProgressAggregator(report: BootReporter) {
  * Fase 1 — verificação. Não baixa nada.
  * Pode ser executada sem gesto do usuário.
  */
-export async function inspect(report: BootReporter): Promise<
+export async function inspect(locale: LocaleBundle, report: BootReporter): Promise<
   | { kind: "tudo-pronto" }
   | { kind: "precisa-baixar"; pendentes: string[] }
   | { kind: "erro"; error: AiError }
@@ -145,8 +156,9 @@ export async function inspect(report: BootReporter): Promise<
   }
   report.step("conversa", "ok");
 
+  const requiresTranslation = locale.meta.translatorLanguage !== locale.meta.modelLanguage;
   report.step("traducao", "correndo");
-  if (!hasTranslator()) {
+  if (requiresTranslation && !hasTranslator()) {
     report.step("traducao", "erro");
     return { kind: "erro", error: new AiError("TRANSLATOR_API_ABSENT") };
   }
@@ -162,44 +174,44 @@ export async function inspect(report: BootReporter): Promise<
     report.step("modelo", "erro");
     return { kind: "erro", error: new AiError("DEVICE_UNSUPPORTED") };
   }
-  report.step("modelo", "ok", { detail: model === "available" ? "instalado" : "precisa baixar" });
+  report.step("modelo", "ok", { detail: message(locale, model === "available" ? "boot.detail.installed" : "boot.detail.needsDownload") });
 
-  report.step("pt-en", "correndo");
-  const ptEn = await translatorAvailability("pt-en");
-  if (ptEn === "timeout") {
-    report.step("pt-en", "erro");
-    return { kind: "erro", error: new AiError("CHECK_TIMEOUT", "Translator.availability pt->en") };
+  report.step("to-model", "correndo");
+  const toModel = await translatorAvailability(locale.meta.translatorLanguage, locale.meta.modelLanguage);
+  if (toModel === "timeout") {
+    report.step("to-model", "erro");
+    return { kind: "erro", error: new AiError("CHECK_TIMEOUT", `Translator.availability ${locale.meta.translatorLanguage}->${locale.meta.modelLanguage}`) };
   }
-  if (ptEn === "unavailable") {
-    report.step("pt-en", "erro");
-    return { kind: "erro", error: new AiError("TRANSLATE_PT_EN_FAILED") };
+  if (toModel === "unavailable") {
+    report.step("to-model", "erro");
+    return { kind: "erro", error: new AiError("TRANSLATE_TO_MODEL_FAILED") };
   }
-  report.step("pt-en", "ok", { detail: ptEn === "available" ? "instalado" : "precisa baixar" });
+  report.step("to-model", "ok", { detail: message(locale, toModel === "available" ? "boot.detail.installed" : "boot.detail.needsDownload") });
 
-  report.step("en-pt", "correndo");
-  const enPt = await translatorAvailability("en-pt");
-  if (enPt === "timeout") {
-    report.step("en-pt", "erro");
-    return { kind: "erro", error: new AiError("CHECK_TIMEOUT", "Translator.availability en->pt") };
+  report.step("from-model", "correndo");
+  const fromModel = await translatorAvailability(locale.meta.modelLanguage, locale.meta.translatorLanguage);
+  if (fromModel === "timeout") {
+    report.step("from-model", "erro");
+    return { kind: "erro", error: new AiError("CHECK_TIMEOUT", `Translator.availability ${locale.meta.modelLanguage}->${locale.meta.translatorLanguage}`) };
   }
-  if (enPt === "unavailable") {
-    report.step("en-pt", "erro");
-    return { kind: "erro", error: new AiError("TRANSLATE_EN_PT_FAILED") };
+  if (fromModel === "unavailable") {
+    report.step("from-model", "erro");
+    return { kind: "erro", error: new AiError("TRANSLATE_FROM_MODEL_FAILED") };
   }
-  report.step("en-pt", "ok", { detail: enPt === "available" ? "instalado" : "precisa baixar" });
+  report.step("from-model", "ok", { detail: message(locale, fromModel === "available" ? "boot.detail.installed" : "boot.detail.needsDownload") });
 
   const pendentes: string[] = [];
-  if (model !== "available") pendentes.push("modelo de conversa");
-  if (ptEn !== "available") pendentes.push("tradução português → inglês");
-  if (enPt !== "available") pendentes.push("tradução inglês → português");
+  if (model !== "available") pendentes.push(message(locale, "boot.pending.model"));
+  if (toModel !== "available") pendentes.push(message(locale, "boot.pending.toModel", { language: locale.meta.nativeName }));
+  if (fromModel !== "available") pendentes.push(message(locale, "boot.pending.fromModel", { language: locale.meta.nativeName }));
 
   if (pendentes.length === 0) {
-    report.step("autorizacao", "ok", { detail: "componentes já instalados" });
+    report.step("autorizacao", "ok", { detail: message(locale, "boot.detail.componentsReady") });
     return { kind: "tudo-pronto" };
   }
 
   report.step("autorizacao", "pausado", {
-    detail: `Falta instalar: ${pendentes.join(", ")}.`,
+    detail: message(locale, "boot.detail.missing", { items: pendentes.join(", ") }),
   });
   return { kind: "precisa-baixar", pendentes };
 }
@@ -208,29 +220,37 @@ export async function inspect(report: BootReporter): Promise<
  * Fase 2 — preparação. Precisa ser chamada a partir de um clique, porque
  * `create()` exige ativação do usuário quando há download envolvido.
  */
-export async function prepare(report: BootReporter): Promise<BootOutcome> {
+export async function prepare(locale: LocaleBundle, report: BootReporter): Promise<BootOutcome> {
   report.step("autorizacao", "ok");
   report.step("download", "correndo", {
     progress: undefined,
-    detail: "Abrindo componentes já instalados ou iniciando instalação...",
+    detail: message(locale, "boot.detail.opening"),
   });
 
-  const track = makeProgressAggregator(report);
+  const track = makeProgressAggregator(report, locale);
 
   let session: ModelSession | undefined;
-  let ptToEn: TranslatorPair | undefined;
-  let enToPt: TranslatorPair | undefined;
+  let toModel: TranslatorPair | undefined;
+  let fromModel: TranslatorPair | undefined;
 
   const cleanup = () => {
     session?.destroy();
-    ptToEn?.destroy();
-    enToPt?.destroy();
+    toModel?.destroy();
+    fromModel?.destroy();
   };
 
   try {
     session = await createSession(PROBE_PROMPT, (value) => track("modelo", value));
-    ptToEn = await createTranslator("pt-en", (value) => track("pt-en", value));
-    enToPt = await createTranslator("en-pt", (value) => track("en-pt", value));
+    toModel = await createTranslator({
+      sourceLanguage: locale.meta.translatorLanguage,
+      targetLanguage: locale.meta.modelLanguage,
+      failCode: "TRANSLATE_TO_MODEL_FAILED",
+    }, (value) => track("to-model", value));
+    fromModel = await createTranslator({
+      sourceLanguage: locale.meta.modelLanguage,
+      targetLanguage: locale.meta.translatorLanguage,
+      failCode: "TRANSLATE_FROM_MODEL_FAILED",
+    }, (value) => track("from-model", value));
   } catch (error) {
     cleanup();
     const mapped = toAiError(error, "DOWNLOAD_INTERRUPTED");
@@ -245,14 +265,14 @@ export async function prepare(report: BootReporter): Promise<BootOutcome> {
 
   report.step("verificacao", "correndo");
   try {
-    const english = await ptToEn.translate("Responda somente com a palavra pronto.");
-    if (!english.trim()) throw new AiError("TRANSLATE_PT_EN_FAILED");
+    const english = await toModel.translate(locale.modelProbe);
+    if (!english.trim()) throw new AiError("TRANSLATE_TO_MODEL_FAILED");
 
     const answer = await session.prompt(`${english}\nReply with exactly one word.`);
     if (!answer.trim()) throw new AiError("SESSION_FAILED");
 
-    const portuguese = await enToPt.translate(answer);
-    if (!portuguese.trim()) throw new AiError("TRANSLATE_EN_PT_FAILED");
+    const localized = await fromModel.translate(answer);
+    if (!localized.trim()) throw new AiError("TRANSLATE_FROM_MODEL_FAILED");
   } catch (error) {
     cleanup();
     const mapped = toAiError(error, "SESSION_FAILED");
@@ -265,34 +285,23 @@ export async function prepare(report: BootReporter): Promise<BootOutcome> {
   // conversa nasce com o próprio prompt de sistema e o próprio histórico.
   session.destroy();
 
-  const readyPtToEn = ptToEn;
-  const readyEnToPt = enToPt;
+  const readyToModel = toModel;
+  const readyFromModel = fromModel;
 
   const runtime: BootRuntime = {
-    ptToEn: readyPtToEn,
-    enToPt: readyEnToPt,
+    toModel: readyToModel,
+    fromModel: readyFromModel,
     destroy() {
-      readyPtToEn.destroy();
-      readyEnToPt.destroy();
+      readyToModel.destroy();
+      readyFromModel.destroy();
     },
   };
 
   return { kind: "pronto", runtime };
 }
 
-export function initialSteps(): BootStep[] {
-  return BOOT_STEPS.map((step) => ({ ...step, state: "espera" }));
-}
-
-export function describeSizes(pendentes: string[]) {
-  const parts: string[] = [];
-  if (pendentes.some((item) => item.includes("modelo"))) {
-    parts.push("o modelo de conversa, que é o componente maior e pode ocupar vários gigabytes");
-  }
-  if (pendentes.some((item) => item.includes("tradução"))) {
-    parts.push("os pacotes de tradução entre português e inglês, bem menores");
-  }
-  return parts.join(" e ");
+export function initialSteps(locale: LocaleBundle): BootStep[] {
+  return bootSteps(locale).map((step) => ({ ...step, state: "espera" }));
 }
 
 export type { AiErrorCode };

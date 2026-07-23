@@ -19,6 +19,8 @@ export type AiErrorCode =
   | "NETWORK_LOST"
   | "TRANSLATE_PT_EN_FAILED"
   | "TRANSLATE_EN_PT_FAILED"
+  | "TRANSLATE_TO_MODEL_FAILED"
+  | "TRANSLATE_FROM_MODEL_FAILED"
   | "SESSION_FAILED"
   | "CONTEXT_OVERFLOW"
   | "CHECK_TIMEOUT"
@@ -140,6 +142,22 @@ export const ERROR_CATALOG: Record<AiErrorCode, AiErrorInfo> = {
     title: "Não consegui preparar a tradução para o português",
     cause: "O pacote de tradução de inglês para português não respondeu ao teste de verificação.",
     action: "Tente novamente. Se persistir, reinicie o Chrome para forçar a reinstalação do componente.",
+    retryable: true,
+    keepsProgress: true,
+  },
+  TRANSLATE_TO_MODEL_FAILED: {
+    code: "TRANSLATE_TO_MODEL_FAILED",
+    title: "Não consegui preparar a tradução da conversa",
+    cause: "O pacote que traduz o idioma escolhido para o idioma do modelo não respondeu à verificação.",
+    action: "Tente novamente. Se persistir, reinicie o Chrome para reinstalar o componente.",
+    retryable: true,
+    keepsProgress: true,
+  },
+  TRANSLATE_FROM_MODEL_FAILED: {
+    code: "TRANSLATE_FROM_MODEL_FAILED",
+    title: "Não consegui preparar as respostas traduzidas",
+    cause: "O pacote que traduz as respostas do modelo para o idioma escolhido não respondeu à verificação.",
+    action: "Tente novamente. Se persistir, reinicie o Chrome para reinstalar o componente.",
     retryable: true,
     keepsProgress: true,
   },

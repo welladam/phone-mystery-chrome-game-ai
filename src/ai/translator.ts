@@ -123,7 +123,20 @@ export type TranslatorPair = {
   destroy(): void;
 };
 
-export type TranslatorDirection = "pt-en" | "en-pt";
+export type TranslatorSpec = {
+  sourceLanguage: string;
+  targetLanguage: string;
+  failCode: "TRANSLATE_TO_MODEL_FAILED" | "TRANSLATE_FROM_MODEL_FAILED";
+};
+
+export function createIdentityTranslator(): TranslatorPair {
+  return {
+    async translate(text: string) {
+      return text;
+    },
+    destroy() {},
+  };
+}
 
 const cache = new Map<string, string>();
 const CACHE_LIMIT = 300;
@@ -137,10 +150,11 @@ function remember(key: string, value: string) {
 }
 
 export async function translatorAvailability(
-  direction: TranslatorDirection,
+  sourceLanguage: string,
+  targetLanguage: string,
 ): Promise<Availability | "timeout"> {
+  if (sourceLanguage === targetLanguage) return "available";
   if (!self.Translator) return "unavailable";
-  const [sourceLanguage, targetLanguage] = direction === "pt-en" ? ["pt", "en"] : ["en", "pt"];
   try {
     const raw = await withTimeout(self.Translator.availability({ sourceLanguage, targetLanguage }));
     if (raw === TIMED_OUT) return "timeout";
@@ -151,15 +165,14 @@ export async function translatorAvailability(
 }
 
 export async function createTranslator(
-  direction: TranslatorDirection,
+  spec: TranslatorSpec,
   onProgress?: (value: number | undefined) => void,
 ): Promise<TranslatorPair> {
+  const { sourceLanguage, targetLanguage, failCode } = spec;
+  if (sourceLanguage === targetLanguage) return createIdentityTranslator();
   if (!self.Translator) {
     throw new AiError("TRANSLATOR_API_ABSENT");
   }
-
-  const [sourceLanguage, targetLanguage] = direction === "pt-en" ? ["pt", "en"] : ["en", "pt"];
-  const failCode = direction === "pt-en" ? "TRANSLATE_PT_EN_FAILED" : "TRANSLATE_EN_PT_FAILED";
 
   const build = async (): Promise<TranslatorInstance> => {
     try {
@@ -193,7 +206,7 @@ export async function createTranslator(
   async function translateLine(line: string): Promise<string> {
     if (!line.trim()) return line;
 
-    const cacheKey = `${direction}:${line}`;
+    const cacheKey = `${sourceLanguage}-${targetLanguage}:${line}`;
     const cached = cache.get(cacheKey);
     if (cached !== undefined) return cached;
 

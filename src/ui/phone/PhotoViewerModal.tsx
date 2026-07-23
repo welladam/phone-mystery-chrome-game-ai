@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, ty
 import { Maximize2, Minus, Plus, RotateCcw, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { PhotoAsset } from "./Bits";
+import { useLocale } from "../../i18n/LocaleContext";
 
 type Photo = {
   id: string;
@@ -20,6 +21,7 @@ type Props = {
 const clamp = (value: number) => Math.min(5, Math.max(1, value));
 
 export default function PhotoViewerModal({ photo, onClose, onExplore }: Props) {
+  const { t } = useLocale();
   const dialogRef = useRef<HTMLDivElement>(null);
   const exploredRef = useRef(false);
   const dragRef = useRef<{ x: number; y: number; left: number; top: number } | undefined>(undefined);
@@ -140,13 +142,13 @@ export default function PhotoViewerModal({ photo, onClose, onExplore }: Props) {
         className="photo-viewer__dialog"
         role="dialog"
         aria-modal="true"
-        aria-label={`Visualização ampliada de ${photo.file}`}
+        aria-label={t("photo.viewerLabel", { file: photo.file })}
         tabIndex={-1}
       >
         <header className="photo-viewer__head">
           <span><Maximize2 size={17} aria-hidden /> {photo.file}</span>
           <span className="photo-viewer__scale">{Math.round(scale * 100)}%</span>
-          <button type="button" onClick={onClose} aria-label="Fechar imagem ampliada"><X size={20} aria-hidden /></button>
+          <button type="button" onClick={onClose} aria-label={t("photo.closeViewer")}><X size={20} aria-hidden /></button>
         </header>
         <div
           className={`photo-viewer__canvas${scale > 1 ? " is-zoomed" : ""}`}
@@ -169,11 +171,11 @@ export default function PhotoViewerModal({ photo, onClose, onExplore }: Props) {
             />
           </div>
         </div>
-        <footer className="photo-viewer__controls" aria-label="Controles de zoom">
-          <button type="button" onClick={() => applyScale(scale / 1.25)} disabled={scale <= 1} aria-label="Diminuir zoom"><Minus size={18} aria-hidden /></button>
-          <button type="button" onClick={() => applyScale(1)} disabled={scale === 1} aria-label="Restaurar zoom"><RotateCcw size={17} aria-hidden /></button>
-          <button type="button" onClick={() => applyScale(scale * 1.25)} disabled={scale >= 5} aria-label="Aumentar zoom"><Plus size={18} aria-hidden /></button>
-          <p>Use a roda do mouse para ampliar e arraste para navegar.</p>
+        <footer className="photo-viewer__controls" aria-label={t("photo.zoomControls")}>
+          <button type="button" onClick={() => applyScale(scale / 1.25)} disabled={scale <= 1} aria-label={t("photo.zoomOut")}><Minus size={18} aria-hidden /></button>
+          <button type="button" onClick={() => applyScale(1)} disabled={scale === 1} aria-label={t("photo.zoomReset")}><RotateCcw size={17} aria-hidden /></button>
+          <button type="button" onClick={() => applyScale(scale * 1.25)} disabled={scale >= 5} aria-label={t("photo.zoomIn")}><Plus size={18} aria-hidden /></button>
+          <p>{t("photo.zoomHelp")}</p>
         </footer>
       </div>
     </div>,

@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { ChevronLeft, Paperclip, Send } from "lucide-react";
-import { CHARACTERS } from "../../content/characters/base";
-import { getClue } from "../../content/manifest";
 import { activeCharacters, presentableClues } from "../../engine/selectors";
 import type { CharacterId } from "../../engine/types";
 import { useAutoScroll } from "../a11y/hooks";
@@ -9,6 +7,8 @@ import { Empty } from "../phone/Bits";
 import { playSound, primeSound } from "../sound";
 import type { AppApi } from "./types";
 import type { ConversationApi } from "./useConversation";
+import { getLocaleChat } from "../../locales/chatRegistry";
+import { useLocale } from "../../i18n/LocaleContext";
 
 type Props = {
   api: AppApi;
@@ -18,6 +18,8 @@ type Props = {
 };
 
 export default function ChatApp({ api, conversation, initialCharacter, requestKey }: Props) {
+  const { t } = useLocale();
+  const chatLocale = getLocaleChat(api.localeId);
   const [openId, setOpenId] = useState<CharacterId | undefined>(initialCharacter);
   const [archived, setArchived] = useState<string>();
   const [draft, setDraft] = useState("");
@@ -59,7 +61,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
   function submit(event: FormEvent) {
     event.preventDefault();
     if (!openId || (!draft.trim() && !attached)) return;
-    const text = draft.trim() || `Quero que você olhe isto: ${getClue(attached ?? "")?.label ?? ""}`;
+    const text = draft.trim() || t("chat.lookAtEvidence", { clue: chatLocale.getClue(attached ?? "")?.label ?? "" });
     void conversation.send(openId, text, attached);
     primeSound();
     playSound("send");
@@ -72,7 +74,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
     return (
       <div className="chatlist">
         {characters.map((id) => {
-          const profile = CHARACTERS[id];
+          const profile = chatLocale.getCharacter(id);
           const state = api.state.chats[id];
           const last = state?.messages[state.messages.length - 1];
           return (
@@ -81,7 +83,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
               <span className="chatlist__body">
                 <span className="chatlist__name">
                   {profile.displayName}
-                  {state?.collapsed && <span className="chatlist__tag">encerrada</span>}
+                  {state?.collapsed && <span className="chatlist__tag">{t("chat.closedTag")}</span>}
                 </span>
                 <span className="chatlist__preview">
                   {last ? last.text.slice(0, 62) : profile.status}
@@ -91,7 +93,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
           );
         })}
 
-        <p className="chatlist__divider">Conversas antigas do aparelho</p>
+        <p className="chatlist__divider">{t("chat.archived")}</p>
         {threads.map((thread) => (
           <button
             key={thread.id}
@@ -113,7 +115,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
   /* ---------------- conversa arquivada ---------------- */
   if (archived) {
     const thread = threads.find((item) => item.id === archived);
-    if (!thread) return <Empty>Conversa não encontrada.</Empty>;
+    if (!thread) return <Empty>{t("chat.notFound")}</Empty>;
 
     return (
       <div className="thread">
@@ -133,7 +135,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
   }
 
   /* ---------------- conversa viva ---------------- */
-  const profile = CHARACTERS[openId!];
+  const profile = chatLocale.getCharacter(openId!);
   const history =
     openId === "CHAR_002"
       ? api.packs.act1?.HISTORY_MOTHER
@@ -160,7 +162,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
               });
             }}
           >
-            <summary>Histórico anterior no aparelho ({history.length} mensagens)</summary>
+            <summary>{t("chat.previousHistory", { count: history.length })}</summary>
             {history.map((line, index) => (
               <div
                 key={index}
@@ -187,7 +189,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
             }
           >
             {message.clueId && (
-              <span className="bubble__attach">📎 {getClue(message.clueId)?.label}</span>
+              <span className="bubble__attach">📎 {chatLocale.getClue(message.clueId)?.label}</span>
             )}
             <p>{message.text}</p>
           </div>
@@ -202,14 +204,14 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
         )}
       </div>
 
-      {chat?.collapsed && <p className="thread__closed">Esta conversa foi encerrada do outro lado.</p>}
+      {chat?.collapsed && <p className="thread__closed">{t("chat.closed")}</p>}
 
       {!chat?.collapsed && (
         <form className="composer" onSubmit={submit}>
           {attached && (
             <div className="composer__attached">
-              📎 {getClue(attached)?.label}
-              <button type="button" onClick={() => setAttached(undefined)} aria-label="Remover anexo">
+              📎 {chatLocale.getClue(attached)?.label}
+              <button type="button" onClick={() => setAttached(undefined)} aria-label={t("chat.removeAttachment")}>
                 ×
               </button>
             </div>
@@ -219,7 +221,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
               type="button"
               className="composer__clip"
               onClick={() => setPicker((value) => !value)}
-              aria-label="Apresentar uma prova"
+              aria-label={t("chat.presentEvidence")}
               disabled={available.length === 0}
             >
               <Paperclip size={17} aria-hidden />
@@ -227,15 +229,15 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
             <input
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
-              placeholder="Escreva em português…"
-              aria-label={`Mensagem para ${profile.displayName}`}
+              placeholder={t("chat.placeholder")}
+              aria-label={t("chat.messageFor", { name: profile.displayName })}
               disabled={conversation.busy}
             />
             <button
               type="submit"
               className="composer__send"
               disabled={conversation.busy || (!draft.trim() && !attached)}
-              aria-label="Enviar"
+              aria-label={t("chat.send")}
             >
               <Send size={17} aria-hidden />
             </button>
@@ -243,7 +245,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
 
           {picker && (
             <div className="composer__picker">
-              {available.length === 0 && <p className="muted">Nenhuma pista nova para apresentar.</p>}
+              {available.length === 0 && <p className="muted">{t("chat.noEvidence")}</p>}
               {available.map((clue) => (
                 <button
                   key={clue.id}

@@ -6,6 +6,8 @@
  * se ele não existir, desenham um placeholder com os metadados corretos.
  */
 
+import type { LocaleId } from "../locales/types";
+
 export const PHOTO_DIR = "/assets/photos";
 export const AUDIO_DIR = "/assets/audio";
 
@@ -19,8 +21,8 @@ export function photoSrc(fileName: string) {
   return `${PHOTO_DIR}/${fileName}`;
 }
 
-export function audioSrc(voiceId: string) {
-  return `${AUDIO_DIR}/${voiceId}.m4a`;
+export function audioSrc(locale: LocaleId, voiceId: string) {
+  return `${AUDIO_DIR}/${locale}/${voiceId}.m4a`;
 }
 
 /** Paleta determinística para o placeholder, derivada do próprio ID. */

@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Sparkles } from "lucide-react";
 import { placeholderTone, photoSrc } from "../../content/assets";
+import { useLocale } from "../../i18n/LocaleContext";
 
 /* ------------------------------------------------------------------ */
 /* Marcador de pista                                                   */
@@ -96,11 +97,12 @@ type ZoomProps = {
 };
 
 export function ZoomBlock({ label, text, revealed, onZoom }: ZoomProps) {
+  const { t } = useLocale();
   if (!revealed) {
     return (
       <button type="button" className="zoom-btn" onClick={onZoom}>
         <Sparkles size={15} aria-hidden />
-        Aprimorar imagem
+        {t("image.enhance")}
       </button>
     );
   }

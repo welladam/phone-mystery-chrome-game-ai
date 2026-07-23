@@ -1,4 +1,3 @@
-import { getApp } from "../../content/manifest";
 import type { AppId, CharacterId } from "../../engine/types";
 import ChatApp from "./ChatApp";
 import {
@@ -27,6 +26,8 @@ import {
 } from "./SimpleApps";
 import type { AppApi } from "./types";
 import type { ConversationApi } from "./useConversation";
+import type { LocaleId } from "../../locales/types";
+import { getLocaleContent } from "../../locales/contentRegistry";
 
 type RenderArgs = {
   appId: AppId;
@@ -92,6 +93,6 @@ export function renderApp({ appId, api, conversation, initialCharacter, chatRequ
   }
 }
 
-export function appTitle(appId: AppId) {
-  return getApp(appId)?.name ?? "Aplicativo";
+export function appTitle(appId: AppId, locale: LocaleId) {
+  return getLocaleContent(locale).manifest.getApp(appId)?.name ?? "Aplicativo";
 }

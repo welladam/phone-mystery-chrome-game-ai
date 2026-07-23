@@ -3,8 +3,8 @@
 Jogo de investigação que roda **inteiramente no navegador**, sem servidor e sem
 chave de API. Você recebe o celular de uma jovem morta e precisa descobrir o que
 aconteceu — explorando os aplicativos do aparelho e conversando com as pessoas
-próximas a ela, em português, com uma inteligência artificial que roda na sua
-própria máquina.
+próximas a ela no idioma escolhido, com uma inteligência artificial que roda na
+sua própria máquina.
 
 ---
 
@@ -84,23 +84,25 @@ Não há sistema de confiança nem pontos de afinidade. A personalidade de cada
 personagem é integral desde a primeira mensagem. Eles escondem coisas por
 motivos próprios, não por pontuação.
 
-**Falas que carregam pista são escritas à mão em português** e entregues
+**Falas que carregam pista são escritas à mão em cada pacote de idioma** e entregues
 diretamente, sem passar pelo modelo nem pela tradução. Isso garante que uma
 palavra decisiva saia sempre exata, e que o mistério continue justo mesmo se o
 modelo variar de uma execução para outra.
 
 ## 4. Como a tradução funciona
 
-Você escreve em português. O jogo então:
+Você escreve no idioma escolhido. O jogo então:
 
-1. traduz sua mensagem para inglês com o **Translator API**, localmente;
+1. traduz sua mensagem do idioma ativo para inglês com o **Translator API**, localmente;
 2. envia o texto em inglês para a sessão do personagem;
 3. recebe a resposta em inglês;
-4. traduz de volta para português;
-5. mostra só o português.
+4. traduz do inglês de volta para o idioma ativo;
+5. mostra somente o idioma escolhido.
 
-Você nunca vê o inglês. Os prompts internos são em inglês porque o modelo local
-interpreta personalidade e emoção com mais estabilidade nesse idioma.
+Você nunca vê o inglês, exceto se um futuro pacote `en-US` estiver ativo. Nesse
+caso, os dois tradutores viram adaptadores de identidade e nenhum pacote de
+tradução é baixado. Os prompts internos permanecem em inglês porque o modelo
+local interpreta personalidade e emoção com mais estabilidade nesse idioma.
 
 Dois cuidados ficam em `src/ai/translator.ts`:
 
@@ -118,13 +120,17 @@ Nenhum serviço externo é usado. Nenhuma chave de API é pedida.
 
 | Onde | O que |
 |---|---|
-| IndexedDB `clara-caso-0447` | progresso da investigação e registro técnico |
-| localStorage | preferências e notas livres do caderno |
+| IndexedDB `clara-caso-0447` | progresso da investigação, separado por locale (`slot-principal:pt-BR`, por exemplo) |
+| localStorage | preferência global de idioma e notas separadas (`clara.case-notes.v2:pt-BR`) |
 
 O save guarda **somente identificadores e estados já alcançados**. Não há texto
 de solução, não há segredo bloqueado e nenhuma chave tem nome revelador. O save
 é assinado com um checksum: se for adulterado, é recusado com uma mensagem
 amigável, sem apagar mais nada.
+
+Ao trocar o idioma em **Opções**, o jogo salva o slot atual, encerra tradutores e
+sessões da IA, recarrega a página e abre o slot daquele idioma. O save legado sem
+locale e as notas antigas são migrados uma única vez para `pt-BR`.
 
 ## 6. Requisitos do navegador
 
@@ -173,6 +179,8 @@ npm run build
 npm run preview
 ```
 
+Antes da compilação, `npm run validate:locales` confere o catálogo, os módulos
+obrigatórios, os nomes genéricos do runtime de tradução e os áudios exigidos.
 O build sai sem *source maps*, minificado, e com o conteúdo narrativo dividido
 em quatro arquivos (`cap-a` a `cap-d`), um por ato.
 
@@ -187,8 +195,9 @@ campo `file` de cada foto em `src/content/shared.ts` e o `id` de cada áudio.
   `IMG_20260308_1944.jpg` (a foto do mirante), `tribuna_barao.png` (a matéria)
   ou `print_live_diego_080326.png` (a transmissão). A extensão pode ser `.jpg`
   ou `.png`, o que já estiver no nome.
-- Áudios: coloque em `public/assets/audio/` com o identificador da gravação —
-  `VOICE_001.m4a` a `VOICE_004.m4a`.
+- Áudios: coloque em `public/assets/audio/<locale>/` com o identificador da
+  gravação — por exemplo, `public/assets/audio/pt-BR/VOICE_001.m4a` a
+  `VOICE_004.m4a`. Não existe fallback para áudio de outro idioma.
 
 Enquanto o arquivo não existir, o jogo desenha um **placeholder** com os
 metadados corretos (data, hora, álbum e descrição). No caso dos áudios, a
@@ -200,7 +209,22 @@ Os **prompts de geração das 20 fotografias** estão em
 fora do pacote enviado ao navegador. Os roteiros de gravação estão em
 [`docs/PRODUCAO-AUDIO.md`](docs/PRODUCAO-AUDIO.md).
 
-## 12. Limpar ou migrar o progresso salvo
+## 12. Adicionar um idioma
+
+O registro central fica em `src/locales/registry.ts`. Cada idioma deve fornecer:
+
+1. metadados BCP-47, idioma da Translator API e diretório próprio de áudio;
+2. catálogo completo de interface, acessibilidade, boot e erros;
+3. módulos de conteúdo dos Atos 1–4, mantendo os mesmos IDs e condições;
+4. perfis, prompts, fatos em inglês, intenções, falas canônicas e proteção contra
+   nomes inventados do chat;
+5. todos os `VOICE_ID` obrigatórios no diretório do locale.
+
+`pt-BR` é o pacote jogável completo. `en-US` está visível no seletor como exemplo
+indisponível e só deve receber `enabled: true` depois de completar conteúdo e
+áudio. Execute `npm run validate:locales` antes de habilitar qualquer pacote.
+
+## 13. Limpar ou migrar o progresso salvo
 
 Para apagar tudo e recomeçar, abra **Opções** no canto superior direito e use
 **Reiniciar o jogo do zero**. Isso remove o progresso, as conversas, as notas e
@@ -220,7 +244,7 @@ fazer:
 Um save cujo checksum não confere é recusado e você recomeça — nada mais no
 navegador é afetado.
 
-## 13. Limitações da proteção contra inspeção
+## 14. Limitações da proteção contra inspeção
 
 A aplicação roda inteiramente no navegador. **Não existe proteção absoluta**
 contra alguém determinado a ler o código pelo DevTools, e este projeto não
@@ -249,7 +273,7 @@ apagar o progresso de quem inspeciona.
 > validado do lado do servidor permitisse. Este projeto é intencionalmente
 > offline e local, então essa troca não foi feita.
 
-## 14. Limitações das APIs experimentais do Chrome
+## 15. Limitações das APIs experimentais do Chrome
 
 Estas APIs ainda mudam de assinatura. Os pontos que afetam o projeto hoje:
 
@@ -270,7 +294,7 @@ Estas APIs ainda mudam de assinatura. Os pontos que afetam o projeto hoje:
 Todo acesso às APIs passa por `src/ai/`, para que uma mudança futura seja
 resolvida num único lugar.
 
-## 15. Adicionar um novo personagem de chat
+## 16. Adicionar um novo personagem de chat
 
 1. Acrescente o identificador em `CharacterId` (`src/engine/types.ts`).
 2. Escreva o perfil em `src/content/characters/base.ts`: nome exibido, estilo de
@@ -296,10 +320,12 @@ src/
   ai/           adaptadores do Chrome, boot em 14 etapas, sessões, erros
   engine/       máquina de estados, regras, senhas, intenções, divulgação
   content/      manifesto, pacotes por ato, personagens, dossiê, assets
+  locales/      registro, textos, conteúdo por ato e pacote de chat de cada idioma
+  i18n/         provider React tipado e interpolação de mensagens
   persistence/  IndexedDB, save com checksum, preferências, diagnóstico
   ui/           boot, pasta do caso, celular, 21 aplicativos, acusação e revelação
 docs/           material de produção (fora do pacote do navegador)
-public/assets/  fotos e áudios substituíveis
+  public/assets/  fotos e áudios versionados por locale
 ```
 
 ## Notas de interface
@@ -318,6 +344,6 @@ public/assets/  fotos e áudios substituíveis
 
 ## Sobre testes
 
-Este repositório não inclui suíte de testes automatizados, por decisão de
-escopo. A verificação é o `npm run build` (que roda `tsc -b`) mais a partida
-manual.
+Este repositório não inclui suíte de testes de interface, por decisão de escopo.
+A verificação automatizada é o `npm run build`, que executa a validação de
+locales, `tsc -b` e o build de produção, complementada por uma partida manual.

@@ -1,5 +1,6 @@
 import { Brain, ChevronRight, UnlockKeyhole } from "lucide-react";
 import { useFocusTrap } from "../a11y/hooks";
+import { useLocale } from "../../i18n/LocaleContext";
 
 export type NarrativeNotice =
   | {
@@ -24,6 +25,7 @@ type Props = {
 };
 
 export default function ProgressNotice({ notice, remaining, onContinue }: Props) {
+  const { t } = useLocale();
   const trapRef = useFocusTrap<HTMLDivElement>(true);
 
   return (
@@ -43,7 +45,7 @@ export default function ProgressNotice({ notice, remaining, onContinue }: Props)
           </span>
           <div>
             <p className="progress-notice__eyebrow">
-              {notice.kind === "deduction" ? "Nova dedução" : `Ato ${notice.act} desbloqueado`}
+              {notice.kind === "deduction" ? t("progress.newDeduction") : t("progress.actUnlocked", { act: notice.act })}
             </p>
             <h2 id="progress-notice-title">{notice.title}</h2>
           </div>
@@ -54,8 +56,8 @@ export default function ProgressNotice({ notice, remaining, onContinue }: Props)
         </p>
 
         {notice.kind === "act" && notice.apps.length > 0 && (
-          <section className="progress-notice__apps" aria-label="Novos aplicativos disponíveis">
-            <span>Novos acessos no aparelho</span>
+          <section className="progress-notice__apps" aria-label={t("progress.newApps")}>
+            <span>{t("progress.newAccess")}</span>
             <ul>
               {notice.apps.map((app) => <li key={app}>{app}</li>)}
             </ul>
@@ -63,9 +65,9 @@ export default function ProgressNotice({ notice, remaining, onContinue }: Props)
         )}
 
         <footer className="progress-notice__foot">
-          <span>{remaining > 0 ? `Mais ${remaining} revelação${remaining > 1 ? "ões" : ""}` : "Progresso salvo"}</span>
+          <span>{remaining > 0 ? t(remaining > 1 ? "progress.morePlural" : "progress.more", { count: remaining }) : t("progress.saved")}</span>
           <button type="button" className="btn btn--primary" onClick={onContinue}>
-            Continuar <ChevronRight size={17} aria-hidden />
+            {t("progress.continue")} <ChevronRight size={17} aria-hidden />
           </button>
         </footer>
       </div>

@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { Delete, Lock } from "lucide-react";
-import { NOTIFICATIONS } from "../../content/shared";
-import { checkLock, getLock } from "../../content/manifest";
+import { useLocale } from "../../i18n/LocaleContext";
+import { getLocaleContent } from "../../locales/contentRegistry";
 
 type Props = {
   onUnlock: () => void;
   reducedMotion: boolean;
 };
 
-const PREVIEW = NOTIFICATIONS.filter((item) => item.at.startsWith("09/03")).slice(0, 3);
-
 export default function LockScreen({ onUnlock, reducedMotion }: Props) {
+  const { localeId, t } = useLocale();
+  const { checkLock, getLock } = getLocaleContent(localeId).manifest;
+  const preview = getLocaleContent(localeId).shared.NOTIFICATIONS
+    .filter((item) => item.at.startsWith("09/03"))
+    .slice(0, 3);
   const [code, setCode] = useState("");
   const [shake, setShake] = useState(false);
   const [message, setMessage] = useState<string>();
@@ -34,7 +37,7 @@ export default function LockScreen({ onUnlock, reducedMotion }: Props) {
       }
 
       setShake(true);
-      setMessage("Código incorreto. O papel dentro da capinha traz a data de nascimento dela.");
+      setMessage(t("lock.incorrect"));
       setTimeout(
         () => {
           setShake(false);
@@ -63,11 +66,11 @@ export default function LockScreen({ onUnlock, reducedMotion }: Props) {
     <div className="lockscreen">
       <div className="lockscreen__clock">
         <span className="lockscreen__hour">06:32</span>
-        <span className="lockscreen__date">segunda-feira, 9 de março</span>
+        <span className="lockscreen__date">{t("lock.date")}</span>
       </div>
 
       <ul className="lockscreen__notifications">
-        {PREVIEW.map((item) => (
+        {preview.map((item) => (
           <li key={item.id}>
             <span className="lockscreen__from">{item.from}</span>
             <span className="lockscreen__preview">{item.preview}</span>
@@ -79,9 +82,9 @@ export default function LockScreen({ onUnlock, reducedMotion }: Props) {
       <div className={`lockscreen__pad${shake && !reducedMotion ? " lockscreen__pad--shake" : ""}`}>
         <p className="lockscreen__hint">
           <Lock size={14} aria-hidden />
-          Digite o código de quatro dígitos
+          {t("lock.enterFourDigits")}
         </p>
-        <div className="lockscreen__dots" aria-label={`${code.length} de 4 dígitos digitados`}>
+        <div className="lockscreen__dots" aria-label={t("lock.digitsEntered", { count: code.length })}>
           {[0, 1, 2, 3].map((index) => (
             <span key={index} className={index < code.length ? "is-filled" : ""} />
           ))}
@@ -99,7 +102,7 @@ export default function LockScreen({ onUnlock, reducedMotion }: Props) {
           <button
             type="button"
             onClick={() => setCode((current) => current.slice(0, -1))}
-            aria-label="Apagar último dígito"
+            aria-label={t("lock.deleteDigit")}
           >
             <Delete size={18} aria-hidden />
           </button>

@@ -1,9 +1,10 @@
 import { Lock } from "lucide-react";
-import { APPS } from "../../content/manifest";
 import { appIsLocked } from "../../engine/selectors";
 import type { AppId, GameState } from "../../engine/types";
 import { getAppVisual } from "./appVisuals";
 import { AppIcon } from "./icons";
+import { useLocale } from "../../i18n/LocaleContext";
+import { getLocaleContent } from "../../locales/contentRegistry";
 
 type Props = {
   state: GameState;
@@ -12,7 +13,10 @@ type Props = {
 };
 
 export default function HomeScreen({ state, badges, onOpen }: Props) {
-  const apps = APPS.filter((app) => state.unlockedApps.includes(app.id) && app.id !== "APP_021");
+  const { localeId, t } = useLocale();
+  const apps = getLocaleContent(localeId).manifest.APPS.filter(
+    (app) => state.unlockedApps.includes(app.id) && app.id !== "APP_021",
+  );
 
   return (
     <div className="home">
@@ -33,12 +37,12 @@ export default function HomeScreen({ state, badges, onOpen }: Props) {
                 <span className="app-tile__gloss" aria-hidden />
                 <AppIcon name={visual.glyph} />
                 {locked && (
-                  <span className="app-tile__lock" aria-label="protegido por senha">
+                  <span className="app-tile__lock" aria-label={t("app.passwordProtected")}>
                     <Lock size={11} aria-hidden />
                   </span>
                 )}
                 {badge > 0 && (
-                  <span className="app-tile__badge" aria-label={`${badge} itens novos`}>
+                  <span className="app-tile__badge" aria-label={t("app.newItems", { count: badge })}>
                     {badge > 9 ? "9+" : badge}
                   </span>
                 )}

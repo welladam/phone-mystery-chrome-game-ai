@@ -1,14 +1,8 @@
 import { useState } from "react";
 import { FolderClosed, KeyRound, X } from "lucide-react";
-import {
-  DOSSIER_ACCESS,
-  DOSSIER_HEADER,
-  DOSSIER_LETTER,
-  DOSSIER_METHOD,
-  DOSSIER_SECTIONS,
-  DOSSIER_WARNING,
-} from "../../content/dossier";
 import { useEscape, useFocusTrap } from "../a11y/hooks";
+import { useLocale } from "../../i18n/LocaleContext";
+import { getLocaleContent } from "../../locales/contentRegistry";
 
 type Props = {
   /** "entrada" mostra a pasta fechada primeiro; "consulta" abre direto. */
@@ -18,6 +12,15 @@ type Props = {
 };
 
 export default function CaseFile({ mode, reducedMotion, onClose }: Props) {
+  const { localeId, t } = useLocale();
+  const {
+    DOSSIER_ACCESS,
+    DOSSIER_HEADER,
+    DOSSIER_LETTER,
+    DOSSIER_METHOD,
+    DOSSIER_SECTIONS,
+    DOSSIER_WARNING,
+  } = getLocaleContent(localeId).dossier;
   const [opened, setOpened] = useState(mode === "consulta");
   const trapRef = useFocusTrap<HTMLDivElement>(true);
   useEscape(mode === "consulta", onClose);
@@ -30,7 +33,7 @@ export default function CaseFile({ mode, reducedMotion, onClose }: Props) {
             type="button"
             className={`case-folder${reducedMotion ? "" : " case-folder--breathe"}`}
             onClick={() => setOpened(true)}
-            aria-label="Abrir a pasta reservada do caso"
+            aria-label={t("caseFile.openReserved")}
           >
             <span className="case-folder__tab" />
             <span className="case-folder__front">
@@ -39,12 +42,12 @@ export default function CaseFile({ mode, reducedMotion, onClose }: Props) {
               <span className="case-folder__office">{DOSSIER_HEADER.office}</span>
               <span className="case-folder__hint">
                 <FolderClosed size={15} aria-hidden />
-                Toque para abrir
+                {t("caseFile.tapOpen")}
               </span>
             </span>
           </button>
           <p className="casefile__caption">
-            Chegou junto com o aparelho. Leia antes de ligar o telefone.
+            {t("caseFile.arrived")}
           </p>
         </div>
       </div>
@@ -52,7 +55,7 @@ export default function CaseFile({ mode, reducedMotion, onClose }: Props) {
   }
 
   return (
-    <div className={`casefile casefile--${mode}`} role="dialog" aria-modal="true" aria-label="Pasta do caso">
+    <div className={`casefile casefile--${mode}`} role="dialog" aria-modal="true" aria-label={t("caseFile.label")}>
       <article className="dossier" ref={trapRef}>
         <header className="dossier__head">
           <div>
@@ -64,7 +67,7 @@ export default function CaseFile({ mode, reducedMotion, onClose }: Props) {
           </div>
           <span className="dossier__stamp">{DOSSIER_HEADER.stamp}</span>
           {mode === "consulta" && (
-            <button type="button" className="dossier__close" onClick={onClose} aria-label="Fechar a pasta">
+            <button type="button" className="dossier__close" onClick={onClose} aria-label={t("caseFile.close")}>
               <X size={18} aria-hidden />
             </button>
           )}
@@ -95,14 +98,14 @@ export default function CaseFile({ mode, reducedMotion, onClose }: Props) {
             <h3>{DOSSIER_ACCESS.title}</h3>
             <p className="dossier__pin">
               <KeyRound size={16} aria-hidden />
-              <span>Código da tela</span>
+              <span>{t("caseFile.screenCode")}</span>
               <strong>{DOSSIER_ACCESS.pin}</strong>
             </p>
             <p>{DOSSIER_ACCESS.note}</p>
           </section>
 
           <section className="dossier__block">
-            <h3>Como conduzir</h3>
+            <h3>{t("caseFile.method")}</h3>
             <ul className="dossier__list">
               {DOSSIER_METHOD.map((item) => (
                 <li key={item}>{item}</li>
@@ -116,10 +119,10 @@ export default function CaseFile({ mode, reducedMotion, onClose }: Props) {
         {mode === "entrada" && (
           <footer className="dossier__foot">
             <button type="button" className="btn btn--primary" onClick={onClose}>
-              Ligar o aparelho
+              {t("caseFile.power")}
             </button>
             <span className="dossier__foot-note">
-              A pasta continua disponível durante toda a investigação.
+              {t("caseFile.available")}
             </span>
           </footer>
         )}

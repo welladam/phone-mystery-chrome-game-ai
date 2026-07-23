@@ -10,9 +10,11 @@ import { APPS, LOCKS, isKnownClue } from "../content/manifest";
 import { SAVE_VERSION, createInitialState } from "../engine/initialState";
 import { fnv1a } from "../engine/text";
 import type { ActNumber, AppId, ChatState, GameState, LockId } from "../engine/types";
+import type { LocaleId } from "../locales/types";
 import { StorageError, withStore } from "./db";
 
-const SAVE_KEY = "slot-principal";
+const LEGACY_SAVE_KEY = "slot-principal";
+const saveKey = (locale: LocaleId) => `${LEGACY_SAVE_KEY}:${locale}`;
 
 export type SaveEnvelope = {
   v: number;
@@ -190,10 +192,16 @@ export function sanitizeState(raw: unknown): GameState | undefined {
  * Ele é descartado de propósito — manter aquele progresso significaria
  * ressuscitar um caso que contradiz este.
  */
-export async function loadSave(): Promise<LoadResult> {
+export async function loadSave(locale: LocaleId): Promise<LoadResult> {
   let envelope: SaveEnvelope | undefined;
+  let readLegacySlot = false;
   try {
-    envelope = await withStore<SaveEnvelope | undefined>("saves", "readonly", (store) => store.get(SAVE_KEY));
+    envelope = await withStore<SaveEnvelope | undefined>("saves", "readonly", (store) => store.get(saveKey(locale)));
+    // O slot anterior à internacionalização sempre foi escrito em pt-BR.
+    if (!envelope && locale === "pt-BR") {
+      envelope = await withStore<SaveEnvelope | undefined>("saves", "readonly", (store) => store.get(LEGACY_SAVE_KEY));
+      readLegacySlot = Boolean(envelope);
+    }
   } catch (error) {
     if (error instanceof StorageError) throw error;
     throw new StorageError("UNKNOWN");
@@ -210,6 +218,10 @@ export async function loadSave(): Promise<LoadResult> {
     }
     const state = sanitizeState(envelope.state);
     if (!state) return { kind: "recusado", reason: "formato" };
+    if (readLegacySlot) {
+      await writeSave(locale, state);
+      await withStore<undefined>("saves", "readwrite", (store) => store.delete(LEGACY_SAVE_KEY));
+    }
     return {
       kind: "migrado",
       state,
@@ -218,9 +230,14 @@ export async function loadSave(): Promise<LoadResult> {
     };
   }
   if (envelope.v < 2) {
+    const state = createInitialState();
+    if (readLegacySlot) {
+      await writeSave(locale, state);
+      await withStore<undefined>("saves", "readwrite", (store) => store.delete(LEGACY_SAVE_KEY));
+    }
     return {
       kind: "migrado",
-      state: createInitialState(),
+      state,
       savedAt: envelope.savedAt ?? new Date().toISOString(),
       from: envelope.v,
     };
@@ -234,25 +251,33 @@ export async function loadSave(): Promise<LoadResult> {
     return { kind: "recusado", reason: "checksum" };
   }
 
+  if (readLegacySlot) {
+    await writeSave(locale, sanitized);
+    await withStore<undefined>("saves", "readwrite", (store) => store.delete(LEGACY_SAVE_KEY));
+  }
+
   return { kind: "ok", state: sanitized, savedAt: envelope.savedAt };
 }
 
-export async function writeSave(state: GameState): Promise<void> {
+export async function writeSave(locale: LocaleId, state: GameState): Promise<void> {
   const envelope: SaveEnvelope = {
     v: SAVE_VERSION,
     checksum: signState(state),
     savedAt: new Date().toISOString(),
     state,
   };
-  await withStore<IDBValidKey>("saves", "readwrite", (store) => store.put(envelope, SAVE_KEY));
+  await withStore<IDBValidKey>("saves", "readwrite", (store) => store.put(envelope, saveKey(locale)));
 }
 
-export async function clearSave(): Promise<void> {
-  await withStore<undefined>("saves", "readwrite", (store) => store.delete(SAVE_KEY));
+export async function clearSave(locale: LocaleId): Promise<void> {
+  await withStore<undefined>("saves", "readwrite", (store) => store.delete(saveKey(locale)));
+  if (locale === "pt-BR") {
+    await withStore<undefined>("saves", "readwrite", (store) => store.delete(LEGACY_SAVE_KEY));
+  }
 }
 
 /** Escrita com atraso, para não gravar a cada tecla. */
-export function createAutoSaver(delayMs = 400) {
+export function createAutoSaver(locale: LocaleId, delayMs = 400) {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let pending: GameState | undefined;
   let onError: ((error: unknown) => void) | undefined;
@@ -262,7 +287,7 @@ export function createAutoSaver(delayMs = 400) {
     const snapshot = pending;
     pending = undefined;
     try {
-      await writeSave(snapshot);
+      await writeSave(locale, snapshot);
     } catch (error) {
       onError?.(error);
     }

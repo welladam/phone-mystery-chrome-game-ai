@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from "react";
 import { Lightbulb, Lock } from "lucide-react";
-import { checkLock, getLock } from "../../content/manifest";
 import { hintFor } from "../../engine/hints";
 import type { GameState, LockId } from "../../engine/types";
 import { useEscape, useFocusTrap } from "../a11y/hooks";
+import { useLocale } from "../../i18n/LocaleContext";
+import { getLocaleContent } from "../../locales/contentRegistry";
 
 type Props = {
   lockId: LockId;
@@ -22,6 +23,8 @@ export default function PasscodeSheet({
   onFail,
   onClose,
 }: Props) {
+  const { localeId, t } = useLocale();
+  const { checkLock, getLock } = getLocaleContent(localeId).manifest;
   const lock = getLock(lockId);
   const [value, setValue] = useState("");
   const [second, setSecond] = useState("");
@@ -47,8 +50,8 @@ export default function PasscodeSheet({
     onFail();
     setError(
       lock.secondFactorAccepts && value.trim()
-        ? "Não abriu. Confira a resposta e também o código de verificação."
-        : "Não abriu. Tente de novo — não há limite de tentativas.",
+        ? t("unlock.failedSecondFactor")
+        : t("unlock.failed"),
     );
     if (!reducedMotion) {
       setValue("");
@@ -56,18 +59,18 @@ export default function PasscodeSheet({
   }
 
   return (
-    <div className="sheet" role="dialog" aria-modal="true" aria-label="Desbloqueio">
+    <div className="sheet" role="dialog" aria-modal="true" aria-label={t("unlock.dialog")}>
       <div className="sheet__panel" ref={trapRef}>
         <header className="sheet__header">
           <Lock size={18} aria-hidden />
-          <h3>Conteúdo protegido</h3>
+          <h3>{t("unlock.protected")}</h3>
         </header>
 
         {lock.priorAttempts && <p className="sheet__forensic">{lock.priorAttempts}</p>}
 
         {showPasswordHints && (
           <p className="sheet__hint">
-            Dica definida pela própria titular: <strong>“{lock.hint}”</strong>
+            {t("app.ownerHint", { hint: lock.hint })}
           </p>
         )}
 
@@ -105,10 +108,10 @@ export default function PasscodeSheet({
 
           <div className="sheet__actions">
             <button type="submit" className="btn btn--primary" disabled={!value.trim()}>
-              Destravar
+              {t("unlock.submit")}
             </button>
             <button type="button" className="btn" onClick={onClose}>
-              Agora não
+              {t("unlock.later")}
             </button>
           </div>
         </form>
@@ -118,7 +121,7 @@ export default function PasscodeSheet({
             {!showHint ? (
               <button type="button" className="btn btn--ghost" onClick={() => setShowHint(true)}>
                 <Lightbulb size={16} aria-hidden />
-                Consultar dica
+                {t("unlock.consultHint")}
               </button>
             ) : (
               <p className="sheet__assist-text">{hint.steps[0]}</p>

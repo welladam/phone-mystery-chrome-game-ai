@@ -9,43 +9,58 @@
  */
 
 import type { ActNumber } from "../engine/types";
+import type { LocaleId } from "../locales/types";
 
-export type Act1Pack = typeof import("./act1");
-export type Act2Pack = typeof import("./act2");
-export type Act3Pack = typeof import("./act3");
-export type Act4Pack = typeof import("./act4");
+export type Act1Pack = typeof import("../locales/pt-BR/act1");
+export type Act2Pack = typeof import("../locales/pt-BR/act2");
+export type Act3Pack = typeof import("../locales/pt-BR/act3");
+export type Act4Pack = typeof import("../locales/pt-BR/act4");
 
-let act1: Promise<Act1Pack> | undefined;
-let act2: Promise<Act2Pack> | undefined;
-let act3: Promise<Act3Pack> | undefined;
-let act4: Promise<Act4Pack> | undefined;
+type LocaleLoaders = {
+  act1: () => Promise<Act1Pack>;
+  act2: () => Promise<Act2Pack>;
+  act3: () => Promise<Act3Pack>;
+  act4: () => Promise<Act4Pack>;
+};
 
-export function loadAct1() {
-  act1 ??= import("./act1");
-  return act1;
+const LOADERS: Record<LocaleId, LocaleLoaders | undefined> = {
+  "pt-BR": {
+    act1: () => import("../locales/pt-BR/act1"),
+    act2: () => import("../locales/pt-BR/act2"),
+    act3: () => import("../locales/pt-BR/act3"),
+    act4: () => import("../locales/pt-BR/act4"),
+  },
+  "en-US": undefined,
+};
+
+const cache = new Map<string, Promise<unknown>>();
+
+function loaderFor(locale: LocaleId) {
+  const loaders = LOADERS[locale];
+  if (!loaders) throw new Error(`Locale não jogável: ${locale}`);
+  return loaders;
 }
 
-export function loadAct2() {
-  act2 ??= import("./act2");
-  return act2;
+function cached<T>(locale: LocaleId, act: string, load: () => Promise<T>) {
+  const key = `${locale}:${act}`;
+  const existing = cache.get(key) as Promise<T> | undefined;
+  if (existing) return existing;
+  const pending = load();
+  cache.set(key, pending);
+  return pending;
 }
 
-export function loadAct3() {
-  act3 ??= import("./act3");
-  return act3;
-}
-
-export function loadAct4() {
-  act4 ??= import("./act4");
-  return act4;
-}
+export const loadAct1 = (locale: LocaleId) => cached(locale, "act1", loaderFor(locale).act1);
+export const loadAct2 = (locale: LocaleId) => cached(locale, "act2", loaderFor(locale).act2);
+export const loadAct3 = (locale: LocaleId) => cached(locale, "act3", loaderFor(locale).act3);
+export const loadAct4 = (locale: LocaleId) => cached(locale, "act4", loaderFor(locale).act4);
 
 /**
  * Os aplicativos e seus registros ficam disponíveis desde o início. O pacote
  * do desfecho continua isolado até o motor confirmar o Ato 4.
  */
-export function preloadForAct(act: ActNumber) {
-  const jobs: Array<Promise<unknown>> = [loadAct1(), loadAct2(), loadAct3()];
-  if (act >= 4) jobs.push(loadAct4());
+export function preloadForAct(locale: LocaleId, act: ActNumber) {
+  const jobs: Array<Promise<unknown>> = [loadAct1(locale), loadAct2(locale), loadAct3(locale)];
+  if (act >= 4) jobs.push(loadAct4(locale));
   return Promise.all(jobs);
 }

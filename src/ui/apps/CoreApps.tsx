@@ -5,21 +5,12 @@
 
 import { useState } from "react";
 import { AlertTriangle, Ghost, Lock, Play } from "lucide-react";
-import {
-  HEALTH_DAY,
-  HEALTH_TREND,
-  HEART_SERIES,
-  NOTIFICATIONS,
-  PHOTOS,
-  SCREEN_TIME,
-  SETTINGS_ABOUT,
-  SETTINGS_SECURITY,
-  WIFI_NETWORKS,
-} from "../../content/shared";
 import { audioSrc } from "../../content/assets";
 import { ClueMark, Empty, PhotoAsset, Row, ZoomBlock } from "../phone/Bits";
 import PhotoViewerModal from "../phone/PhotoViewerModal";
 import type { AppApi } from "./types";
+import { useLocale } from "../../i18n/LocaleContext";
+import { getLocaleContent } from "../../locales/contentRegistry";
 
 function marker(api: AppApi) {
   return (clueId?: string) =>
@@ -38,6 +29,8 @@ function marker(api: AppApi) {
 /* ------------------------------------------------------------------ */
 
 export function NotificationsApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
+  const { NOTIFICATIONS } = getLocaleContent(api.localeId).shared;
   const mark = marker(api);
   const [onlyOrphans, setOnlyOrphans] = useState(false);
   const list = onlyOrphans ? NOTIFICATIONS.filter((item) => item.orphan) : NOTIFICATIONS;
@@ -45,17 +38,14 @@ export function NotificationsApp({ api }: { api: AppApi }) {
   return (
     <div className="list">
       <section className="panel">
-        <p className="muted">
-          Retenção estendida ativada em 14/10/2025 — 120 dias. É por isso que as prévias de 8 de
-          março ainda existem.
-        </p>
+        <p className="muted">{t("notifications.retention")}</p>
         <label className="toggle">
           <input
             type="checkbox"
             checked={onlyOrphans}
             onChange={(event) => setOnlyOrphans(event.target.checked)}
           />
-          Mostrar só prévias sem mensagem correspondente
+          {t("notifications.onlyOrphans")}
         </label>
       </section>
 
@@ -73,9 +63,7 @@ export function NotificationsApp({ api }: { api: AppApi }) {
         >
           <p className="quote">{item.preview}</p>
           {item.orphan && (
-            <p className="muted">
-              Esta prévia não corresponde a nenhuma mensagem existente na conversa.
-            </p>
+            <p className="muted">{t("notifications.orphan")}</p>
           )}
           {mark(item.clueId)}
         </Row>
@@ -89,49 +77,59 @@ export function NotificationsApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function PhotosApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
+  const { PHOTOS } = getLocaleContent(api.localeId).shared;
   const mark = marker(api);
-  const [album, setAlbum] = useState("Recentes");
+  const [album, setAlbum] = useState("recent");
   const [selected, setSelected] = useState<string>();
   const [viewer, setViewer] = useState<string>();
 
   const hiddenUnlocked = api.state.solvedLocks.includes("LOCK_006");
+  const albums = [
+    { id: "recent", label: t("photo.album.recent") },
+    { id: "camera", label: t("photo.album.camera") },
+    { id: "screenshots", label: t("photo.album.screenshots") },
+    { id: "favorites", label: t("photo.album.favorites") },
+    { id: "hidden", label: t("photo.album.hidden") },
+    { id: "deleted", label: t("photo.album.deleted") },
+  ];
 
   const visible = PHOTOS.filter((photo) => {
     if (photo.hidden && !hiddenUnlocked) return false;
-    if (album === "Recentes") return !photo.hidden && !photo.deleted;
-    if (album === "Oculto") return photo.hidden === true;
-    if (album === "Recentemente apagados") return photo.deleted === true;
-    return photo.album === album;
+    if (album === "recent") return !photo.hidden && !photo.deleted;
+    if (album === "hidden") return photo.hidden === true;
+    if (album === "deleted") return photo.deleted === true;
+    const albumLabel = albums.find((item) => item.id === album)?.label;
+    return photo.album === albumLabel;
   });
 
-  const albums = ["Recentes", "Câmera", "Capturas de tela", "Favoritos", "Oculto", "Recentemente apagados"];
   const current = PHOTOS.find((photo) => photo.id === selected);
 
   return (
     <div className="photos">
       <div className="tabs tabs--scroll">
-        {albums.map((name) => (
+        {albums.map(({ id, label }) => (
           <button
-            key={name}
+            key={id}
             type="button"
-            className={album === name ? "is-active" : ""}
+            className={album === id ? "is-active" : ""}
             onClick={() => {
-              setAlbum(name);
+              setAlbum(id);
               setSelected(undefined);
-              if (name === "Oculto" && !hiddenUnlocked) api.requestLock("LOCK_006");
+              if (id === "hidden" && !hiddenUnlocked) api.requestLock("LOCK_006");
             }}
           >
-            {name}
-            {name === "Oculto" && !hiddenUnlocked ? " 🔒" : ""}
+            {label}
+            {id === "hidden" && !hiddenUnlocked ? " 🔒" : ""}
           </button>
         ))}
       </div>
 
-      {album === "Oculto" && !hiddenUnlocked && (
+      {album === "hidden" && !hiddenUnlocked && (
         <Empty>
           {api.state.difficulty === "hard"
-            ? "Álbum protegido. Insira o código para acessar."
-            : "Álbum protegido. A dica pede “o dia mais importante do ano”."}
+            ? t("photo.hiddenProtected")
+            : t("photo.hiddenHint")}
         </Empty>
       )}
 
@@ -142,7 +140,7 @@ export function PhotosApp({ api }: { api: AppApi }) {
               key={photo.id}
               type="button"
               onClick={() => setSelected(photo.id)}
-              aria-label={`Abrir detalhes de ${photo.file}`}
+              aria-label={t("photo.openDetails", { file: photo.file })}
             >
               <PhotoAsset
                 photoId={photo.id}
@@ -155,12 +153,12 @@ export function PhotosApp({ api }: { api: AppApi }) {
               <span className="photos__stamp">{photo.takenAt}</span>
             </button>
           ))}
-          {visible.length === 0 && album !== "Oculto" && <Empty>Nenhuma foto neste álbum.</Empty>}
+          {visible.length === 0 && album !== "hidden" && <Empty>{t("photo.none")}</Empty>}
         </div>
       ) : (
         <article className="photo-detail">
           <button type="button" className="btn btn--ghost" onClick={() => setSelected(undefined)}>
-            ← Voltar para o álbum
+            {t("photo.backAlbum")}
           </button>
           <button type="button" className="photo-detail__open" onClick={() => setViewer(current.id)}>
             <PhotoAsset
@@ -170,29 +168,29 @@ export function PhotosApp({ api }: { api: AppApi }) {
               takenAt={current.takenAt}
               album={current.album}
             />
-            <span>Toque para ampliar</span>
+            <span>{t("photo.tapExpand")}</span>
           </button>
           {current.caption && <p className="photo-detail__caption">“{current.caption}”</p>}
           <p className="photo-detail__alt">{current.alt}</p>
 
           <dl className="meta-grid">
             <div>
-              <dt>Data e hora</dt>
+              <dt>{t("photo.dateTime")}</dt>
               <dd>{current.takenAt}</dd>
             </div>
             <div>
-              <dt>Álbum</dt>
+              <dt>{t("photo.album")}</dt>
               <dd>{current.album}</dd>
             </div>
             <div>
-              <dt>Arquivo</dt>
+              <dt>{t("photo.file")}</dt>
               <dd>{current.file}</dd>
             </div>
             <div>
-              <dt>Origem</dt>
-              <dd>{current.device ?? "Câmera do aparelho"}</dd>
+              <dt>{t("photo.source")}</dt>
+              <dd>{current.device ?? t("photo.camera")}</dd>
             </div>
-            {current.gps && <div className="meta-grid__wide"><dt>Localização</dt><dd>{current.gps}</dd></div>}
+            {current.gps && <div className="meta-grid__wide"><dt>{t("photo.location")}</dt><dd>{current.gps}</dd></div>}
           </dl>
 
           {current.zoom && api.state.difficulty === "normal" && (
@@ -235,6 +233,7 @@ export function PhotosApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function NotesApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const mark = marker(api);
   const [open, setOpen] = useState<string>();
   const notes = api.packs.act1?.NOTES_OPEN ?? [];
@@ -246,8 +245,7 @@ export function NotesApp({ api }: { api: AppApi }) {
     <div className="list">
       <section className="panel panel--warn">
         <p>
-          <AlertTriangle size={14} aria-hidden /> Tentativas registradas: 3 falhas em 08/03/2026,
-          20h24.
+          <AlertTriangle size={14} aria-hidden /> {t("notes.failedAttempts")}
         </p>
         {mark("CLUE_053")}
       </section>
@@ -260,7 +258,7 @@ export function NotesApp({ api }: { api: AppApi }) {
           </button>
           {open === note.id && (
             <div className="note__body">
-              {note.body ? <pre>{note.body}</pre> : <p className="muted">Nota sem conteúdo. Só o título.</p>}
+              {note.body ? <pre>{note.body}</pre> : <p className="muted">{t("notes.empty")}</p>}
               {mark(note.clueId)}
             </div>
           )}
@@ -276,7 +274,7 @@ export function NotesApp({ api }: { api: AppApi }) {
           <span>
             {!unlocked && <Lock size={13} aria-hidden />} {locked?.title ?? "22/06"}
           </span>
-          <span className="muted">{unlocked ? locked?.editedAt : "protegida"}</span>
+          <span className="muted">{unlocked ? locked?.editedAt : t("notes.protected")}</span>
         </button>
         {unlocked && open === "NOTE_004" && locked && (
           <div className="note__body">
@@ -295,6 +293,7 @@ export function NotesApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function RecorderApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const mark = marker(api);
   const [open, setOpen] = useState<string>();
   const unlocked = api.state.solvedLocks.includes("LOCK_004");
@@ -306,15 +305,15 @@ export function RecorderApp({ api }: { api: AppApi }) {
       <div className="list">
         <section className="panel panel--warn">
           <h3>
-            <Lock size={16} aria-hidden /> Este aplicativo está protegido
+            <Lock size={16} aria-hidden /> {t("app.protected")}
           </h3>
           {api.state.difficulty === "normal" && (
-            <p className="muted">Dica definida pela titular: “a data que eu devia ter respeitado”.</p>
+            <p className="muted">{t("recorder.ownerHint")}</p>
           )}
-          <p className="muted">Tentativas registradas: 2 falhas em 08/03/2026, 20h29.</p>
+          <p className="muted">{t("recorder.failedAttempts")}</p>
           {mark("CLUE_051")}
           <button type="button" className="btn btn--primary" onClick={() => api.requestLock("LOCK_004")}>
-            Inserir código
+            {t("app.enterCode")}
           </button>
         </section>
       </div>
@@ -345,16 +344,16 @@ export function RecorderApp({ api }: { api: AppApi }) {
                   {voice.at} · {voice.duration}
                 </span>
               </span>
-              {played && <span className="voice__done">ouvido</span>}
+              {played && <span className="voice__done">{t("recorder.listened")}</span>}
             </button>
 
             {open === voice.id && (
               <div className="voice__body">
-                <audio controls preload="none" src={audioSrc(voice.id)} className="voice__player">
-                  Seu navegador não reproduz áudio. A transcrição completa está abaixo.
+                <audio controls preload="none" src={audioSrc(api.localeId, voice.id)} className="voice__player">
+                  {t("recorder.unsupported")}
                 </audio>
                 <p className="muted voice__note">
-                  O arquivo de áudio é opcional. A transcrição abaixo é a fonte oficial do conteúdo.
+                  {t("recorder.transcriptAuthority")}
                 </p>
                 <ol className="transcript">
                   {voice.transcript.map((line, index) => (
@@ -372,12 +371,9 @@ export function RecorderApp({ api }: { api: AppApi }) {
 
                 {voice.id === "VOICE_004" && excerpt && (
                   <div className="voice__action">
-                    <p className="muted">
-                      Você pode enviar um trecho desta gravação para alguém, dentro do aplicativo de
-                      conversa.
-                    </p>
+                    <p className="muted">{t("recorder.shareExcerptHelp")}</p>
                     <button type="button" className="btn btn--danger" onClick={api.sendExcerptToFriend}>
-                      Enviar {excerpt.label} para Alice
+                      {t("recorder.shareExcerpt", { label: excerpt.label })}
                     </button>
                   </div>
                 )}
@@ -391,11 +387,11 @@ export function RecorderApp({ api }: { api: AppApi }) {
                       disabled={api.state.sentAudioToDiego}
                     >
                       {api.state.sentAudioToDiego
-                        ? "Áudio enviado ao irmão da vítima"
-                        : "Enviar este áudio ao irmão da vítima"}
+                        ? t("recorder.sentBrother")
+                        : t("recorder.sendBrother")}
                     </button>
                     <p className="muted">
-                      Não altera a investigação. Ela gravou isso para ser ouvido.
+                      {t("recorder.sendBrotherHelp")}
                     </p>
                   </div>
                 )}
@@ -413,6 +409,8 @@ export function RecorderApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function HealthApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
+  const { HEALTH_DAY, HEALTH_TREND, HEART_SERIES } = getLocaleContent(api.localeId).shared;
   const mark = marker(api);
   const max = 130;
 
@@ -420,12 +418,12 @@ export function HealthApp({ api }: { api: AppApi }) {
     <div className="list">
       <section className="panel">
         <h3>{HEALTH_DAY.device}</h3>
-        <p className="muted">Última sincronização: {HEALTH_DAY.lastSync}</p>
+        <p className="muted">{t("health.lastSync", { date: HEALTH_DAY.lastSync })}</p>
       </section>
 
       <section className="panel">
-        <h3>Domingo, 8 de março</h3>
-        <div className="chart" role="img" aria-label="Frequência cardíaca do dia, com interrupção às 19h58">
+        <h3>{t("health.day")}</h3>
+        <div className="chart" role="img" aria-label={t("health.chartLabel")}>
           {HEART_SERIES.map((point) => (
             <div key={point.time} className="chart__col">
               <div
@@ -438,19 +436,19 @@ export function HealthApp({ api }: { api: AppApi }) {
         </div>
         <dl className="meta-grid">
           <div>
-            <dt>Passos</dt>
+            <dt>{t("health.steps")}</dt>
             <dd>{HEALTH_DAY.steps}</dd>
           </div>
           <div>
-            <dt>Última leitura</dt>
+            <dt>{t("health.lastReading")}</dt>
             <dd>{HEALTH_DAY.lastHeartRate}</dd>
           </div>
           <div>
-            <dt>Leituras após 19h58</dt>
+            <dt>{t("health.readingsAfter")}</dt>
             <dd>{HEALTH_DAY.readingsAfter}</dd>
           </div>
           <div>
-            <dt>Sono na noite seguinte</dt>
+            <dt>{t("health.sleep")}</dt>
             <dd>{HEALTH_DAY.sleepNextNight}</dd>
           </div>
         </dl>
@@ -460,7 +458,7 @@ export function HealthApp({ api }: { api: AppApi }) {
       </section>
 
       <section className="panel">
-        <h3>Doze meses</h3>
+        <h3>{t("health.twelveMonths")}</h3>
         {HEALTH_TREND.map((item) => (
           <Row key={item.metric} title={item.metric} meta={item.window}>
             <p className="muted">
@@ -479,18 +477,20 @@ export function HealthApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function SettingsApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
+  const { SCREEN_TIME, SETTINGS_ABOUT, SETTINGS_SECURITY, WIFI_NETWORKS } = getLocaleContent(api.localeId).shared;
   const mark = marker(api);
 
   return (
     <div className="list">
       <section className="panel">
-        <h3>Tempo de uso · 08/03/2026</h3>
+        <h3>{t("device.screenTime")}</h3>
         <table className="table">
           <thead>
             <tr>
-              <th>Período</th>
-              <th>Estado</th>
-              <th>Aplicativo</th>
+              <th>{t("device.period")}</th>
+              <th>{t("device.state")}</th>
+              <th>{t("device.app")}</th>
             </tr>
           </thead>
           <tbody>
@@ -508,7 +508,7 @@ export function SettingsApp({ api }: { api: AppApi }) {
       </section>
 
       <section className="panel">
-        <h3>Sobre o aparelho</h3>
+        <h3>{t("device.about")}</h3>
         {SETTINGS_ABOUT.map((item) => (
           <Row key={item.label} title={item.label} meta={item.value} />
         ))}
@@ -516,7 +516,7 @@ export function SettingsApp({ api }: { api: AppApi }) {
       </section>
 
       <section className="panel">
-        <h3>Redes memorizadas</h3>
+        <h3>{t("device.networks")}</h3>
         {WIFI_NETWORKS.map((net) => {
           // A rede com sobrenome só vira pista quando há a quem associá-la.
           const registrable = Boolean(net.clueId);
@@ -529,7 +529,7 @@ export function SettingsApp({ api }: { api: AppApi }) {
       </section>
 
       <section className="panel">
-        <h3>Segurança e backup</h3>
+        <h3>{t("device.security")}</h3>
         {SETTINGS_SECURITY.map((item) => (
           <Row key={item.label} title={item.label} meta={item.value}>
             {item.note && <p className="muted">{item.note}</p>}
@@ -545,14 +545,15 @@ export function SettingsApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function MapsApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const mark = marker(api);
   const pack = api.packs.act2;
-  if (!pack) return <Empty>Carregando…</Empty>;
+  if (!pack) return <Empty>{t("maps.loading")}</Empty>;
 
   return (
     <div className="list">
       <section className="panel">
-        <h3>Trajeto de 8 de março</h3>
+        <h3>{t("maps.route")}</h3>
         <ol className="timeline">
           {pack.LOCATION_DAY.map((entry) => (
             <li key={entry.period} className={"flag" in entry && entry.flag ? "is-flag" : ""}>
@@ -562,20 +563,17 @@ export function MapsApp({ api }: { api: AppApi }) {
             </li>
           ))}
         </ol>
-        <p className="callout">
-          Onze horas sem um metro de deslocamento — e, sobreposto a isso, quase quarenta minutos de
-          tela ligada.
-        </p>
+        <p className="callout">{t("maps.routeSummary")}</p>
         {mark("CLUE_006")}
       </section>
 
       <section className="panel">
-        <h3>Locais frequentes</h3>
+        <h3>{t("maps.frequent")}</h3>
         {pack.FREQUENT_PLACES.map((place) => (
           <Row
             key={place.place}
             title={place.place}
-            meta={`${place.visits} ${place.visits === 1 ? "visita" : "visitas"} · ${place.last}`}
+            meta={`${t(place.visits === 1 ? "maps.visit" : "maps.visits", { count: place.visits })} · ${place.last}`}
             flag={"flag" in place && Boolean(place.flag)}
           >
             {mark(place.clueId)}
@@ -591,6 +589,7 @@ export function MapsApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function FilesApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const mark = marker(api);
   // Pasta aberta e arquivo aberto são estados independentes: abrir um arquivo
   // não pode fechar a pasta que o contém.
@@ -598,7 +597,7 @@ export function FilesApp({ api }: { api: AppApi }) {
   const [openFile, setOpenFile] = useState<string>();
   const pack2 = api.packs.act2;
   const pack3 = api.packs.act3;
-  if (!pack2) return <Empty>Carregando…</Empty>;
+  if (!pack2) return <Empty>{t("maps.loading")}</Empty>;
 
   const vaultOpen = api.state.solvedLocks.includes("LOCK_003");
   const zipOpen = api.state.solvedLocks.includes("LOCK_008");
@@ -613,7 +612,7 @@ export function FilesApp({ api }: { api: AppApi }) {
   return (
     <div className="list">
       <div className="drive__storage">
-        <p className="muted">Drive · 14,6 GB de 15 GB</p>
+        <p className="muted">{t("files.storage")}</p>
         <div className="drive__bar">
           <span style={{ width: "97%" }} />
         </div>
@@ -667,7 +666,7 @@ export function FilesApp({ api }: { api: AppApi }) {
                             <pre>{doc}</pre>
                             {file.id === "DR_CASO_1" && (
                               <div className="flaws">
-                                <h4>Afirmações contrariadas pelos dados do aparelho</h4>
+                                <h4>{t("files.contradicted")}</h4>
                                 {pack2.DESPACHO_FLAWS.map((flaw) => (
                                   <Row key={flaw.id} title={flaw.quote}>
                                     <p>{flaw.counter}</p>
@@ -684,28 +683,15 @@ export function FilesApp({ api }: { api: AppApi }) {
                           <div className="file__body">
                             {isZip ? (
                               <>
-                                <p>
-                                  Cópia automática da conversa feita às 19h30 de 8 de março — 28
-                                  minutos antes da morte e 41 minutos antes de a conversa ser
-                                  apagada. As três mensagens do dia estão íntegras, com carimbo de
-                                  recebimento.
-                                </p>
+                                <p>{t("files.backupIntro")}</p>
                                 <ul className="backup">
-                                  <li>
-                                    <strong>15h48</strong> — preciso te falar hoje. pessoalmente.
-                                    pedra lascada 19h30?
-                                  </li>
-                                  <li>
-                                    <strong>16h02</strong> — ai clara…. tá bom. 19h30
-                                  </li>
-                                  <li>
-                                    <strong>18h27</strong> — to saindo daqui a pouco. me espera lá em
-                                    cima
-                                  </li>
+                                  <li>{t("files.backup.line1")}</li>
+                                  <li>{t("files.backup.line2")}</li>
+                                  <li>{t("files.backup.line3")}</li>
                                 </ul>
                               </>
                             ) : (
-                              <p className="muted">Arquivo sem visualização direta.</p>
+                              <p className="muted">{t("files.noPreview")}</p>
                             )}
                             {mark(file.clueId)}
                           </div>
@@ -713,7 +699,7 @@ export function FilesApp({ api }: { api: AppApi }) {
                       </article>
                     );
                   })}
-                  {children.length === 0 && <p className="muted">Pasta vazia neste ponto da perícia.</p>}
+                  {children.length === 0 && <p className="muted">{t("files.emptyFolder")}</p>}
                 </div>
               )}
             </section>

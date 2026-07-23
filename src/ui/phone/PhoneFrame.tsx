@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { BatteryLow, MessageCircle, Wifi, X } from "lucide-react";
+import { useLocale } from "../../i18n/LocaleContext";
 
 export type PhoneAlert = {
   title: string;
@@ -23,6 +24,7 @@ export default function PhoneFrame({
   onDismissNotification,
   children,
 }: Props) {
+  const { t } = useLocale();
   return (
     <div className="phone">
       <span className="phone__side phone__side--volume" aria-hidden />
@@ -36,7 +38,7 @@ export default function PhoneFrame({
         <span className="phone__status-icons">
           <Wifi size={14} aria-hidden />
           <BatteryLow size={16} aria-hidden />
-          <span aria-label={`Bateria em ${battery} por cento`}>{battery}%</span>
+          <span aria-label={t("phone.battery", { value: battery })}>{battery}%</span>
         </span>
       </div>
       {notification && (
@@ -48,7 +50,7 @@ export default function PhoneFrame({
               <small>{notification.text}</small>
             </span>
           </button>
-          <button type="button" className="phone-alert__close" onClick={onDismissNotification} aria-label="Dispensar notificação">
+          <button type="button" className="phone-alert__close" onClick={onDismissNotification} aria-label={t("phone.dismissNotification")}>
             <X size={14} aria-hidden />
           </button>
         </div>

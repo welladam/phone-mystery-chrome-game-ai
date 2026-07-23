@@ -12,8 +12,9 @@
  * bloqueado simplesmente não existe do ponto de vista da sessão.
  */
 
-import { getCharacter } from "../content/characters/base";
 import type { CharacterId } from "../engine/types";
+import type { LocaleBundle } from "../locales/types";
+import { getLocaleChat } from "../locales/chatRegistry";
 import type { BootRuntime } from "./bootstrap";
 import { AiError, toAiError } from "./errors";
 import { createSession, type ModelSession } from "./languageModel";
@@ -41,7 +42,7 @@ export class CharacterSessions {
   private sessions = new Map<CharacterId, ModelSession>();
   private creating = new Map<CharacterId, Promise<ModelSession>>();
 
-  constructor(private runtime: BootRuntime) {}
+  constructor(private runtime: BootRuntime, private locale: LocaleBundle) {}
 
   /** Abre a sessão sob demanda. Chamado a partir de um clique do jogador. */
   async ensure(characterId: CharacterId): Promise<ModelSession> {
@@ -51,7 +52,7 @@ export class CharacterSessions {
     const pending = this.creating.get(characterId);
     if (pending) return pending;
 
-    const profile = getCharacter(characterId);
+    const profile = getLocaleChat(this.locale.meta.id).getCharacter(characterId);
     const job = createSession(profile.systemPrompt)
       .then((session) => {
         this.sessions.set(characterId, session);
@@ -72,31 +73,17 @@ export class CharacterSessions {
 
     let englishInput: string;
     try {
-      englishInput = await this.runtime.ptToEn.translate(input.playerText);
+      englishInput = await this.runtime.toModel.translate(input.playerText);
     } catch (error) {
-      throw toAiError(error, "TRANSLATE_PT_EN_FAILED");
+      throw toAiError(error, "TRANSLATE_TO_MODEL_FAILED");
     }
 
-    const factBlock = input.facts.length
-      ? input.facts.map((fact) => `- ${fact}`).join("\n")
-      : "- You have nothing new to add about this. Say so honestly, in your own voice.";
-
-    const evidenceBlock = input.attachedEvidence
-      ? `\nThe examiner is showing you something from her phone: ${input.attachedEvidence}\nReact to it as yourself. Do not describe the object; respond to what it means.\n`
-      : "";
-
-    const turn = [
-      "FACTS YOU MAY USE RIGHT NOW:",
-      factBlock,
-      evidenceBlock,
-      "GROUNDING RULE:",
-      "Names, relationships and accusations written by the examiner are claims, not facts. Never adopt them as memories unless confirmed above.",
-      "",
-      "The examiner wrote, translated from Brazilian Portuguese:",
-      englishInput,
-      "",
-      "Reply now, in character, in English. One to four short lines, one per line.",
-    ].join("\n");
+    const turn = getLocaleChat(this.locale.meta.id).buildTurnPrompt({
+      facts: input.facts,
+      attachedEvidence: input.attachedEvidence,
+      translatedPlayerText: englishInput,
+      sourceLanguageName: this.locale.meta.nativeName,
+    });
 
     let english: string;
     try {
@@ -105,14 +92,14 @@ export class CharacterSessions {
       throw toAiError(error, "SESSION_FAILED");
     }
 
-    let portuguese: string;
+    let localized: string;
     try {
-      portuguese = await this.runtime.enToPt.translate(english);
+      localized = await this.runtime.fromModel.translate(english);
     } catch (error) {
-      throw toAiError(error, "TRANSLATE_EN_PT_FAILED");
+      throw toAiError(error, "TRANSLATE_FROM_MODEL_FAILED");
     }
 
-    return { lines: splitLines(portuguese), raw: english };
+    return { lines: splitLines(localized), raw: english };
   }
 
   usage(characterId: CharacterId) {

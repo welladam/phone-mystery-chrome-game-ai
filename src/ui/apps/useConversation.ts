@@ -13,24 +13,13 @@
 import { useCallback, useRef, useState } from "react";
 import type { CharacterSessions } from "../../ai/characterSessions";
 import { AiError } from "../../ai/errors";
-import { getCharacter } from "../../content/characters/base";
-import { getClue } from "../../content/manifest";
 import { loadAct3, loadAct4 } from "../../content/registry";
 import { logDiagnostic } from "../../persistence/diagnostics";
-import { allowedFacts } from "../../engine/disclosure";
-import { classifyAll, classifyIntent, HOSTILE_INTENTS, type IntentId } from "../../engine/intents";
-import { guardedNameReply, guardPersonMention } from "../../engine/nameGuard";
-import {
-  collapseBeat,
-  leakWarning,
-  metaReply,
-  openingBeat,
-  shouldLeakToShared,
-  threatReply,
-  unknownBeat,
-  type ScriptedBeat,
-} from "../../engine/scripted";
+import { HOSTILE_INTENTS, type IntentId } from "../../engine/intents";
+import type { ScriptedBeat } from "../../engine/scripted";
 import type { CharacterId, ChatMessage, GameAction, GameState } from "../../engine/types";
+import type { LocaleId } from "../../locales/types";
+import { getLocaleChat } from "../../locales/chatRegistry";
 
 let messageSeq = 0;
 function makeMessage(role: ChatMessage["role"], text: string, extra?: Partial<ChatMessage>): ChatMessage {
@@ -58,9 +47,11 @@ type Params = {
   state: GameState;
   dispatch: (action: GameAction) => void;
   sessions?: CharacterSessions;
+  localeId: LocaleId;
 };
 
-export function useConversation({ state, dispatch, sessions }: Params): ConversationApi {
+export function useConversation({ state, dispatch, sessions, localeId }: Params): ConversationApi {
+  const chatLocale = getLocaleChat(localeId);
   const [typing, setTyping] = useState<CharacterId>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<AiError>();
@@ -74,7 +65,7 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
       dispatch({ type: "SET_TYPING", characterId });
       setTyping(characterId);
 
-      const profile = getCharacter(characterId);
+      const profile = chatLocale.getCharacter(characterId);
       for (const line of beat.lines) {
         if (!reduced) {
           // Teto baixo de propósito: falas canônicas longas não podem virar
@@ -106,7 +97,7 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
       dispatch({ type: "SET_TYPING", characterId: undefined });
       setTyping(undefined);
     },
-    [dispatch],
+    [chatLocale, dispatch],
   );
 
   const greet = useCallback(
@@ -115,7 +106,7 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
       const chat = current.chats[characterId];
       if (!chat || chat.messages.length > 0) return;
 
-      const profile = getCharacter(characterId);
+      const profile = chatLocale.getCharacter(characterId);
       if (profile.openingFromPlayer) {
         dispatch({
           type: "CHAT_APPEND",
@@ -124,7 +115,7 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
         });
       }
 
-      const beat = openingBeat(characterId);
+      const beat = chatLocale.openingBeat(characterId);
       if (beat) await deliverBeat(characterId, beat, false);
     },
     [deliverBeat, dispatch],
@@ -132,10 +123,10 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
 
   const deliverCollapse = useCallback(
     async (characterId: CharacterId) => {
-      const pack = await loadAct4();
-      await deliverBeat(characterId, collapseBeat(pack, characterId), false);
+      const pack = await loadAct4(localeId);
+      await deliverBeat(characterId, chatLocale.collapseBeat(pack, characterId), false);
     },
-    [deliverBeat],
+    [deliverBeat, localeId],
   );
 
   const send = useCallback(
@@ -149,8 +140,8 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
       setError(undefined);
 
       const trimmed = text.trim();
-      const intents = classifyAll(trimmed);
-      const primary = classifyIntent(trimmed);
+      const intents = chatLocale.classifyAll(trimmed);
+      const primary = chatLocale.classifyIntent(trimmed);
 
       dispatch({
         type: "CHAT_APPEND",
@@ -162,7 +153,7 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
 
       // O que o jogador conta a um personagem pode chegar a outro — mas só
       // pela via narrativa, nunca por leitura de sessão.
-      if (shouldLeakToShared(intents)) {
+      if (chatLocale.shouldLeakToShared(intents)) {
         intents.forEach((intent) => dispatch({ type: "LEAK", token: intent }));
       }
 
@@ -170,19 +161,19 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
         // 2a. Metalinguagem e ameaça têm resposta canônica, em personagem.
         if (intents.includes("INT_021")) {
           dispatch({ type: "META_ATTEMPT" });
-          await deliverBeat(characterId, metaReply(characterId), false);
+          await deliverBeat(characterId, chatLocale.metaReply(characterId), false);
           return;
         }
         if (intents.includes("INT_015")) {
-          await deliverBeat(characterId, threatReply(characterId), false);
+          await deliverBeat(characterId, chatLocale.threatReply(characterId), false);
           return;
         }
 
         // 2b. O contato anônimo tem uma trilha própria de deslizes.
         if (characterId === "CHAR_005") {
-          const pack = await loadAct3();
+          const pack = await loadAct3(localeId);
           const sourcePresses = chat.intents.filter((intent) => intent === "INT_008").length + (intents.includes("INT_008") ? 1 : 0);
-          const beat = unknownBeat(pack, {
+          const beat = chatLocale.unknownBeat(pack, {
             state: current,
             chat,
             characterId,
@@ -196,25 +187,25 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
         }
 
         // 2c. Contar do atropelamento tem consequência declarada em tela.
-        const leak = leakWarning(characterId, intents as IntentId[]);
+        const leak = chatLocale.leakWarning(characterId, intents as IntentId[]);
         if (leak && !chat.beats.includes(leak.id)) {
           await deliverBeat(characterId, leak, false);
           return;
         }
 
         // 3. Fatos permitidos agora. Nada além disto chega à sessão.
-        const { ids, facts } = allowedFacts(current, characterId, chat, intents as IntentId[]);
+        const { ids, facts } = chatLocale.allowedFacts(current, characterId, chat, intents as IntentId[]);
 
         // Nomes afirmados pelo jogador não viram memórias do personagem. Se o
         // nome não existe no caso, ainda não pode ser conhecido ou precisa ser
         // ocultado, a resposta sai do motor e a alegação nem chega ao modelo.
-        const guardedName = guardPersonMention(trimmed, characterId, current.act, facts);
+        const guardedName = chatLocale.guardPersonMention(trimmed, characterId, current.act, facts);
         if (guardedName) {
           await deliverBeat(
             characterId,
             {
               id: `NAME_GUARD_${guardedName.reason}_${guardedName.name}`,
-              lines: guardedNameReply(characterId, guardedName.name),
+              lines: chatLocale.guardedNameReply(characterId, guardedName.name),
             },
             false,
           );
@@ -228,7 +219,7 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
         setTyping(characterId);
         dispatch({ type: "SET_TYPING", characterId });
 
-        const clue = clueId ? getClue(clueId) : undefined;
+        const clue = clueId ? chatLocale.getClue(clueId) : undefined;
         const result = await sessions.ask({
           characterId,
           playerText: trimmed,
@@ -239,7 +230,7 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
 
         dispatch({ type: "CHAT_DISCLOSE", characterId, factIds: ids });
 
-        const profile = getCharacter(characterId);
+        const profile = chatLocale.getCharacter(characterId);
         const lines = result.lines.length ? result.lines : ["…"];
         for (const line of lines) {
           const wait = Math.min(2200, profile.minDelayMs + line.length * profile.typingSpeed);
@@ -289,7 +280,7 @@ export function useConversation({ state, dispatch, sessions }: Params): Conversa
         setBusy(false);
       }
     },
-    [busy, deliverBeat, dispatch, sessions],
+    [busy, chatLocale, deliverBeat, dispatch, localeId, sessions],
   );
 
   return {

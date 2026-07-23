@@ -3,8 +3,6 @@ import { inspect, initialSteps, prepare, type BootRuntime, type BootStep } from 
 import { CharacterSessions } from "./ai/characterSessions";
 import { AiError, toAiError } from "./ai/errors";
 import { FolderClosed, Lock, Settings } from "lucide-react";
-import { CHARACTERS } from "./content/characters/base";
-import { getApp, getLock, MEMORIES } from "./content/manifest";
 import { loadAct1, loadAct2, loadAct3, loadAct4, preloadForAct } from "./content/registry";
 import type { Act1Pack, Act2Pack, Act3Pack, Act4Pack } from "./content/registry";
 import { evaluate } from "./engine/accusation";
@@ -34,21 +32,9 @@ import PasscodeSheet from "./ui/phone/PasscodeSheet";
 import PhoneFrame from "./ui/phone/PhoneFrame";
 import ProgressNotice, { type NarrativeNotice } from "./ui/progress/ProgressNotice";
 import SiteSettingsModal from "./ui/settings/SiteSettingsModal";
-
-const ACT_NOTICES: Record<number, { title: string; text: string }> = {
-  2: {
-    title: "A linha do tempo não fecha",
-    text: "Clara já estava morta quando alguém voltou a usar o telefone. O aparelho acaba de revelar novas áreas para investigação.",
-  },
-  3: {
-    title: "O passado voltou ao caso",
-    text: "A madrugada de junho não é um detalhe. Novos registros podem ligar o que aconteceu naquele carro à morte de Clara.",
-  },
-  4: {
-    title: "A gravação muda tudo",
-    text: "A peça que faltava está ao seu alcance. É hora de reconstruir os fatos e apontar quem matou Clara.",
-  },
-};
+import { useLocale } from "./i18n/LocaleContext";
+import { getLocaleChat } from "./locales/chatRegistry";
+import { getLocaleContent } from "./locales/contentRegistry";
 
 /**
  * Um aplicativo protegido não renderiza o próprio conteúdo enquanto a senha
@@ -64,6 +50,8 @@ function AppLocked({
   showHint: boolean;
   onUnlock: (lockId: LockId) => void;
 }) {
+  const { localeId, t } = useLocale();
+  const { getApp, getLock } = getLocaleContent(localeId).manifest;
   const app = getApp(appId);
   const lock = app?.lock ? getLock(app.lock) : undefined;
   if (!app?.lock || !lock) return null;
@@ -72,11 +60,11 @@ function AppLocked({
     <div className="list">
       <section className="panel panel--warn">
         <h3>
-          <Lock size={16} aria-hidden /> Este aplicativo está protegido
+          <Lock size={16} aria-hidden /> {t("app.protected")}
         </h3>
-        {showHint && <p className="muted">Dica definida pela titular: “{lock.hint}”</p>}
+        {showHint && <p className="muted">{t("app.ownerHint", { hint: lock.hint })}</p>}
         <button type="button" className="btn btn--primary" onClick={() => onUnlock(app.lock!)}>
-          Inserir código
+          {t("app.enterCode")}
         </button>
       </section>
     </div>
@@ -84,9 +72,12 @@ function AppLocked({
 }
 
 export default function App() {
+  const { locale, localeId, t } = useLocale();
+  const localeChat = getLocaleChat(localeId);
+  const localeContent = getLocaleContent(localeId);
   /* ---------------- boot ---------------- */
   const [phase, setPhase] = useState<BootPhase>("desligado");
-  const [steps, setSteps] = useState<BootStep[]>(() => initialSteps());
+  const [steps, setSteps] = useState<BootStep[]>(() => initialSteps(locale));
   const [bootError, setBootError] = useState<AiError>();
   const [pending, setPending] = useState<string[]>([]);
   const [restoredNote, setRestoredNote] = useState<string>();
@@ -133,8 +124,8 @@ export default function App() {
    */
   const [caseFile, setCaseFile] = useState<"entrada" | "consulta" | undefined>();
 
-  const autoSaver = useMemo(() => createAutoSaver(), []);
-  const conversation = useConversation({ state, dispatch, sessions });
+  const autoSaver = useMemo(() => createAutoSaver(localeId), [localeId]);
+  const conversation = useConversation({ state, dispatch, sessions, localeId });
   const handleActiveChat = useCallback((characterId?: CharacterId) => setActiveChat(characterId), []);
 
   const report = useMemo(
@@ -180,10 +171,10 @@ export default function App() {
   useEffect(() => {
     autoSaver.onError((error) => {
       const mapped = toAiError(error, "STORAGE_BLOCKED");
-      setToast(mapped.info.title);
+      setToast(locale.errors?.[mapped.code]?.title ?? mapped.info.title);
       void logDiagnostic({ category: "storage", code: mapped.code });
     });
-  }, [autoSaver]);
+  }, [autoSaver, locale.errors]);
 
   useEffect(() => {
     if (!state.difficultyChosen) return;
@@ -204,20 +195,20 @@ export default function App() {
 
   useEffect(() => {
     let alive = true;
-    void preloadForAct(state.act).then(async () => {
+    void preloadForAct(localeId, state.act).then(async () => {
       if (!alive) return;
       const next: ContentPacks = {
-        act1: await loadAct1(),
-        act2: (await loadAct2()) as Act2Pack,
-        act3: (await loadAct3()) as Act3Pack,
+        act1: await loadAct1(localeId),
+        act2: (await loadAct2(localeId)) as Act2Pack,
+        act3: (await loadAct3(localeId)) as Act3Pack,
       };
-      if (state.act >= 4) next.act4 = (await loadAct4()) as Act4Pack;
+      if (state.act >= 4) next.act4 = (await loadAct4(localeId)) as Act4Pack;
       setPacks(next as { act1: Act1Pack } & ContentPacks);
     });
     return () => {
       alive = false;
     };
-  }, [state.act]);
+  }, [localeId, state.act]);
 
   /* ---------------- entrada do contato anônimo ---------------- */
 
@@ -228,7 +219,7 @@ export default function App() {
       const gate = evaluateUnknownGate(state, Date.now());
       if (!gate.ready) return;
 
-      const pack = await loadAct3();
+      const pack = await loadAct3(localeId);
       dispatch({ type: "FIRE_EVENT", eventId: EVENTS.UNKNOWN });
 
       const lines =
@@ -255,7 +246,7 @@ export default function App() {
 
     const timer = setTimeout(() => void check(), 3000);
     return () => clearTimeout(timer);
-  }, [state, reducedMotion]);
+  }, [localeId, state, reducedMotion]);
 
   /* ---------------- revelação ---------------- */
 
@@ -281,10 +272,10 @@ export default function App() {
   const runInspection = useCallback(async () => {
     setBootError(undefined);
     setPhase("verificando");
-    setSteps(initialSteps());
+    setSteps(initialSteps(locale));
 
     try {
-      const result = await inspect(report);
+      const result = await inspect(locale, report);
       if (result.kind === "erro") {
         setBootError(result.error);
         setPhase("erro");
@@ -303,14 +294,14 @@ export default function App() {
       setPhase("erro");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [report]);
+  }, [locale, report]);
 
   const runPreparation = useCallback(async () => {
     setBootError(undefined);
     setRestoredNote(undefined);
     setPhase("preparando");
 
-    const outcome = await prepare(report);
+    const outcome = await prepare(locale, report);
     if (outcome.kind === "erro") {
       setBootError(outcome.error);
       setPhase("erro");
@@ -329,7 +320,7 @@ export default function App() {
     sessionsRef.current?.destroy();
     runtimeRef.current?.destroy();
 
-    const nextSessions = new CharacterSessions(outcome.runtime);
+    const nextSessions = new CharacterSessions(outcome.runtime, locale);
     runtimeRef.current = outcome.runtime;
     sessionsRef.current = nextSessions;
     setSessions(nextSessions);
@@ -340,7 +331,7 @@ export default function App() {
     let jaComecou = false;
     let restoredState: GameState | undefined;
     try {
-      const save = await loadSave();
+      const save = await loadSave(localeId);
       if (save.kind === "ok" || save.kind === "migrado") {
         restoredState = save.state;
         progressSnapshotRef.current = {
@@ -352,13 +343,13 @@ export default function App() {
         jaComecou = save.state.phoneUnlocked;
       } else if (save.kind === "recusado") {
         setRestoredNote(
-          "O progresso salvo não pôde ser lido e foi ignorado. Nenhum outro dado do navegador foi afetado.",
+          t("save.corrupt"),
         );
-        await clearSave();
+        await clearSave(localeId);
       }
     } catch (error) {
       const mapped = toAiError(error, "STORAGE_BLOCKED");
-      setRestoredNote(mapped.info.action);
+      setRestoredNote(locale.errors?.[mapped.code]?.action ?? mapped.info.action);
       void logDiagnostic({ category: "storage", code: mapped.code });
     }
 
@@ -379,7 +370,7 @@ export default function App() {
     incomingReadyRef.current = true;
     progressReadyRef.current = true;
     setBooted(true);
-  }, [report]);
+  }, [locale, localeId, report, t]);
 
   // Recursos nativos do Chrome sobrevivem durante toda a partida e são
   // encerrados apenas quando o aplicativo realmente sai da página.
@@ -397,6 +388,7 @@ export default function App() {
       state,
       packs,
       reducedMotion,
+      localeId,
       examine: (clueId: string) => dispatch({ type: "EXAMINE_CLUE", clueId }),
       find: (clueId: string) => dispatch({ type: "FIND_CLUE", clueId }),
       zoom: (photoId: string) => dispatch({ type: "ZOOM_PHOTO", photoId }),
@@ -410,7 +402,7 @@ export default function App() {
       setActiveChat: handleActiveChat,
       sendExcerptToFriend: () => {
         void (async () => {
-          const pack = await loadAct3();
+          const pack = await loadAct3(localeId);
           const excerpt = pack.DECISIVE_EXCERPT;
           setOpenChat({ id: "CHAR_004", request: Date.now() });
           setOpenAppId("APP_002");
@@ -420,7 +412,7 @@ export default function App() {
             message: {
               id: `exc${Date.now()}`,
               role: "player",
-              text: `[áudio 0:19] ${excerpt.text}`,
+              text: t("chat.audioAttachment", { text: excerpt.text }),
               at: new Date().toISOString(),
             },
           });
@@ -430,7 +422,7 @@ export default function App() {
       },
       sendAudioToDiego: () => {
         dispatch({ type: "SEND_AUDIO_TO_DIEGO" });
-        setToast("Áudio enviado.");
+        setToast(t("chat.audioSent"));
       },
       setAccusation: (patch: Record<string, unknown>) =>
         dispatch({ type: "SET_ACCUSATION", patch: patch as never }),
@@ -450,7 +442,7 @@ export default function App() {
       useHint: (obstacleId: string) => dispatch({ type: "USE_HINT", obstacleId }),
       markUnknownRead: () => dispatch({ type: "MARK_UNKNOWN_READ" }),
     }),
-    [state, packs, reducedMotion, conversation, handleActiveChat],
+    [state, packs, reducedMotion, localeId, conversation, handleActiveChat, t],
   );
 
   useEffect(() => {
@@ -478,7 +470,7 @@ export default function App() {
 
     if (!latest) return;
     const incoming = latest as { characterId: CharacterId; text: string };
-    const profile = CHARACTERS[incoming.characterId];
+    const profile = localeChat.getCharacter(incoming.characterId);
     setPhoneNotification({
       characterId: incoming.characterId,
       title: profile.displayName,
@@ -494,7 +486,7 @@ export default function App() {
 
     if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
     notificationTimerRef.current = setTimeout(() => setPhoneNotification(undefined), 4600);
-  }, [activeChat, state.chats]);
+  }, [activeChat, localeChat, state.chats]);
 
   useEffect(() => () => {
     if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
@@ -518,19 +510,25 @@ export default function App() {
     const newMemoryIds = state.memories.filter((id) => !previous.memories.includes(id));
     const newApps = state.unlockedApps
       .filter((id) => !previous.unlockedApps.includes(id))
-      .map((id) => getApp(id)?.name)
+      .map((id) => localeContent.manifest.getApp(id)?.name)
       .filter((name): name is string => Boolean(name));
     const additions: NarrativeNotice[] = newMemoryIds.flatMap((id) => {
-      const memory = MEMORIES.find((item) => item.id === id);
+      const memory = localeContent.manifest.MEMORIES.find((item) => item.id === id);
       return memory
         ? [{ id: `deduction-${id}`, kind: "deduction", title: memory.label, text: memory.text }]
         : [];
     });
 
     if (state.act > previous.act) {
-      const copy = ACT_NOTICES[state.act] ?? {
-        title: "A investigação avançou",
-        text: "As novas conexões mudaram o rumo do caso.",
+      const actCopy = {
+        1: undefined,
+        2: { title: t("act.2.title"), text: t("act.2.text") },
+        3: { title: t("act.3.title"), text: t("act.3.text") },
+        4: { title: t("act.4.title"), text: t("act.4.text") },
+      }[state.act];
+      const copy = actCopy ?? {
+        title: t("progress.advanced.title"),
+        text: t("progress.advanced.text"),
       };
       additions.push({
         id: `act-${state.act}-${state.actEnteredAt}`,
@@ -553,12 +551,12 @@ export default function App() {
       playSound(additions.some((item) => item.kind === "act") ? "unlock" : "clue");
       if (!reducedMotion && typeof navigator.vibrate === "function") navigator.vibrate([90, 70, 140]);
     }
-  }, [booted, reducedMotion, state.act, state.actEnteredAt, state.difficulty, state.memories, state.unlockedApps]);
+  }, [booted, locale.messages, reducedMotion, state.act, state.actEnteredAt, state.difficulty, state.memories, state.unlockedApps, t]);
 
   const restartInvestigation = useCallback(async () => {
     autoSaver.cancel();
-    await clearSave();
-    clearNotebookStorage();
+    await clearSave(localeId);
+    clearNotebookStorage(localeId);
 
     if (sessions) {
       await Promise.allSettled(
@@ -590,7 +588,7 @@ export default function App() {
     setNotebookOpen(true);
     setShowSettings(false);
     setCaseFile("entrada");
-  }, [autoSaver, sessions]);
+  }, [autoSaver, localeId, sessions]);
 
   /* ---------------- render ---------------- */
 
@@ -659,7 +657,7 @@ export default function App() {
         ) : openAppId ? (
           <AppShell
             appId={openAppId}
-            title={appTitle(openAppId)}
+            title={appTitle(openAppId, localeId)}
             contained={openAppId === "APP_002"}
             onBack={() => {
               setOpenAppId(undefined);
@@ -689,24 +687,24 @@ export default function App() {
 
       <CaseNotebook api={api} open={notebookOpen} onToggle={() => setNotebookOpen((value) => !value)} />
 
-      <nav className="site-actions" aria-label="Ferramentas da investigação">
+      <nav className="site-actions" aria-label={t("site.tools")}>
         <button
           type="button"
           className="site-action site-action--casefile"
           onClick={() => setCaseFile("consulta")}
-          aria-label="Abrir material do caso"
+          aria-label={t("site.openCaseMaterial")}
         >
           <FolderClosed size={19} aria-hidden />
-          <span>Material do caso</span>
+          <span>{t("site.caseMaterial")}</span>
         </button>
         <button
           type="button"
           className="site-action"
           onClick={() => setShowSettings(true)}
-          aria-label="Abrir opções da investigação"
+          aria-label={t("site.openOptions")}
         >
           <Settings size={19} aria-hidden />
-          <span>Opções</span>
+          <span>{t("site.options")}</span>
         </button>
       </nav>
 
@@ -718,7 +716,7 @@ export default function App() {
           onSolved={() => {
             dispatch({ type: "SOLVE_LOCK", lockId: lockRequest });
             setLockRequest(undefined);
-            setToast("Conteúdo destravado.");
+            setToast(t("unlock.success"));
             playSound("unlock");
           }}
           onFail={() => dispatch({ type: "FAIL_LOCK", lockId: lockRequest })}
@@ -767,6 +765,14 @@ export default function App() {
             savePrefs(next);
           }}
           onExportDiagnostics={() => void exportDiagnostics()}
+          onLocaleChange={async (nextLocale) => {
+            if (nextLocale === localeId) return;
+            await autoSaver.flushNow();
+            sessionsRef.current?.destroy();
+            runtimeRef.current?.destroy();
+            savePrefs({ ...prefs, locale: nextLocale, localeChosen: true });
+            window.location.reload();
+          }}
           onRestart={restartInvestigation}
           onClose={() => setShowSettings(false)}
         />

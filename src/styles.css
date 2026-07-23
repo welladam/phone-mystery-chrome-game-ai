@@ -584,6 +584,88 @@ pre {
 .difficulty-screen__icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px; background: rgba(241, 191, 106, 0.12); color: var(--amber); }
 .difficulty-screen__icon--hard { background: rgba(169, 154, 222, 0.12); color: var(--violet); }
 
+/* ---------------- idioma ---------------- */
+
+.language-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(131, 181, 223, 0.13), transparent 32rem),
+    radial-gradient(circle at 10% 90%, rgba(138, 209, 160, 0.09), transparent 28rem);
+}
+
+.language-card {
+  width: min(100%, 590px);
+  padding: clamp(1.1rem, 3vw, 1.7rem);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: linear-gradient(165deg, var(--panel-2), var(--panel));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.48);
+}
+
+.language-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.language-card__head > svg { flex: 0 0 auto; margin-top: 0.25rem; color: var(--blue); }
+.language-card__head p { margin: 0; color: var(--blue); font-size: 0.7rem; letter-spacing: 0.1em; }
+.language-card__head h1 { margin: 0.2rem 0 0; font-size: clamp(1.35rem, 4vw, 1.85rem); }
+.language-card__head span { display: block; margin-top: 0.45rem; color: var(--muted); line-height: 1.55; }
+
+.language-options {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.language-options > button {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.035);
+  text-align: left;
+}
+
+.language-options > button:not(:disabled):hover,
+.language-options > button.is-active {
+  border-color: rgba(138, 209, 160, 0.48);
+  background: rgba(138, 209, 160, 0.09);
+}
+
+.language-options > button > span:first-child { min-width: 0; display: grid; gap: 0.15rem; }
+.language-options strong { font-size: 0.9rem; }
+.language-options small { color: var(--muted); font-size: 0.68rem; }
+.language-options__locked { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--muted); font-size: 0.7rem; white-space: nowrap; }
+.language-card__note { margin: 1rem 0 0; color: var(--muted); font-size: 0.74rem; line-height: 1.5; }
+
+.language-screen--compact {
+  min-height: 0;
+  display: block;
+  padding: 0;
+  background: none;
+}
+
+.language-screen--compact .language-card {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.language-screen--compact .language-options { margin-top: 0.65rem; }
+
 /* ==================================================================
    PALCO E CELULAR
    ================================================================== */

@@ -10,9 +10,10 @@
 
 import { useState } from "react";
 import { AlertTriangle, Mail, PhoneIncoming, PhoneMissed, PhoneOutgoing } from "lucide-react";
-import { CALLS, CONTACTS, UNKNOWN_NUMBER } from "../../content/shared";
 import { ClueMark, Empty, Row } from "../phone/Bits";
 import type { AppApi } from "./types";
+import { getLocaleContent } from "../../locales/contentRegistry";
+import { useLocale } from "../../i18n/LocaleContext";
 
 function useClue(api: AppApi) {
   return (clueId?: string) =>
@@ -29,6 +30,8 @@ function useClue(api: AppApi) {
 /* ------------------------------------------------------------------ */
 
 export function ContactsApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
+  const { CONTACTS, UNKNOWN_NUMBER } = getLocaleContent(api.localeId).shared;
   const mark = useClue(api);
 
   return (
@@ -49,10 +52,8 @@ export function ContactsApp({ api }: { api: AppApi }) {
           {contact.note && <p className="muted">“{contact.note}”</p>}
         </Row>
       ))}
-      <Row title={UNKNOWN_NUMBER} meta="sem cadastro" flag>
-        <p className="muted">
-          Este número não está na agenda. Ele aparece uma única vez no histórico de chamadas.
-        </p>
+      <Row title={UNKNOWN_NUMBER} meta={t("contacts.unregistered")} flag>
+        <p className="muted">{t("contacts.unknownHelp")}</p>
         {mark("CLUE_028")}
       </Row>
     </div>
@@ -62,6 +63,8 @@ export function ContactsApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function CallsApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
+  const { CALLS } = getLocaleContent(api.localeId).shared;
   const mark = useClue(api);
   const icons = {
     recebida: <PhoneIncoming size={15} aria-hidden />,
@@ -86,7 +89,7 @@ export function CallsApp({ api }: { api: AppApi }) {
           <p className="muted">
             {call.kind}
             {call.duration ? ` · ${call.duration}` : ""}
-            {call.unsaved ? " · número sem cadastro" : ""}
+            {call.unsaved ? ` · ${t("calls.unsaved")}` : ""}
           </p>
           {mark(call.clueId)}
         </Row>
@@ -98,16 +101,17 @@ export function CallsApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function CalendarApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const mark = useClue(api);
   const events = api.packs.act1?.CALENDAR ?? [];
 
-  if (!events.length) return <Empty>Nada carregado ainda.</Empty>;
+  if (!events.length) return <Empty>{t("calendar.empty")}</Empty>;
 
   return (
     <div className="list">
       {events.map((event) => (
         <Row key={event.id} title={event.title} meta={`${event.date} · ${event.time}`}>
-          <p className="muted">Criado em {event.createdAt}</p>
+          <p className="muted">{t("calendar.created", { date: event.createdAt })}</p>
           {event.note && <p className="muted">{event.note}</p>}
           {mark(event.clueId)}
         </Row>
@@ -119,10 +123,11 @@ export function CalendarApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function BrowserApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const mark = useClue(api);
   const history = api.packs.act2?.BROWSER_HISTORY ?? [];
 
-  if (!history.length) return <Empty>Histórico ainda não recuperado.</Empty>;
+  if (!history.length) return <Empty>{t("browser.empty")}</Empty>;
 
   return (
     <div className="list">
@@ -138,6 +143,7 @@ export function BrowserApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function MailApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const mark = useClue(api);
   const [open, setOpen] = useState<string>();
   const [account, setAccount] = useState<"principal" | "arquivo">("principal");
@@ -170,10 +176,7 @@ export function MailApp({ api }: { api: AppApi }) {
       </div>
 
       {account === "arquivo" && !archiveUnlocked && (
-        <Empty>
-          Esta conta pede a resposta de segurança e um código de verificação. O Autenticador
-          mostra que a conta existe.
-        </Empty>
+        <Empty>{t("mail.archiveLocked")}</Empty>
       )}
 
       {list.map((item) => (
@@ -199,18 +202,24 @@ export function MailApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function BankApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const mark = useClue(api);
   const pack = api.packs.act2;
-  if (!pack) return <Empty>Carregando…</Empty>;
+  if (!pack) return <Empty>{t("maps.loading")}</Empty>;
 
   return (
     <div className="list">
       <section className="panel">
-        <h3>Recorrência ativa</h3>
+        <h3>{t("bank.recurring")}</h3>
         <p className="panel__big">{pack.BANK_RECURRING.label}</p>
         <p className="muted">
-          {pack.BANK_RECURRING.amount} · {pack.BANK_RECURRING.day} · {pack.BANK_RECURRING.count}{" "}
-          ocorrências desde {pack.BANK_RECURRING.since} · total {pack.BANK_RECURRING.total}
+          {t("bank.occurrences", {
+            amount: pack.BANK_RECURRING.amount,
+            day: pack.BANK_RECURRING.day,
+            count: pack.BANK_RECURRING.count,
+            since: pack.BANK_RECURRING.since,
+            total: pack.BANK_RECURRING.total,
+          })}
         </p>
         <p className="muted">{pack.BANK_RECURRING.description}</p>
         {mark("CLUE_014")}
@@ -234,13 +243,14 @@ export function BankApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function RidesApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const mark = useClue(api);
   const own = api.packs.act3?.RIDES_OWN ?? [];
   const shared = api.packs.act3?.RIDES_SHARED;
 
   return (
     <div className="list">
-      <h3 className="section-title">Corridas solicitadas por Clara</h3>
+      <h3 className="section-title">{t("rides.own")}</h3>
       {own.length ? (
         own.map((ride) => (
           <Row key={ride.id} title={ride.route} meta={ride.at}>
@@ -248,15 +258,12 @@ export function RidesApp({ api }: { api: AppApi }) {
           </Row>
         ))
       ) : (
-        <Empty>Nenhuma corrida no período carregado.</Empty>
+        <Empty>{t("rides.none")}</Empty>
       )}
 
-      <h3 className="section-title">Compartilhado comigo</h3>
+      <h3 className="section-title">{t("rides.shared")}</h3>
       {!shared ? (
-        <Empty>
-          Nada aqui ainda. Capturas de tela enviadas por terceiros aparecem nesta aba quando você as
-          recebe em conversa.
-        </Empty>
+        <Empty>{t("rides.sharedEmpty")}</Empty>
       ) : (
         <>
           <p className="muted">{shared.header}</p>
@@ -278,9 +285,10 @@ export function RidesApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function SocialApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const mark = useClue(api);
   const pack = api.packs.act2;
-  if (!pack) return <Empty>Carregando…</Empty>;
+  if (!pack) return <Empty>{t("maps.loading")}</Empty>;
 
   return (
     <div className="list social">
@@ -291,32 +299,32 @@ export function SocialApp({ api }: { api: AppApi }) {
         <div>
           <h3>@{pack.SOCIAL_PROFILE.handle}</h3>
           <p className="muted">
-            Última publicação em {pack.SOCIAL_PROFILE.lastPost} · {pack.SOCIAL_PROFILE.silence}
+            {t("social.lastPost", { date: pack.SOCIAL_PROFILE.lastPost, silence: pack.SOCIAL_PROFILE.silence })}
           </p>
         </div>
       </section>
 
-      <h3 className="section-title">Mensagens diretas · diego.andrade.silva</h3>
+      <h3 className="section-title">{t("social.direct")}</h3>
       <div className="social__dms">
         {pack.DM_DIEGO.map((dm, index) => (
-          <Row key={dm.at} title={`Mensagem ${index + 1}`} meta={dm.at}>
+          <Row key={dm.at} title={t("social.message", { number: index + 1 })} meta={dm.at}>
             <p className="quote">{dm.text}</p>
           </Row>
         ))}
       </div>
       {mark("CLUE_018")}
 
-      <h3 className="section-title">Salvos</h3>
+      <h3 className="section-title">{t("social.saved")}</h3>
       <div className="social__grid">
         {pack.SOCIAL_PROFILE.saved.map((item) => (
-          <Row key={item.id} title={item.label} meta="captura de tela" flag>
+          <Row key={item.id} title={item.label} meta={t("social.screenshot")} flag>
             <p className="muted">{item.note}</p>
             {mark(item.clueId)}
           </Row>
         ))}
       </div>
 
-      <h3 className="section-title">Stories arquivados</h3>
+      <h3 className="section-title">{t("social.archivedStories")}</h3>
       <div className="social__grid">
         {pack.SOCIAL_PROFILE.archivedStories.map((item) => (
           <Row key={item.id} title={item.note} meta={item.at}>
@@ -331,6 +339,7 @@ export function SocialApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function TasksApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const mark = useClue(api);
   const tasks = api.packs.act2?.TASKS ?? [];
 
@@ -349,7 +358,7 @@ export function TasksApp({ api }: { api: AppApi }) {
           }
           meta={"due" in task && task.due ? task.due : undefined}
         >
-          <p className="muted">Criada em {task.created}</p>
+          <p className="muted">{t("tasks.created", { date: task.created })}</p>
           {"note" in task && task.note && <p className="muted">{task.note}</p>}
           {mark(task.clueId)}
         </Row>
@@ -361,17 +370,15 @@ export function TasksApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function AuthApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const codes = api.packs.act3?.AUTH_CODES ?? [];
-  if (!codes.length) return <Empty>Carregando…</Empty>;
+  if (!codes.length) return <Empty>{t("auth.empty")}</Empty>;
 
   return (
     <div className="list">
-      <p className="muted">
-        Este aplicativo guarda apenas códigos de verificação, nunca senhas. Ele revela quais contas
-        existem.
-      </p>
+      <p className="muted">{t("auth.help")}</p>
       {codes.map((entry) => (
-        <Row key={entry.account} title={entry.account} meta="expira em 21s" flag={Boolean(entry.highlight)}>
+        <Row key={entry.account} title={entry.account} meta={t("auth.expires")} flag={Boolean(entry.highlight)}>
           <p className="code">{entry.code}</p>
         </Row>
       ))}
@@ -382,20 +389,21 @@ export function AuthApp({ api }: { api: AppApi }) {
 /* ------------------------------------------------------------------ */
 
 export function TrashApp({ api }: { api: AppApi }) {
+  const { t } = useLocale();
   const mark = useClue(api);
   const [open, setOpen] = useState<string>();
   const items = api.packs.act2?.TRASH ?? [];
 
   return (
     <div className="list">
-      <p className="muted">Itens recuperados da imagem forense de 12/03/2026.</p>
+      <p className="muted">{t("trash.recovered")}</p>
       {items.map((item) => (
         <article key={item.id} className="mail__item">
           <button type="button" className="mail__head" onClick={() => setOpen(open === item.id ? undefined : item.id)}>
             <AlertTriangle size={14} aria-hidden />
             <span className="mail__from">{item.label}</span>
             <span className="mail__subject">{item.kind}</span>
-            <span className="mail__at">apagado em {item.deletedAt}</span>
+            <span className="mail__at">{t("trash.deleted", { date: item.deletedAt })}</span>
           </button>
           {open === item.id && (
             <div className="mail__body">
