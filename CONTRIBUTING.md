@@ -180,7 +180,7 @@ Do not include diagnostic output that contains private player messages.
 
 ## Documentation
 
-`README.md` is the canonical English project overview. `README.pt-BR.md` is its Brazilian Portuguese counterpart. Update both when requirements, setup, architecture, persistence, or public behavior changes.
+`README.md` is the concise English entry page and `README.pt-BR.md` is its Brazilian Portuguese counterpart. `README_FULL.md` and `README_FULL.pt-BR.md` hold the complete technical documentation. Update both languages and the appropriate short/full layer when requirements, setup, architecture, persistence, or public behavior changes.
 
 `docs/README.md` indexes spoiler-bearing production artifacts. New production documents must be added to that index with language, spoiler level, and purpose.
 

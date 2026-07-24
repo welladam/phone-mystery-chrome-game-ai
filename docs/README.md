@@ -1,6 +1,6 @@
 # Production documents
 
-[Project README](../README.md) · [Português (Brasil)](../README.pt-BR.md)
+[Project overview](../README.md) · [Full documentation](../README_FULL.md) · [Português (Brasil)](../README.pt-BR.md)
 
 This directory contains the prompts, narrative-design output, and media-production references used to create **The Clara Mystery**.
 
@@ -9,6 +9,14 @@ This directory contains the prompts, narrative-design output, and media-producti
 > Most files in this directory reveal passwords, evidence paths, character secrets, the identity of the person responsible, and the complete ending. Players should not read them before finishing the game.
 
 The documents remain in Brazilian Portuguese. They are primary production artifacts for a story grounded in Brazilian dialogue, institutions, locations, dates, and cultural behavior. This index explains them in English without translating or duplicating the complete source material.
+
+## AI creation disclosure
+
+**The entire project was created with AI:** source code, narrative design, story, characters, dialogue, documentation, photographs, artwork, and audio.
+
+Development followed a 100% vibe-coding workflow with Codex and Claude. Natural-language direction was converted into story documents and working code, then inspected and refined through iterative prompts. Human involvement provided creative direction, selection, review, and revision requests, while AI produced the implementation and creative assets.
+
+The files in this directory are intentionally public so contributors can inspect the prompts and outputs behind the project rather than treating AI assistance as an undisclosed part of production.
 
 ## Artifact lineage
 
