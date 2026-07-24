@@ -80,7 +80,7 @@ export function inspectBrowser() {
     isChrome,
     isEdge,
     isMobile,
-    /** As APIs pedem Chrome 138+; 148+ é o que a documentação recomenda. */
+    /** Translator API pede 138+; o Prompt API para sites pede Chrome 148+. */
     tooOld: typeof version === "number" && version < 138,
   };
 }

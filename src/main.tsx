@@ -3,11 +3,13 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import { LocaleProvider } from "./i18n/LocaleContext";
 import { loadPrefs, savePrefs } from "./persistence/prefs";
+import { useReducedMotion } from "./ui/a11y/hooks";
 import LanguageScreen from "./ui/boot/LanguageScreen";
 import "./styles.css";
 
 function Root() {
   const [prefs, setPrefs] = useState(loadPrefs);
+  const reducedMotion = useReducedMotion(prefs.reducedMotion);
 
   return (
     <LocaleProvider localeId={prefs.locale}>
@@ -16,6 +18,7 @@ function Root() {
       ) : (
         <LanguageScreen
           current={prefs.locale}
+          reducedMotion={reducedMotion}
           onChoose={(locale) => {
             const next = { ...prefs, locale, localeChosen: true };
             savePrefs(next);

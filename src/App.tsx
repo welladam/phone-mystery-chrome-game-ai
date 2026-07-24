@@ -109,7 +109,6 @@ export default function App() {
   const progressReadyRef = useRef(false);
   const incomingReadyRef = useRef(false);
   const incomingCountsRef = useRef<Record<string, number>>({});
-  const lastNotificationRef = useRef<{ characterId: CharacterId; at: number } | undefined>(undefined);
   const notificationTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const progressSnapshotRef = useRef({
     act: state.act,
@@ -331,7 +330,11 @@ export default function App() {
     let jaComecou = false;
     let restoredState: GameState | undefined;
     try {
-      const save = await loadSave(localeId);
+      // A tela "aparelho pronto" precisa de um instante para ser percebida —
+      // sem isso, uma restauração rápida do save a atravessa num único quadro.
+      const save = reducedMotion
+        ? await loadSave(localeId)
+        : (await Promise.all([loadSave(localeId), new Promise((resolve) => setTimeout(resolve, 500))]))[0];
       if (save.kind === "ok" || save.kind === "migrado") {
         restoredState = save.state;
         progressSnapshotRef.current = {
@@ -370,7 +373,7 @@ export default function App() {
     incomingReadyRef.current = true;
     progressReadyRef.current = true;
     setBooted(true);
-  }, [locale, localeId, report, t]);
+  }, [locale, localeId, report, t, reducedMotion]);
 
   // Recursos nativos do Chrome sobrevivem durante toda a partida e são
   // encerrados apenas quando o aplicativo realmente sai da página.
@@ -457,16 +460,22 @@ export default function App() {
     if (!incomingReadyRef.current) return;
 
     let latest: { characterId: CharacterId; text: string } | undefined;
+    let receivedCount = 0;
     (Object.entries(state.chats) as Array<[CharacterId, GameState["chats"][string]]>).forEach(
       ([characterId, chat]) => {
         const previous = incomingCountsRef.current[characterId] ?? 0;
         const additions = chat.messages.slice(previous).filter((message) => message.role === "character");
         incomingCountsRef.current[characterId] = chat.messages.length;
+        receivedCount += additions.length;
         if (additions.length && activeChat !== characterId) {
           latest = { characterId, text: additions[additions.length - 1].text };
         }
       },
     );
+
+    for (let index = 0; index < receivedCount; index += 1) {
+      window.setTimeout(() => playSound("notify"), index * 140);
+    }
 
     if (!latest) return;
     const incoming = latest as { characterId: CharacterId; text: string };
@@ -476,13 +485,6 @@ export default function App() {
       title: profile.displayName,
       text: incoming.text.slice(0, 88),
     });
-
-    const now = Date.now();
-    const last = lastNotificationRef.current;
-    if (!last || last.characterId !== incoming.characterId || now - last.at > 3500) {
-      playSound("notify");
-    }
-    lastNotificationRef.current = { characterId: incoming.characterId, at: now };
 
     if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
     notificationTimerRef.current = setTimeout(() => setPhoneNotification(undefined), 4600);
@@ -582,7 +584,6 @@ export default function App() {
     setPhoneNotification(undefined);
     incomingCountsRef.current = {};
     incomingReadyRef.current = true;
-    lastNotificationRef.current = undefined;
     if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
     setNarrativeNotices([]);
     setNotebookOpen(true);
@@ -600,6 +601,7 @@ export default function App() {
         error={bootError}
         pending={pending}
         restored={restoredNote}
+        reducedMotion={reducedMotion}
         onPowerOn={() => void runInspection()}
         onAuthorize={() => void runPreparation()}
         onRetry={() => void runInspection()}
@@ -619,7 +621,12 @@ export default function App() {
   }
 
   if (!state.difficultyChosen) {
-    return <DifficultyScreen onChoose={(difficulty) => dispatch({ type: "SET_DIFFICULTY", difficulty })} />;
+    return (
+      <DifficultyScreen
+        reducedMotion={reducedMotion}
+        onChoose={(difficulty) => dispatch({ type: "SET_DIFFICULTY", difficulty })}
+      />
+    );
   }
 
   if (showReveal && packs.act4) {

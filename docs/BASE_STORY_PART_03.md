@@ -440,7 +440,7 @@ Esse e-mail é **CLUE_015** e também o gatilho do momento em que Regina, no ní
 > Autorizo o contato com terceiros por meio da linha (32) 99114-2087, mantida ativa por decisão familiar, ficando o profissional obrigado a se identificar como perito na primeira mensagem de cada conversa.
 > Juiz de Fora, 04/05/2026.
 
-**[DEV]** É aqui que está o **CPF completo de Clara** — rota B para LOCK_007 (`0982`). E a cláusula de identificação obrigatória é o que justifica, dentro da ficção, a mensagem-padrão de abertura de cada chat.
+**[DEV]** É aqui que está o **CPF completo de Clara** — rota B para LOCK_007 (`0698`). E a cláusula de identificação obrigatória é o que justifica, dentro da ficção, a mensagem-padrão de abertura de cada chat.
 
 ---
 

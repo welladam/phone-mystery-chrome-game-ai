@@ -284,7 +284,7 @@ Se o jogador enviou **VOICE_003** para Diego, o encerramento ganha uma cartela f
 | **LOCK_004** | *"'A data que eu devia ter respeitado' não é a data do acidente. É anterior."* | *"Ela decorou a data de nascimento dele e escreveu isso duas vezes: num rascunho apagado e num áudio."* | *"170498."* |
 | **LOCK_005** | *"Pergunta de segurança padrão. A resposta está fixada nos Favoritos."* | *"Ela guardou uma foto de um cachorro com plaquinha na coleira."* | *"fumaça — e o código de 6 dígitos está no autenticador."* |
 | **LOCK_006** | *"Uma data que importava mais pra ela do que a dela própria."* | *"Está escrita no cartão de contato de uma pessoa só."* | *"1109."* |
-| **LOCK_007** | *"O documento que a mãe assinou qualifica a filha por extenso."* | *"Termo de autorização, pasta CASO."* | *"0982."* |
+| **LOCK_007** | *"O documento que a mãe assinou qualifica a filha por extenso."* | *"Termo de autorização, pasta CASO."* | *"0698."* |
 | **LOCK_008** | *"Elas tinham um lugar. O nome dele está no histórico de localização."* | *"Junto, minúsculo, sem espaço."* | *"pedralascada."* |
 | **LOCK_009** | *"A dica diz 'o ano que a gente se conheceu'. Alguém contou os anos em voz alta num aniversário."* | *"11 anos, em setembro de 2025."* | *"clara2014."* |
 | **Théo não abre** | *"Ele não está escondendo onde estava. Está escondendo como trabalha."* | *"Dê a ele uma garantia. Diga que não te interessa a irregularidade, só o horário."* | *"Diga, com estas palavras ou equivalentes: isso não vai para a polícia."* |

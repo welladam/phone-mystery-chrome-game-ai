@@ -28,5 +28,17 @@ export const enUSExample = {
     "common.cancel": "Cancel",
     "common.unavailable": "Unavailable",
   },
+  bootHowItems: [
+    "The investigation runs entirely in your browser. No data leaves the device.",
+    "You talk to the three people closest to Clara through an AI that runs on your own machine.",
+    "Write in your own language: translation happens locally, no external service or API key.",
+    "Search the apps, crack the passwords and write the final accusation.",
+  ],
+  bootAtmosphere: [
+    "Her phone is still on.",
+    "Someone kept typing after she died.",
+    "\"Monday I'll tell you everything.\" She never reached Monday.",
+    "Everything you need is inside the device.",
+  ],
 } satisfies LocaleBundle;
 

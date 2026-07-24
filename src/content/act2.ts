@@ -382,7 +382,7 @@ Rascunho salvo em 07/03/2026 11h20. Excluído em 07/03/2026 11h48.
 
 Diego,
 
-Seu irmão nasceu em 17 de abril de 1998. Eu decorei isso.
+Seu irmão nasceu em 17 de abril de 1998. Eu decorei essa data inteira, seis números, porque eu devia ter respeitado antes.
 Meu nome é Clara. Eu estava no carro.
 Eu não dirigia. Isso não me faz melhor, eu sei, mas eu preciso que fique escrito porque é verdade e porque eu vou dizer isso pra uma advogada segunda-feira de manhã e eu quero que você saiba antes da polícia.
 O dinheiro é meu. Desculpa pela mentira da ONG. Eu não sabia como fazer.

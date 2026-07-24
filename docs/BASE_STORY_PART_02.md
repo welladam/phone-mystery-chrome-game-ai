@@ -417,7 +417,7 @@ bpm
 
 > 🔒 *Confirme sua identidade*
 > `Últimos 4 dígitos do CPF`
-> **Resposta: 0982**
+> **Resposta: 0698**
 > **[DEV]** Disponível em PHOTO_017 (foto da carteira de estudante com CPF parcialmente visível) e no PDF `termo_autorizacao_familia.pdf` na pasta CASO, onde Regina qualifica a filha com CPF completo. Duas rotas.
 
 #### Extrato — março/2026

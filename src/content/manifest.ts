@@ -115,7 +115,7 @@ export const LOCKS: Lock[] = [
     prompt: "Últimos 4 dígitos do CPF da titular",
     hint: "O termo assinado pela família qualifica Clara por extenso.",
     length: 4,
-    accepts: ["0982"],
+    accepts: ["0698"],
     grantsClues: ["CLUE_014", "CLUE_057", "CLUE_032"],
   },
   {

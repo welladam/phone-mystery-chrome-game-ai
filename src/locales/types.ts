@@ -21,6 +21,10 @@ export type LocaleBundle = {
     unavailableLabel?: string;
   };
   messages: Record<string, string>;
+  /** Itens do checklist "como funciona" na tela de entrada. */
+  bootHowItems: string[];
+  /** Citações atmosféricas exibidas "digitando" durante o carregamento. */
+  bootAtmosphere: string[];
   errors?: Record<string, {
     title: string;
     cause: string;

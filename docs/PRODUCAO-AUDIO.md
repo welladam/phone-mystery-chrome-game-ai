@@ -2,12 +2,17 @@
 
 Material de produção. Fica fora de `src/`, portanto não é empacotado.
 
-Os áudios são **opcionais**. A transcrição cronometrada em
-`src/content/act3.ts` é a fonte oficial do conteúdo e sempre aparece na tela.
-Se um arquivo de som existir, ele toca junto; se não existir, o jogo segue
-normalmente com a transcrição.
+As transcrições cronometradas são a fonte oficial do conteúdo e sempre
+aparecem na tela. O runtime consegue apresentar a transcrição quando um arquivo
+de som falha, mas um locale só pode ser marcado como jogável quando todos os
+áudios obrigatórios existem e passam por `npm run validate:locales`.
 
-Para usar: salve como `public/assets/audio/<ID>.m4a`.
+Para usar: salve como `public/assets/audio/<locale>/<ID>.m4a`. Por exemplo,
+os arquivos em português brasileiro ficam em
+`public/assets/audio/pt-BR/VOICE_001.m4a` a `VOICE_004.m4a`.
+
+Não existe fallback para o áudio de outro idioma. Um locale só pode ser
+habilitado quando possuir todos os arquivos obrigatórios no próprio diretório.
 
 | ID | Arquivo no jogo | Duração | Quem fala | Tom |
 |---|---|---|---|---|
@@ -73,8 +78,9 @@ v2**. Use v3 quando disponível na sua conta; caia para v2 se não estiver.
   ffmpeg -i entrada.mp3 -c:a aac -b:a 192k VOICE_00X.m4a
   ```
 
-- **Onde salvar**: `public/assets/audio/VOICE_00X.m4a`, sobrescrevendo o
-  placeholder. Nenhuma outra configuração no código é necessária.
+- **Onde salvar**: `public/assets/audio/pt-BR/VOICE_00X.m4a`, sobrescrevendo o
+  arquivo daquele locale. Para outro idioma, use o diretório BCP-47
+  correspondente. Nenhuma outra configuração no código é necessária.
 
 ### As duas vozes
 

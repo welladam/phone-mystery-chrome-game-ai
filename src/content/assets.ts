@@ -11,6 +11,9 @@ import type { LocaleId } from "../locales/types";
 export const PHOTO_DIR = "/assets/photos";
 export const AUDIO_DIR = "/assets/audio";
 
+/** Pôster usado como evidência na tela de entrada. */
+export const POSTER_SRC = "/assets/art/clara-poster-v2.png";
+
 /**
  * Carrega a imagem pelo nome de arquivo real da história (o campo `file` de
  * cada foto — ex.: `IMG_20260308_1944.jpg`, `tribuna_barao.png`). Assim os

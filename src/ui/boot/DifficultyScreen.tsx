@@ -1,11 +1,18 @@
 import { EyeOff, Lightbulb, ShieldCheck } from "lucide-react";
 import type { Difficulty } from "../../engine/types";
 import { useLocale } from "../../i18n/LocaleContext";
+import NoirBackdrop from "./NoirBackdrop";
 
-export default function DifficultyScreen({ onChoose }: { onChoose: (value: Difficulty) => void }) {
+type Props = {
+  onChoose: (value: Difficulty) => void;
+  reducedMotion: boolean;
+};
+
+export default function DifficultyScreen({ onChoose, reducedMotion }: Props) {
   const { t } = useLocale();
   return (
     <main className="difficulty-screen">
+      <NoirBackdrop reducedMotion={reducedMotion} />
       <section className="difficulty-screen__panel" aria-labelledby="difficulty-title">
         <p className="difficulty-screen__eyebrow">{t("difficulty.eyebrow")}</p>
         <h1 id="difficulty-title">{t("difficulty.title")}</h1>

@@ -70,7 +70,7 @@ export const HINTS: Hint[] = [
     steps: [
       "O documento que a mãe assinou qualifica a filha por extenso.",
       "Termo de autorização, na pasta CASO da nuvem.",
-      "0982.",
+      "0698.",
     ],
   },
   {

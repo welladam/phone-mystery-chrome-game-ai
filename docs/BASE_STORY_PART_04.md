@@ -15,7 +15,7 @@
 | LOCK_004 | APP_009 · Voz Segura | PIN 6 | **170498** | *"a data que eu devia ter respeitado"* | 3 |
 | LOCK_005 | APP_004 · conta secundária | pergunta + código | **fumaça** + `903774` | *"Qual era o nome do seu primeiro animal de estimação?"* | 3 |
 | LOCK_006 | APP_003 · álbum Oculto | PIN 4 | **1109** | *"o dia mais importante do ano"* | 2–3 |
-| LOCK_007 | APP_015 · Banco Aurora | 4 dígitos | **0982** | *"últimos 4 dígitos do seu CPF"* | 2 |
+| LOCK_007 | APP_015 · Banco Aurora | 4 dígitos | **0698** | *"últimos 4 dígitos do seu CPF"* | 2 |
 | LOCK_008 | APP_012 · `chat_backup_....zip` | palavra | **pedralascada** | *"onde a gente sempre foi"* | 2–4 |
 | LOCK_009 | APP_017 · Fluxo | alfanumérica | **clara2014** | *"a de sempre + o ano que a gente se conheceu"* | 2 |
 
@@ -28,7 +28,7 @@
 | **LOCK_004** `170498` | DEL_001: *"nasceu em 17 de abril de 1998"* | Desconhecida, nível 1, dita a data | VOICE_003 [03:44] — Clara diz em voz alta **[DEV: circular por design — quem já ouviu VOICE_003 já está dentro do app; serve só como confirmação]** |
 | **LOCK_005** `fumaça` | PHOTO_002 — plaquinha da coleira | Regina, nível 2: *"a Clara tinha um cachorro chamado Fumaça, morreu em 2020"* | Álbum Favoritos — a foto está fixada |
 | **LOCK_006** `1109` | Cartão de contato de Alice: *"aniversário 11/09"* | Mensagem de 11/09/2025 no chat de Alice | Calendário — evento anual recorrente *"Lice 🎂"* |
-| **LOCK_007** `0982` | `termo_autorizacao_familia.pdf` — CPF completo | Comprovantes de Pix — CPF mascarado ***.882.706-** ❌ *(insuficiente sozinho — só confirma)* | Regina, nível 1, informa se perguntada |
+| **LOCK_007** `0698` | `termo_autorizacao_familia.pdf` — CPF completo | Comprovantes de Pix — CPF mascarado ***.882.706-** ❌ *(insuficiente sozinho — só confirma)* | Regina, nível 1, informa se perguntada |
 | **LOCK_008** `pedralascada` | PHOTO_018 — legenda *"PL 💛 sempre"* | Locais frequentes no APP_011 — nome completo do mirante | Regina ou Alice, nível 2, nomeiam o lugar |
 | **LOCK_009** `clara2014` | Mensagem de Alice 11/09/2025: *"11 anos… desde a sétima série"* | PHOTO_011 — legenda *"10 anos disso 🥹 2014–2024"* | Dica salva no navegador |
 
@@ -182,7 +182,7 @@ FRENTE 1 (o dano)
                                                      └─→ [EVENT_011 → ATO 3]
 
 FRENTE 2 (o dinheiro)
-  CLUE_042 → termo_autorizacao (CPF) → LOCK_007 (0982) → APP_015
+  CLUE_042 → termo_autorizacao (CPF) → LOCK_007 (0698) → APP_015
        ├─ CLUE_014 (Pix p/ Marlene) ─┐
        ├─ CLUE_057 (saque 1.850)     ─┼─⇒ MEMORY_003 "Ela pagava a
        └─ CLUE_032 (Pix de Alice)    ─┘   família e financiou o conserto"

@@ -2,17 +2,20 @@ import { Check, Globe2, Lock } from "lucide-react";
 import { useLocale } from "../../i18n/LocaleContext";
 import { LOCALE_LIST } from "../../locales/registry";
 import type { LocaleId } from "../../locales/types";
+import NoirBackdrop from "./NoirBackdrop";
 
 type Props = {
   current: LocaleId;
   onChoose: (locale: LocaleId) => void;
   compact?: boolean;
+  reducedMotion?: boolean;
 };
 
-export default function LanguageScreen({ current, onChoose, compact = false }: Props) {
+export default function LanguageScreen({ current, onChoose, compact = false, reducedMotion = false }: Props) {
   const { t } = useLocale();
   return (
     <div className={`language-screen${compact ? " language-screen--compact" : ""}`}>
+      {!compact && <NoirBackdrop reducedMotion={reducedMotion} />}
       <section className="language-card" aria-labelledby="language-title">
         {!compact && (
           <header className="language-card__head">

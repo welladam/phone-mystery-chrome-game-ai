@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; background:#070c0a; }
+  ::selection { background: rgba(138,209,160,.25); }
+  .mc-stage, .mc-stage * {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Ccircle cx='13' cy='13' r='4' fill='none' stroke='%238ad1a0' stroke-width='1.4' opacity='.95'/%3E%3Cpath d='M13 1.5v5M13 19.5v5M1.5 13h5M19.5 13h5' stroke='%238ad1a0' stroke-width='1.4' stroke-linecap='round' opacity='.8'/%3E%3Ccircle cx='13' cy='13' r='1' fill='%238ad1a0'/%3E%3C/svg%3E") 13 13, crosshair;
+  }
+  .mc-stage button, .mc-stage a, .mc-stage [role="button"] {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Ccircle cx='13' cy='13' r='7' fill='rgba(138,209,160,.22)' stroke='%238ad1a0' stroke-width='1.6'/%3E%3Ccircle cx='13' cy='13' r='1.8' fill='%238ad1a0'/%3E%3C/svg%3E") 13 13, pointer;
+  }
+  @keyframes mcGrain { 0%{transform:translate(0,0)} 10%{transform:translate(-4%,-4%)} 30%{transform:translate(3%,-2%)} 50%{transform:translate(-2%,3%)} 70%{transform:translate(4%,2%)} 90%{transform:translate(-3%,1%)} 100%{transform:translate(0,0)} }
+  @keyframes mcFlicker { 0%,100%{opacity:.16} 48%{opacity:.13} 50%{opacity:.22} 52%{opacity:.12} }
+  @keyframes mcRise { from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:translateY(0)} }
+  @keyframes mcRiseL { from{opacity:0; transform:translateX(-16px)} to{opacity:1; transform:translateX(0)} }
+  @keyframes mcBlink { 0%,45%{opacity:1} 50%,95%{opacity:0} 100%{opacity:1} }
+  @keyframes mcPulse { 0%,100%{opacity:.5; transform:scale(1)} 50%{opacity:1; transform:scale(1.14)} }
+  @keyframes mcSpin { to{transform:rotate(360deg)} }
+  @keyframes mcSheen { 0%{transform:translateX(-120%)} 60%,100%{transform:translateX(320%)} }
+  @keyframes mcScan { from{transform:translateY(-100%)} to{transform:translateY(120vh)} }
+  @keyframes mcCaret { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+  .mc-reveal { animation: mcRise .7s cubic-bezier(.2,.7,.2,1) both; }
+</style>
+</helmet>
+<div class="mc-stage" ref="{{ rootRef }}" style="position:relative; min-height:100vh; width:100%; overflow:hidden; background:radial-gradient(circle at 22% 8%, rgba(131,181,223,.10), transparent 34rem), radial-gradient(circle at 84% 96%, rgba(138,209,160,.09), transparent 32rem), linear-gradient(158deg,#0a0f0d 0%,#121816 52%,#080d0b 100%); font-family:Inter,ui-sans-serif,system-ui,sans-serif; color:#f1f6ef; -webkit-font-smoothing:antialiased; user-select:none;">
+
+  <!-- grain + scanline + vignette overlays -->
+  <div aria-hidden="true" style="position:absolute; inset:-40%; z-index:60; pointer-events:none; opacity:.16; mix-blend-mode:overlay; background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;); animation:mcGrain 1.1s steps(3) infinite, mcFlicker 5s ease-in-out infinite;"></div>
+  <div aria-hidden="true" style="position:absolute; inset:0; z-index:58; pointer-events:none; background:repeating-linear-gradient(180deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,.14) 3px, rgba(0,0,0,0) 4px); opacity:.4;"></div>
+  <div aria-hidden="true" style="position:absolute; inset:0; z-index:59; pointer-events:none; overflow:hidden;"><div style="position:absolute; left:0; right:0; height:34vh; background:linear-gradient(180deg, transparent, rgba(138,209,160,.045), transparent); animation:mcScan 7.5s linear infinite;"></div></div>
+  <div aria-hidden="true" style="position:absolute; inset:0; z-index:57; pointer-events:none; box-shadow:inset 0 0 200px 60px rgba(0,0,0,.75), inset 0 0 60px rgba(0,0,0,.5);"></div>
+
+  <!-- language selector -->
+  <div style="position:absolute; top:22px; right:26px; z-index:70; display:flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:11px;">
+    <span style="color:#5f6f66; letter-spacing:.12em; margin-right:4px;">IDIOMA</span>
+    <sc-for list="{{ langs }}" as="opt" hint-placeholder-count="2">
+      <button type="button" onClick="{{ opt.select }}" style="border:1px solid {{ opt.border }}; background:{{ opt.bg }}; color:{{ opt.fg }}; padding:5px 10px; border-radius:7px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.06em; transition:all .18s ease;">{{ opt.label }}</button>
+    </sc-for>
+  </div>
+
+  <!-- ======================= ENTRADA ======================= -->
+  <sc-if value="{{ isEntrada }}" hint-placeholder-val="{{ true }}">
+  <div class="mc-reveal" style="position:relative; z-index:20; min-height:100vh; display:grid; grid-template-columns:minmax(300px, 0.92fr) minmax(360px, 1fr); gap:clamp(24px,4vw,64px); align-items:center; max-width:1240px; margin:0 auto; padding:clamp(64px,7vh,96px) clamp(24px,5vw,72px);">
+
+    <!-- POSTER as evidence -->
+    <div style="perspective:1400px;">
+      <div ref="{{ tiltRef }}" style="position:relative; transform-style:preserve-3d; transition:transform .12s ease-out; will-change:transform;">
+        <div style="position:absolute; inset:-14px; border:1px solid rgba(138,209,160,.16); border-radius:6px;"></div>
+        <!-- corner brackets -->
+        <div style="position:absolute; top:-14px; left:-14px; width:26px; height:26px; border-top:2px solid #8ad1a0; border-left:2px solid #8ad1a0;"></div>
+        <div style="position:absolute; top:-14px; right:-14px; width:26px; height:26px; border-top:2px solid #8ad1a0; border-right:2px solid #8ad1a0;"></div>
+        <div style="position:absolute; bottom:-14px; left:-14px; width:26px; height:26px; border-bottom:2px solid #8ad1a0; border-left:2px solid #8ad1a0;"></div>
+        <div style="position:absolute; bottom:-14px; right:-14px; width:26px; height:26px; border-bottom:2px solid #8ad1a0; border-right:2px solid #8ad1a0;"></div>
+
+        <div style="position:relative; border-radius:4px; overflow:hidden; box-shadow:0 40px 90px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.6);">
+          <img src="assets/clara-poster-v2.png" alt="O Mistério de Clara" draggable="false" style="display:block; width:100%; height:auto; filter:contrast(1.05) saturate(.96);">
+          <!-- glare sheen following pointer -->
+          <div ref="{{ glowRef }}" style="position:absolute; inset:0; pointer-events:none; background:radial-gradient(220px 220px at 50% 30%, rgba(255,255,255,.10), transparent 70%); mix-blend-mode:screen; transition:background-position .1s;"></div>
+          <div style="position:absolute; inset:0; pointer-events:none; background:linear-gradient(180deg, transparent 55%, rgba(7,12,10,.35) 100%);"></div>
+        </div>
+
+        <!-- evidence tag -->
+        <div style="position:absolute; top:14px; left:14px; z-index:4; display:flex; align-items:center; gap:8px; padding:5px 10px; background:rgba(8,12,10,.82); border:1px solid rgba(241,191,106,.4); border-radius:5px; backdrop-filter:blur(6px); font-family:'JetBrains Mono',monospace;">
+          <span style="width:8px; height:8px; border-radius:50%; background:#f1bf6a; box-shadow:0 0 8px #f1bf6a; animation:mcPulse 1.8s ease-in-out infinite;"></span>
+          <span style="font-size:10.5px; letter-spacing:.14em; color:#f1bf6a;">EVIDÊNCIA · IP 0447/2026</span>
+        </div>
+      </div>
+      <!-- caption -->
+      <p style="margin:28px 4px 0; font-family:'JetBrains Mono',monospace; font-size:11.5px; line-height:1.7; color:#7f8f86; letter-spacing:.02em;">
+        <span style="color:#9fb0a6;">&gt; ITEM:</span> aparelho de Clara M. Vasques<br>
+        <span style="color:#9fb0a6;">&gt; {{ t.returned }}:</span> 24/04/2026 · Del. Homicídios<br>
+        <span style="color:#9fb0a6;">&gt; {{ t.status }}:</span> <span style="color:#ef8e8e;">{{ t.archived }}</span>
+      </p>
+    </div>
+
+    <!-- DOSSIER panel -->
+    <div>
+      <p style="margin:0; display:flex; align-items:center; gap:10px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:#8ad1a0; text-transform:uppercase;">
+        <span style="display:inline-block; width:34px; height:1px; background:#8ad1a0;"></span>{{ t.eyebrow }}
+      </p>
+      <h1 style="margin:16px 0 0; font-family:Oswald,sans-serif; font-weight:600; text-transform:uppercase; letter-spacing:.01em; line-height:.92; font-size:clamp(40px,6vw,74px); color:#f1f6ef; text-shadow:0 2px 30px rgba(0,0,0,.6);">
+        {{ t.title1 }}<br><span style="color:#e9c887;">{{ t.title2 }}</span>
+      </h1>
+
+      <p style="margin:22px 0 0; padding-left:16px; border-left:2px solid rgba(241,191,106,.5); font-size:clamp(15px,1.5vw,18px); font-style:italic; line-height:1.55; color:#dbe6de; max-width:34em; text-wrap:pretty;">
+        “{{ t.tagline }}”
+      </p>
+
+      <!-- section: O caso -->
+      <div style="margin-top:30px; padding:18px 20px; border:1px solid rgba(236,245,239,.1); border-radius:12px; background:rgba(255,255,255,.025);">
+        <p style="margin:0 0 8px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.18em; color:#f1bf6a; text-transform:uppercase;">01 — {{ t.caseHead }}</p>
+        <p style="margin:0; font-size:14.5px; line-height:1.65; color:#c9d6cf; text-wrap:pretty;">{{ t.caseBody }}</p>
+      </div>
+
+      <!-- section: Como funciona -->
+      <div style="margin-top:14px; padding:18px 20px; border:1px solid rgba(131,181,223,.18); border-radius:12px; background:rgba(131,181,223,.06);">
+        <p style="margin:0 0 12px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.18em; color:#83b5df; text-transform:uppercase;">02 — {{ t.howHead }}</p>
+        <div style="display:grid; gap:10px;">
+          <sc-for list="{{ t.howItems }}" as="row" hint-placeholder-count="3">
+            <div style="display:flex; gap:11px; align-items:flex-start;">
+              <span style="flex:0 0 auto; margin-top:2px; width:20px; height:20px; display:grid; place-items:center; border-radius:6px; background:rgba(138,209,160,.14); color:#8ad1a0; font-family:'JetBrains Mono',monospace; font-size:11px;">✓</span>
+              <span style="font-size:13.5px; line-height:1.5; color:#c9d6cf; text-wrap:pretty;">{{ row }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <button type="button" onClick="{{ startLoading }}" style="margin-top:26px; width:100%; display:flex; align-items:center; justify-content:center; gap:12px; padding:17px 24px; border:none; border-radius:12px; background:linear-gradient(180deg,#9bdcaf,#8ad1a0); color:#0b1310; font-family:Oswald,sans-serif; font-weight:600; font-size:17px; letter-spacing:.06em; text-transform:uppercase; box-shadow:0 12px 30px rgba(138,209,160,.28); position:relative; overflow:hidden;" style-hover="filter:brightness(1.06); transform:translateY(-1px);">
+        <span style="position:absolute; inset:0; width:40%; background:linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent); animation:mcSheen 3.4s ease-in-out infinite;"></span>
+        <span style="position:relative; z-index:2; display:inline-flex; align-items:center; gap:12px;">{{ t.cta }} <span style="font-size:19px;">→</span></span>
+      </button>
+      <p style="margin:14px 2px 0; font-family:'JetBrains Mono',monospace; font-size:11px; line-height:1.6; color:#6d7d74;">{{ t.footnote }}</p>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ======================= CARREGAMENTO ======================= -->
+  <sc-if value="{{ isCarregando }}" hint-placeholder-val="{{ false }}">
+  <div style="position:relative; z-index:20; min-height:100vh; display:grid; place-items:center; padding:40px 24px;">
+    <div style="width:min(100%,680px); display:grid; gap:34px; justify-items:center; text-align:center;">
+
+      <!-- rotating forensic seal -->
+      <div style="position:relative; width:132px; height:132px; display:grid; place-items:center;">
+        <div style="position:absolute; inset:0; border:1px solid rgba(138,209,160,.25); border-radius:50%;"></div>
+        <div style="position:absolute; inset:10px; border-top:2px solid #8ad1a0; border-right:2px solid transparent; border-bottom:2px solid rgba(131,181,223,.5); border-left:2px solid transparent; border-radius:50%; animation:mcSpin 2.4s linear infinite;"></div>
+        <div style="position:absolute; inset:26px; border:1px dashed rgba(241,191,106,.35); border-radius:50%; animation:mcSpin 9s linear infinite reverse;"></div>
+        <div style="font-family:Oswald,sans-serif; font-weight:600; font-size:30px; color:#e9c887; line-height:1;">{{ percent }}<span style="font-size:15px; color:#8ad1a0;">%</span></div>
+      </div>
+
+      <div>
+        <p style="margin:0; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.24em; color:#8ad1a0; text-transform:uppercase;">{{ t.bootEyebrow }}</p>
+        <h2 style="margin:10px 0 0; font-family:Oswald,sans-serif; font-weight:500; text-transform:uppercase; letter-spacing:.02em; font-size:clamp(24px,4vw,38px);">{{ t.bootTitle }}</h2>
+      </div>
+
+      <!-- progress bar -->
+      <div style="width:100%; max-width:520px;">
+        <div style="height:6px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden;">
+          <div ref="{{ barRef }}" style="height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,#8ad1a0,#83b5df); box-shadow:0 0 12px rgba(138,209,160,.6); transition:width .18s ease;"></div>
+        </div>
+      </div>
+
+      <!-- boot steps -->
+      <ul style="list-style:none; margin:0; padding:0; width:100%; max-width:520px; display:grid; gap:9px; text-align:left;">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="7">
+          <li style="display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:9px; background:{{ s.bg }}; border:1px solid {{ s.border }}; opacity:{{ s.opacity }}; transition:all .3s ease;">
+            <span style="flex:0 0 auto; width:16px; height:16px; display:grid; place-items:center;">{{ s.icon }}</span>
+            <span style="flex:1; font-family:'JetBrains Mono',monospace; font-size:12.5px; letter-spacing:.02em; color:{{ s.color }};">{{ s.label }}</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:#6d7d74; letter-spacing:.1em;">{{ s.tag }}</span>
+          </li>
+        </sc-for>
+      </ul>
+
+      <!-- typed dossier quote -->
+      <p style="margin:6px 0 0; min-height:2.6em; font-style:italic; font-size:clamp(14px,1.6vw,17px); line-height:1.5; color:#b9c8bf; max-width:38em; text-wrap:pretty;">
+        “{{ typed }}”<span style="display:inline-block; width:8px; margin-left:1px; color:#8ad1a0; animation:mcCaret 1s step-end infinite;">▍</span>
+      </p>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ======================= PRONTO ======================= -->
+  <sc-if value="{{ isPronto }}" hint-placeholder-val="{{ false }}">
+  <div class="mc-reveal" style="position:relative; z-index:20; min-height:100vh; display:grid; place-items:center; padding:40px 24px; text-align:center;">
+    <div style="display:grid; gap:24px; justify-items:center; max-width:420px;">
+      <div style="position:relative; width:110px; height:210px; border-radius:22px; border:1px solid rgba(220,233,225,.22); background:linear-gradient(150deg,#0e1512,#1a221f 60%,#0b100e); box-shadow:0 30px 70px rgba(0,0,0,.6), inset 0 0 24px rgba(0,0,0,.4); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; overflow:hidden;">
+        <div style="position:absolute; top:9px; left:50%; transform:translateX(-50%); width:44px; height:6px; border-radius:999px; background:#050807;"></div>
+        <div style="width:34px; height:34px; border-radius:50%; background:radial-gradient(circle at 34% 30%,#cdeed9,#8ad1a0 46%,#2f6e42); box-shadow:0 0 0 5px rgba(138,209,160,.12); animation:mcPulse 2s ease-in-out infinite;"></div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; color:#8ad1a0;">CLARA · 24</span>
+        <span style="font-family:Oswald,sans-serif; font-size:24px; font-weight:300; color:#e9f2ec;">21:20</span>
+      </div>
+      <div>
+        <p style="margin:0; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.24em; color:#8ad1a0; text-transform:uppercase;">{{ t.readyEyebrow }}</p>
+        <h2 style="margin:10px 0 0; font-family:Oswald,sans-serif; font-weight:600; text-transform:uppercase; letter-spacing:.03em; font-size:clamp(26px,4vw,40px);">{{ t.readyTitle }}</h2>
+        <p style="margin:12px 0 0; font-size:14.5px; line-height:1.6; color:#9fb0a6; max-width:30em;">{{ t.readyBody }}</p>
+      </div>
+      <button type="button" onClick="{{ restart }}" style="display:inline-flex; align-items:center; gap:10px; padding:13px 26px; border:1px solid rgba(138,209,160,.45); border-radius:11px; background:rgba(138,209,160,.1); color:#dbe6de; font-family:Oswald,sans-serif; font-weight:500; font-size:14px; letter-spacing:.06em; text-transform:uppercase;" style-hover="background:rgba(138,209,160,.18);">↺ {{ t.replay }}</button>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { phase: "entrada", lang: "pt", progress: 0, typed: "", qi: 0, ci: 0, holding: false };
+
+  strings = {
+    pt: {
+      eyebrow: "Perícia Digital Independente",
+      title1: "O Mistério", title2: "de Clara",
+      tagline: "O celular dela ainda está ligado. E alguém continuou digitando depois que ela morreu.",
+      returned: "DEVOLVIDO", status: "STATUS", archived: "ARQUIVADO — provável suicídio",
+      caseHead: "O caso",
+      caseBody: "Clara Mendonça Vasques, 24 anos, foi encontrada morta ao pé de um mirante em 9 de março de 2026. O inquérito foi arquivado. A mãe dela não aceitou — e contratou você, um perito digital, entregando o aparelho da filha. O telefone está parcialmente desbloqueado. Descubra o que aconteceu.",
+      howHead: "Como funciona",
+      howItems: [
+        "A investigação roda inteiramente no seu navegador. Nenhum dado sai do aparelho.",
+        "Você conversa com as três pessoas mais próximas de Clara por uma IA que roda na sua máquina.",
+        "Escreva no seu idioma: a tradução acontece localmente, sem serviço externo nem chave de API.",
+        "Vasculhe 20 aplicativos, resolva 9 senhas e escreva a acusação final."
+      ],
+      cta: "Iniciar investigação",
+      footnote: "> requer Chrome 138+ · contexto seguro · ~22 GB para o 1º download",
+      bootEyebrow: "Inicializando perícia",
+      bootTitle: "Preparando o aparelho",
+      readyEyebrow: "Verificado",
+      readyTitle: "Aparelho pronto",
+      readyBody: "O espelho do celular de Clara foi montado. Tudo o que você precisa está aqui dentro.",
+      replay: "Rever sequência"
+    },
+    en: {
+      eyebrow: "Independent Digital Forensics",
+      title1: "The Mystery", title2: "of Clara",
+      tagline: "Her phone is still on. And someone kept typing after she died.",
+      returned: "RETURNED", status: "STATUS", archived: "ARCHIVED — probable suicide",
+      caseHead: "The case",
+      caseBody: "Clara Mendonça Vasques, 24, was found dead at the foot of a lookout on March 9, 2026. The inquiry was archived. Her mother refused to accept it — and hired you, a digital examiner, handing over her daughter's phone. The device is partially unlocked. Find out what happened.",
+      howHead: "How it works",
+      howItems: [
+        "The investigation runs entirely in your browser. No data leaves the device.",
+        "You talk to the three people closest to Clara through an AI that runs on your own machine.",
+        "Write in your own language: translation happens locally, no external service or API key.",
+        "Search 20 apps, crack 9 passwords and write the final accusation."
+      ],
+      cta: "Begin the investigation",
+      footnote: "> requires Chrome 138+ · secure context · ~22 GB for the 1st download",
+      bootEyebrow: "Initializing forensics",
+      bootTitle: "Preparing the device",
+      readyEyebrow: "Verified",
+      readyTitle: "Device ready",
+      readyBody: "The mirror of Clara's phone has been mounted. Everything you need is in here.",
+      replay: "Replay sequence"
+    }
+  };
+
+  bootSteps = {
+    pt: ["Verificando contexto seguro", "Autenticando laudo particular", "Carregando modelo de linguagem local", "Preparando tradutor offline", "Descriptografando espelho do aparelho", "Reconstruindo a linha do tempo", "Ligando o aparelho de Clara"],
+    en: ["Verifying secure context", "Authenticating private report", "Loading local language model", "Preparing offline translator", "Decrypting device mirror", "Reconstructing the timeline", "Powering on Clara's phone"]
+  };
+
+  quotes = {
+    pt: ["O celular dela ainda está ligado.", "Alguém continuou digitando depois que ela morreu.", "\"Segunda-feira eu conto tudo.\" Ela não chegou à segunda-feira.", "Tudo o que você precisa está dentro do aparelho."],
+    en: ["Her phone is still on.", "Someone kept typing after she died.", "\"Monday I'll tell you everything.\" She never reached Monday.", "Everything you need is inside the device."]
+  };
+
+  constructor(...a) {
+    super(...a);
+    this.rootRef = React.createRef();
+    this.tiltRef = React.createRef();
+    this.glowRef = React.createRef();
+    this.barRef = React.createRef();
+    this._onMove = this._onMove.bind(this);
+  }
+
+  componentDidMount() { window.addEventListener("mousemove", this._onMove); }
+  componentWillUnmount() {
+    window.removeEventListener("mousemove", this._onMove);
+    clearInterval(this._prog); clearInterval(this._type);
+  }
+
+  _onMove(e) {
+    if (this.state.phase !== "entrada") return;
+    const root = this.rootRef.current; if (!root) return;
+    const r = root.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    if (this.tiltRef.current) this.tiltRef.current.style.transform = `rotateY(${px * 6}deg) rotateX(${-py * 6}deg)`;
+    if (this.glowRef.current) this.glowRef.current.style.backgroundPosition = `${(px + 0.5) * 100}% ${(py + 0.5) * 100}%`;
+  }
+
+  setLang(l) { this.setState({ lang: l }); }
+
+  startLoading() {
+    clearInterval(this._prog); clearInterval(this._type);
+    this.setState({ phase: "carregamento", progress: 0, typed: "", qi: 0, ci: 0, holding: false });
+    this._prog = setInterval(() => {
+      this.setState(s => {
+        const next = Math.min(100, s.progress + (0.9 + Math.random() * 2.4));
+        if (this.barRef.current) this.barRef.current.style.width = next + "%";
+        if (next >= 100) {
+          clearInterval(this._prog);
+          setTimeout(() => { clearInterval(this._type); this.setState({ phase: "pronto" }); }, 850);
+        }
+        return { progress: next };
+      });
+    }, 95);
+    this._type = setInterval(() => this._tick(), 52);
+  }
+
+  _tick() {
+    this.setState(s => {
+      const list = this.quotes[s.lang];
+      const q = list[s.qi];
+      if (s.holding) return s;
+      if (s.ci < q.length) return { typed: q.slice(0, s.ci + 1), ci: s.ci + 1 };
+      // reached end -> hold, then advance
+      setTimeout(() => this.setState(st => ({ holding: false, qi: (st.qi + 1) % list.length, ci: 0, typed: "" })), 1500);
+      return { holding: true };
+    });
+  }
+
+  restart() {
+    clearInterval(this._prog); clearInterval(this._type);
+    this.setState({ phase: "entrada", progress: 0, typed: "", qi: 0, ci: 0, holding: false });
+  }
+
+  _stepView(t) {
+    const s = this.state;
+    const N = this.bootSteps[s.lang].length;
+    const active = Math.min(N - 1, Math.floor(s.progress / 100 * N));
+    const full = s.progress >= 100;
+    return this.bootSteps[s.lang].map((label, i) => {
+      let st = "wait";
+      if (full || i < active) st = "ok";
+      else if (i === active) st = "run";
+      const map = {
+        ok:   { bg: "rgba(138,209,160,.08)", border: "rgba(138,209,160,.28)", color: "#dbe6de", icon: React.createElement("span", { style: { color: "#8ad1a0", fontSize: "13px" } }, "✓"), tag: "OK", opacity: 1 },
+        run:  { bg: "rgba(241,191,106,.08)", border: "rgba(241,191,106,.3)", color: "#f4e6c4", icon: React.createElement("span", { style: { display: "inline-block", width: "10px", height: "10px", border: "2px solid #f1bf6a", borderTopColor: "transparent", borderRadius: "50%", animation: "mcSpin .7s linear infinite" } }), tag: "…", opacity: 1 },
+        wait: { bg: "rgba(255,255,255,.02)", border: "rgba(236,245,239,.08)", color: "#6d7d74", icon: React.createElement("span", { style: { width: "6px", height: "6px", borderRadius: "50%", background: "rgba(159,176,166,.35)", display: "inline-block" } }), tag: "", opacity: .5 }
+      };
+      return { label, ...map[st] };
+    });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const t = this.strings[s.lang];
+    const langs = [
+      { code: "pt", label: "PT-BR" },
+      { code: "en", label: "EN" }
+    ].map(o => ({
+      label: o.label,
+      select: () => this.setLang(o.code),
+      bg: s.lang === o.code ? "rgba(138,209,160,.16)" : "rgba(255,255,255,.03)",
+      fg: s.lang === o.code ? "#8ad1a0" : "#9fb0a6",
+      border: s.lang === o.code ? "rgba(138,209,160,.5)" : "rgba(236,245,239,.12)"
+    }));
+    return {
+      t, langs,
+      rootRef: this.rootRef, tiltRef: this.tiltRef, glowRef: this.glowRef, barRef: this.barRef,
+      isEntrada: s.phase === "entrada",
+      isCarregando: s.phase === "carregamento",
+      isPronto: s.phase === "pronto",
+      percent: Math.round(s.progress),
+      steps: this._stepView(t),
+      typed: s.typed,
+      startLoading: () => this.startLoading(),
+      restart: () => this.restart()
+    };
+  }
+}
+</script>
+</body>
+</html>

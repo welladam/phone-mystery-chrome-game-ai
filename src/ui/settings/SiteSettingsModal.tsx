@@ -63,6 +63,7 @@ export default function SiteSettingsModal({
             <p>{t("settings.languageHelp")}</p>
             <LanguageScreen
               compact
+              reducedMotion={prefs.reducedMotion}
               current={prefs.locale}
               onChoose={(locale) => void onLocaleChange(locale)}
             />
