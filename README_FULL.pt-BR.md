@@ -4,6 +4,8 @@
 
 ![Pôster de O Mistério de Clara](public/assets/art/clara-poster-v2.png)
 
+[Jogar online](https://welladam.github.io/phone-mystery-chrome-game-ai/)
+
 Jogo narrativo de investigação, open source, que roda inteiramente no navegador. Você recebe o celular de uma jovem cuja morte foi tratada como provável suicídio. Explore os aplicativos, recupere o que foi escondido, converse com as pessoas próximas a ela e descubra o que realmente aconteceu.
 
 As conversas usam o Prompt API do Chrome e o Gemini Nano no próprio dispositivo. Não existe backend, inferência na nuvem, chave de API ou sistema de contas: modelo, tradução, estado do jogo e progresso permanecem no computador do jogador.

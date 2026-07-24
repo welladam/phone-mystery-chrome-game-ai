@@ -4,6 +4,8 @@
 
 ![The Clara Mystery poster](public/assets/art/clara-poster-v2.png)
 
+[Play online](https://welladam.github.io/phone-mystery-chrome-game-ai/)
+
 An open-source investigative narrative that runs entirely in the browser. You receive the phone of a young woman whose death was ruled a probable suicide. Explore its apps, recover what was hidden, talk to the people closest to her, and determine what really happened.
 
 The conversations are powered by Chrome's on-device Prompt API and Gemini Nano. There is no backend, cloud inference, API key, or account system: the model, translation, game state, and saved investigation remain on the player's computer.

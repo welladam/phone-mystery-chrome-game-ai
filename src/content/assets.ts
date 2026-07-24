@@ -8,11 +8,13 @@
 
 import type { LocaleId } from "../locales/types";
 
-export const PHOTO_DIR = "/assets/photos";
-export const AUDIO_DIR = "/assets/audio";
+const PUBLIC_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+export const PHOTO_DIR = `${PUBLIC_BASE}/assets/photos`;
+export const AUDIO_DIR = `${PUBLIC_BASE}/assets/audio`;
 
 /** Pôster usado como evidência na tela de entrada. */
-export const POSTER_SRC = "/assets/art/clara-poster-v2.png";
+export const POSTER_SRC = `${PUBLIC_BASE}/assets/art/clara-poster-v2.png`;
 
 /**
  * Carrega a imagem pelo nome de arquivo real da história (o campo `file` de

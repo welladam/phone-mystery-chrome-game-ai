@@ -4,6 +4,8 @@
 
 ![The Clara Mystery poster](public/assets/art/clara-poster-v2.png)
 
+[Play online](https://welladam.github.io/phone-mystery-chrome-game-ai/) · [Full documentation](README_FULL.md)
+
 An open-source browser mystery powered by Chrome's on-device AI. You receive the phone of a young woman whose death was ruled a probable suicide. Explore her apps, recover hidden evidence, talk to the people closest to her, and determine what really happened.
 
 > **Playable prototype · v0.1.0 · Brazilian Portuguese only**
