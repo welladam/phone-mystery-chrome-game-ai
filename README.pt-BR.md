@@ -2,7 +2,9 @@
 
 [English](README.md) · [Português (Brasil)](README.pt-BR.md) · [Documentação completa](README_FULL.pt-BR.md)
 
-![Pôster de O Mistério de Clara](public/assets/art/clara-poster-v2.png)
+<p align="center">
+  <img src="public/assets/art/clara-poster-v2.png" alt="Pôster de O Mistério de Clara" width="512">
+</p>
 
 [Jogar online](https://welladam.github.io/phone-mystery-chrome-game-ai/) · [Documentação completa](README_FULL.pt-BR.md)
 
@@ -30,7 +32,14 @@ Os prompts originais e resultados narrativos estão publicados em [`docs/`](docs
 
 A história aborda morte, luto, coação, culpa e violência sem descrição gráfica. Recomendada para maiores de 16 anos.
 
-## Como a IA funciona
+## APIs de IA do Chrome utilizadas
+
+- **[Prompt API for Gemini Nano](https://developer.chrome.com/docs/ai/prompt-api):** executa cada personagem localmente em uma sessão de conversa isolada. O Gemini Nano é baixado e administrado pelo Chrome; este projeto não chama a API Gemini na nuvem.
+- **[Translator API](https://developer.chrome.com/docs/ai/translator-api):** traduz as mensagens em português para inglês antes da inferência e traduz as respostas de volta. Os pacotes de idioma também são baixados e executados localmente.
+
+Não existe backend, inferência na nuvem, chave de API, extensão, analytics ou conta de jogador.
+
+### Como funciona
 
 A IA interpreta os personagens; ela não controla o mistério.
 
@@ -43,7 +52,17 @@ mensagem do jogador
 
 O motor determinístico decide quais fatos cada personagem pode receber, quais pistas foram examinadas, se uma senha está correta, quando um ato avança e como o jogo termina. Pistas essenciais usam respostas canônicas escritas manualmente para que a variação do modelo não torne o mistério injusto.
 
-Tudo roda pelo Prompt API e Translator API locais do Chrome. Não existe backend, inferência na nuvem, chave de API, analytics ou conta de jogador.
+O motor do jogo continua controlando fatos, senhas, progressão e desfecho; o Gemini Nano apenas interpreta os personagens.
+
+## Como preparar o Chrome
+
+1. Atualize o **Google Chrome para computador para a versão 148 ou superior** em `chrome://settings/help`.
+2. Confira os requisitos de hardware e armazenamento abaixo e use uma conexão sem limite de dados no primeiro download.
+3. Abra o [jogo online](https://welladam.github.io/phone-mystery-chrome-game-ai/) ou execute pelo `localhost`. Não abra o `index.html` usando `file://`.
+4. Quando o jogo solicitar, selecione **Aceitar e iniciar download**. Mantenha a aba aberta enquanto o Chrome baixa o Gemini Nano e os pacotes de tradução português/inglês.
+5. Nas próximas visitas, o Chrome normalmente reutiliza esses componentes. O estado deles pode ser consultado em `chrome://on-device-internals`.
+
+No Chrome 148+ normalmente não é necessário instalar o modelo manualmente, usar extensão, criar chave de API ou habilitar flag experimental. Parâmetros de amostragem podem ter disponibilidade experimental separada, mas este projeto não depende deles.
 
 ## Requisitos
 
@@ -54,7 +73,7 @@ Tudo roda pelo Prompt API e Translator API locais do Chrome. Não existe backend
 - Conexão sem limite para o primeiro download dos modelos
 - `localhost`, `127.0.0.1` ou HTTPS
 
-Chrome para celular e outros navegadores não são compatíveis com as APIs de modelo usadas. Consulte os [requisitos completos e diagnóstico](README_FULL.pt-BR.md#requisitos-de-navegador-e-hardware).
+Chrome para celular e outros navegadores não são compatíveis com as APIs de modelo usadas. Consulte o [guia completo de configuração e diagnóstico](README_FULL.pt-BR.md#como-preparar-o-chrome).
 
 ## Rodar localmente
 

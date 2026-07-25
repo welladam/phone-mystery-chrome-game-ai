@@ -2,7 +2,9 @@
 
 [Visão rápida](README.pt-BR.md) · [Full documentation in English](README_FULL.md) · [Documentação completa em português](README_FULL.pt-BR.md) · [Documentos de produção](docs/README.md)
 
-![Pôster de O Mistério de Clara](public/assets/art/clara-poster-v2.png)
+<p align="center">
+  <img src="public/assets/art/clara-poster-v2.png" alt="Pôster de O Mistério de Clara" width="512">
+</p>
 
 [Jogar online](https://welladam.github.io/phone-mystery-chrome-game-ai/)
 
@@ -130,6 +132,17 @@ Para a experiência web completa:
 Chrome para Android e iOS não é compatível com as APIs de modelo fundamental usadas aqui. O Translator API também não funciona em Web Workers.
 
 Requisitos e assinaturas ainda podem mudar. Consulte a documentação oficial do [Prompt API](https://developer.chrome.com/docs/ai/prompt-api), [Translator API](https://developer.chrome.com/docs/ai/translator-api) e o [estado das Built-in AI APIs](https://developer.chrome.com/docs/ai/built-in-apis) antes de publicar.
+
+## Como preparar o Chrome
+
+1. Abra `chrome://settings/help` e atualize o Chrome para computador para a versão 148 ou superior.
+2. Confirme que o equipamento atende aos requisitos de armazenamento e GPU/CPU acima. Use uma conexão sem limite de dados no primeiro download.
+3. Abra a versão do GitHub Pages por HTTPS ou sirva o projeto em `localhost`/`127.0.0.1`. Uma página aberta por `file://` não acessa essas APIs.
+4. Inicie o jogo e selecione **Aceitar e iniciar download**. Essa ação autoriza `LanguageModel.create()` e `Translator.create()` a obter o Gemini Nano e os pacotes de idioma necessários.
+5. Mantenha a aba aberta enquanto a inicialização informa download, instalação e verificação. O Chrome administra os componentes e normalmente os reutiliza nas próximas visitas.
+6. Se um computador compatível ainda indicar componente ausente, consulte `chrome://on-device-internals`, confirme o espaço livre do perfil e verifique se alguma política corporativa está restringindo a IA integrada.
+
+O fluxo estável para sites não exige chave da API Gemini na nuvem, extensão, instalador manual de modelo nem flag experimental do Chrome. Parâmetros de amostragem têm disponibilidade experimental separada, mas o jogo não depende deles.
 
 ## Rodar localmente
 

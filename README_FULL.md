@@ -2,7 +2,9 @@
 
 [Quick overview](README.md) · [Full documentation in English](README_FULL.md) · [Documentação completa em português](README_FULL.pt-BR.md) · [Production documents](docs/README.md)
 
-![The Clara Mystery poster](public/assets/art/clara-poster-v2.png)
+<p align="center">
+  <img src="public/assets/art/clara-poster-v2.png" alt="The Clara Mystery poster" width="512">
+</p>
 
 [Play online](https://welladam.github.io/phone-mystery-chrome-game-ai/)
 
@@ -130,6 +132,17 @@ For the complete web experience:
 Chrome for Android and iOS is not supported by the foundation-model APIs used here. The Translator API is also unavailable in Web Workers.
 
 The requirements and API signatures may change. Check the official [Prompt API documentation](https://developer.chrome.com/docs/ai/prompt-api), [Translator API documentation](https://developer.chrome.com/docs/ai/translator-api), and [Built-in AI API status](https://developer.chrome.com/docs/ai/built-in-apis) before publishing a deployment.
+
+## Prepare Chrome
+
+1. Open `chrome://settings/help` and update desktop Chrome to version 148 or newer.
+2. Make sure the device meets the storage and GPU/CPU requirements above. Use an unmetered connection for the initial downloads.
+3. Open the GitHub Pages deployment over HTTPS, or serve the project from `localhost`/`127.0.0.1`. A page opened with `file://` cannot access these APIs.
+4. Start the game and select **Accept and start download**. That user action authorizes `LanguageModel.create()` and `Translator.create()` to obtain Gemini Nano and the required language packs.
+5. Keep the tab open while the boot screen reports download, installation, and verification. Chrome owns the components and normally reuses them on later visits.
+6. If a compatible machine still reports a missing component, inspect `chrome://on-device-internals`, confirm that the profile has enough free space, and check whether an enterprise policy is restricting built-in AI.
+
+The stable website flow requires no Gemini cloud API key, extension, manual model installer, or experimental Chrome flag. Sampling parameters have separate experimental availability, but the game does not depend on them.
 
 ## Run locally
 
