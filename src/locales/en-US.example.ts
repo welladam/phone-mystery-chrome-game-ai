@@ -27,6 +27,15 @@ export const enUSExample = {
     "common.close": "Close",
     "common.cancel": "Cancel",
     "common.unavailable": "Unavailable",
+    "boot.actionRequired": "Your action is required",
+    "boot.attentionRequired": "Setup needs your attention",
+    "boot.phoneWaitsForInstall": "The phone will turn on only after this step is complete.",
+    "boot.startingInstall": "Starting installation…",
+    "boot.acceptDownload": "Accept and start download",
+    "boot.acceptContinue": "Accept and continue",
+    "boot.acceptingDownload": "Authorizing download…",
+    "boot.tryAgain": "Try again",
+    "boot.retrying": "Trying again…",
   },
   bootHowItems: [
     "The investigation runs entirely in your browser. No data leaves the device.",
@@ -41,4 +50,3 @@ export const enUSExample = {
     "Everything you need is inside the device.",
   ],
 } satisfies LocaleBundle;
-

@@ -16,6 +16,7 @@ import type { AiError, AiErrorInfo } from "../../ai/errors";
 import { POSTER_SRC } from "../../content/assets";
 import { exportDiagnostics } from "../../persistence/diagnostics";
 import { useLocale } from "../../i18n/LocaleContext";
+import { useFocusTrap } from "../a11y/hooks";
 import NoirBackdrop from "./NoirBackdrop";
 
 export type BootPhase =
@@ -128,6 +129,148 @@ function StepPill({ step }: { step: BootStep }) {
       </span>
       <span className="sr-only">{stateLabel[step.state]}</span>
     </li>
+  );
+}
+
+type BootActionModalProps = {
+  kind: "install" | "error";
+  pending: string[];
+  error?: AiError;
+  errorInfo?: Pick<AiErrorInfo, "title" | "cause" | "action" | "retryable" | "keepsProgress">;
+  onAuthorize: () => void;
+  onRetry: () => void;
+};
+
+function BootActionModal({
+  kind,
+  pending,
+  error,
+  errorInfo,
+  onAuthorize,
+  onRetry,
+}: BootActionModalProps) {
+  const { t } = useLocale();
+  const dialogRef = useFocusTrap<HTMLDivElement>(true);
+  const [busy, setBusy] = useState(false);
+  const isError = kind === "error";
+  const needsDownloadConsent =
+    error?.code === "ACTIVATION_REQUIRED" || error?.code === "DOWNLOAD_NOT_AUTHORIZED";
+  const titleId = `boot-action-title-${kind}`;
+  const descriptionId = `boot-action-description-${kind}`;
+  const pendingKey = pending.join("|");
+
+  useEffect(() => {
+    setBusy(false);
+  }, [kind, error?.code, pendingKey]);
+
+  return (
+    <div className={`boot-action-modal boot-action-modal--${kind}`} role="presentation">
+      <div
+        ref={dialogRef}
+        className="boot-action-modal__dialog"
+        role={isError ? "alertdialog" : "dialog"}
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+      >
+        <div className="boot-action-modal__icon" aria-hidden>
+          {isError ? <AlertTriangle size={25} /> : <Download size={25} />}
+        </div>
+
+        <p className="boot-action-modal__eyebrow">
+          {isError ? t("boot.attentionRequired") : t("boot.actionRequired")}
+        </p>
+
+        {!isError && (
+          <>
+            <h3 id={titleId}>{t("boot.installTitle")}</h3>
+            <div id={descriptionId} className="boot-action-modal__copy">
+              <p className="boot-action-modal__lead">{t("boot.missing", { items: pending.join(", ") })}</p>
+              <p>{t("boot.installHelp")}</p>
+            </div>
+            <p className="boot-action-modal__notice">
+              <ShieldCheck size={15} aria-hidden />
+              {t("boot.phoneWaitsForInstall")}
+            </p>
+            <button
+              type="button"
+              className="boot-action-modal__primary"
+              disabled={busy}
+              onClick={() => {
+                setBusy(true);
+                onAuthorize();
+              }}
+            >
+              {busy ? <RefreshCw className="boot-action-modal__spinning" size={18} aria-hidden /> : <Download size={18} aria-hidden />}
+              {busy ? t("boot.acceptingDownload") : t("boot.acceptDownload")}
+            </button>
+          </>
+        )}
+
+        {isError && errorInfo && (
+          <>
+            <h3 id={titleId}>{errorInfo.title}</h3>
+            <div id={descriptionId} className="boot-action-modal__copy">
+              <p className="boot-action-modal__lead">{errorInfo.cause}</p>
+              <p>{errorInfo.action}</p>
+            </div>
+            {errorInfo.keepsProgress && (
+              <p className="boot-action-modal__notice">
+                <ShieldCheck size={15} aria-hidden />
+                {t("boot.progressSafe")}
+              </p>
+            )}
+            <div className="boot-action-modal__actions">
+              {errorInfo.retryable && (
+                <button
+                  type="button"
+                  className="boot-action-modal__primary"
+                  disabled={busy}
+                  onClick={() => {
+                    setBusy(true);
+                    onRetry();
+                  }}
+                >
+                  {needsDownloadConsent && !busy ? (
+                    <ShieldCheck size={18} aria-hidden />
+                  ) : (
+                    <RefreshCw
+                      className={busy ? "boot-action-modal__spinning" : undefined}
+                      size={18}
+                      aria-hidden
+                    />
+                  )}
+                  {busy
+                    ? needsDownloadConsent
+                      ? t("boot.acceptingDownload")
+                      : t("boot.retrying")
+                    : needsDownloadConsent
+                      ? t("boot.acceptContinue")
+                      : t("boot.tryAgain")}
+                </button>
+              )}
+              <button
+                type="button"
+                className="boot-action-modal__secondary"
+                disabled={busy}
+                onClick={() => window.location.reload()}
+              >
+                {t("boot.reload")}
+              </button>
+              <button
+                type="button"
+                className="boot-action-modal__secondary"
+                disabled={busy}
+                onClick={() => void exportDiagnostics()}
+              >
+                <FileDown size={16} aria-hidden />
+                {t("settings.exportDiagnostics")}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -279,83 +422,57 @@ function CarregandoView({
   const typed = useTypedQuote(locale.bootAtmosphere, reducedMotion);
   const showAuthorize = phase === "aguardando-autorizacao" && !error;
   const showQuote = !error && !showAuthorize;
+  const actionKind = showAuthorize ? "install" : error && errorInfo ? "error" : undefined;
 
   return (
-    <div className="boot-carregando mc-reveal">
-      <div className="boot-carregando__seal" role="img" aria-label={`${percent}%`}>
-        <span className="boot-carregando__seal-ring boot-carregando__seal-ring--outer" />
-        <span className="boot-carregando__seal-ring boot-carregando__seal-ring--inner" />
-        <span className="boot-carregando__seal-percent">
-          {percent}
-          <small>%</small>
-        </span>
-      </div>
-
-      <div className="boot-carregando__head">
-        <p className="boot-carregando__eyebrow">{t("boot.loadingEyebrow")}</p>
-        <h2 className="boot-carregando__title">{t("boot.loadingTitle")}</h2>
-      </div>
-
-      <div className="boot-carregando__bar">
-        <div className="boot-carregando__bar-fill" style={{ width: `${percent}%` }} />
-      </div>
-
-      <ul className="boot-carregando__steps">
-        {steps.map((step) => (
-          <StepPill key={step.id} step={step} />
-        ))}
-      </ul>
-
-      {showAuthorize && (
-        <section className="boot-card boot-card--amber">
-          <h3>{t("boot.installTitle")}</h3>
-          <p>{t("boot.missing", { items: pending.join(", ") })}</p>
-          <p className="boot-card__muted">{t("boot.installHelp")}</p>
-          <button type="button" className="boot-card__cta" onClick={onAuthorize}>
-            <Download size={17} aria-hidden />
-            {t("boot.downloadInstall")}
-          </button>
-        </section>
-      )}
-
-      {error && errorInfo && (
-        <section className="boot-card boot-card--danger" role="alert">
-          <h3>
-            <AlertTriangle size={16} aria-hidden />
-            {errorInfo.title}
-          </h3>
-          <p>{errorInfo.cause}</p>
-          <p className="boot-card__muted">{errorInfo.action}</p>
-          {errorInfo.keepsProgress && (
-            <p className="boot-card__reassure">
-              <ShieldCheck size={14} aria-hidden />
-              {t("boot.progressSafe")}
-            </p>
-          )}
-          <div className="boot-card__actions">
-            {errorInfo.retryable && (
-              <button type="button" className="boot-card__cta" onClick={onRetry}>
-                <RefreshCw size={15} aria-hidden />
-                {t("boot.install")}
-              </button>
-            )}
-            <button type="button" className="boot-card__ghost" onClick={() => window.location.reload()}>
-              {t("boot.reload")}
-            </button>
-            <button type="button" className="boot-card__ghost" onClick={() => void exportDiagnostics()}>
-              <FileDown size={15} aria-hidden />
-              {t("settings.exportDiagnostics")}
-            </button>
-          </div>
-        </section>
-      )}
-
-      {showQuote && (
-        <p className="boot-carregando__quote">
-          “{typed}”<span className="boot-carregando__caret" aria-hidden>
-            ▍
+    <div className={`boot-carregando mc-reveal${actionKind ? " boot-carregando--blocked" : ""}`}>
+      <div
+        className="boot-carregando__background"
+        aria-hidden={actionKind ? true : undefined}
+      >
+        <div className="boot-carregando__seal" role="img" aria-label={`${percent}%`}>
+          <span className="boot-carregando__seal-ring boot-carregando__seal-ring--outer" />
+          <span className="boot-carregando__seal-ring boot-carregando__seal-ring--inner" />
+          <span className="boot-carregando__seal-percent">
+            {percent}
+            <small>%</small>
           </span>
-        </p>
+        </div>
+
+        <div className="boot-carregando__head">
+          <p className="boot-carregando__eyebrow">{t("boot.loadingEyebrow")}</p>
+          <h2 className="boot-carregando__title">{t("boot.loadingTitle")}</h2>
+        </div>
+
+        <div className="boot-carregando__bar">
+          <div className="boot-carregando__bar-fill" style={{ width: `${percent}%` }} />
+        </div>
+
+        <ul className="boot-carregando__steps">
+          {steps.map((step) => (
+            <StepPill key={step.id} step={step} />
+          ))}
+        </ul>
+
+        {showQuote && (
+          <p className="boot-carregando__quote">
+            “{typed}”<span className="boot-carregando__caret" aria-hidden>
+              ▍
+            </span>
+          </p>
+        )}
+      </div>
+
+      {actionKind && (
+        <BootActionModal
+          key={`${actionKind}-${error?.code ?? pending.join("|")}`}
+          kind={actionKind}
+          pending={pending}
+          error={error}
+          errorInfo={errorInfo}
+          onAuthorize={onAuthorize}
+          onRetry={onRetry}
+        />
       )}
     </div>
   );

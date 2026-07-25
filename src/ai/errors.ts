@@ -107,9 +107,9 @@ export const ERROR_CATALOG: Record<AiErrorCode, AiErrorInfo> = {
   },
   DOWNLOAD_NOT_AUTHORIZED: {
     code: "DOWNLOAD_NOT_AUTHORIZED",
-    title: "Falta a sua autorização para baixar",
-    cause: "Nada é baixado sem você mandar. O Chrome precisa instalar os componentes antes do primeiro uso.",
-    action: "Toque em “Baixar e instalar” para começar. Você acompanha o progresso aqui.",
+    title: "Autorize o primeiro download",
+    cause: "Nada é baixado sem a sua confirmação. Os componentes ficam no próprio Chrome e só precisam ser obtidos na primeira utilização.",
+    action: "Selecione “Aceitar e iniciar download”. O Chrome fará o restante e mostrará o progresso nesta tela.",
     retryable: true,
     keepsProgress: true,
   },
@@ -190,9 +190,11 @@ export const ERROR_CATALOG: Record<AiErrorCode, AiErrorInfo> = {
   },
   ACTIVATION_REQUIRED: {
     code: "ACTIVATION_REQUIRED",
-    title: "Toque para continuar",
-    cause: "O Chrome exige uma ação sua imediatamente antes de preparar os componentes.",
-    action: "Toque no botão abaixo para continuar de onde parou.",
+    title: "Autorize o Chrome a continuar o download",
+    cause:
+      "O Chrome exige um clique de confirmação imediatamente antes de baixar ou abrir cada componente local. Nada novo será instalado fora do navegador.",
+    action:
+      "Selecione “Aceitar e continuar”. O download será iniciado ou retomado nesta tela, e o progresso aparecerá logo em seguida.",
     retryable: true,
     keepsProgress: true,
   },

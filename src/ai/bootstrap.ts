@@ -240,17 +240,40 @@ export async function prepare(locale: LocaleBundle, report: BootReporter): Promi
   };
 
   try {
-    session = await createSession(PROBE_PROMPT, (value) => track("modelo", value));
-    toModel = await createTranslator({
+    // Todas as chamadas `create()` precisam nascer diretamente do mesmo clique.
+    // Se aguardarmos uma antes de iniciar a seguinte, a ativação transitória do
+    // usuário pode expirar e o Chrome pede uma segunda confirmação.
+    const sessionJob = createSession(PROBE_PROMPT, (value) => track("modelo", value));
+    const toModelJob = createTranslator({
       sourceLanguage: locale.meta.translatorLanguage,
       targetLanguage: locale.meta.modelLanguage,
       failCode: "TRANSLATE_TO_MODEL_FAILED",
     }, (value) => track("to-model", value));
-    fromModel = await createTranslator({
+    const fromModelJob = createTranslator({
       sourceLanguage: locale.meta.modelLanguage,
       targetLanguage: locale.meta.translatorLanguage,
       failCode: "TRANSLATE_FROM_MODEL_FAILED",
     }, (value) => track("from-model", value));
+
+    const [sessionResult, toModelResult, fromModelResult] = await Promise.allSettled([
+      sessionJob,
+      toModelJob,
+      fromModelJob,
+    ]);
+
+    if (sessionResult.status === "fulfilled") session = sessionResult.value;
+    if (toModelResult.status === "fulfilled") toModel = toModelResult.value;
+    if (fromModelResult.status === "fulfilled") fromModel = fromModelResult.value;
+
+    if (sessionResult.status === "rejected") throw sessionResult.reason;
+    if (toModelResult.status === "rejected") throw toModelResult.reason;
+    if (fromModelResult.status === "rejected") throw fromModelResult.reason;
+
+    // Os testes acima também informam ao TypeScript que os três resultados
+    // abaixo estão necessariamente disponíveis.
+    session = sessionResult.value;
+    toModel = toModelResult.value;
+    fromModel = fromModelResult.value;
   } catch (error) {
     cleanup();
     const mapped = toAiError(error, "DOWNLOAD_INTERRUPTED");
