@@ -27,6 +27,7 @@ export const enUSExample = {
     "common.close": "Close",
     "common.cancel": "Cancel",
     "common.unavailable": "Unavailable",
+    "chat.historyDivider": "End of history · new messages",
     "boot.actionRequired": "Your action is required",
     "boot.attentionRequired": "Setup needs your attention",
     "boot.phoneWaitsForInstall": "The phone will turn on only after this step is complete.",

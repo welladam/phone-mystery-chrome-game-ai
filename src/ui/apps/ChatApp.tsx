@@ -51,7 +51,22 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
   }, [archived, threads, api]);
 
   const chat = openId ? api.state.chats[openId] : undefined;
+  const history =
+    openId === "CHAR_002"
+      ? api.packs.act1?.HISTORY_MOTHER
+      : openId === "CHAR_003"
+        ? api.packs.act1?.HISTORY_BOYFRIEND
+        : openId === "CHAR_004"
+          ? api.packs.act1?.HISTORY_FRIEND
+          : undefined;
   const scrollRef = useAutoScroll<HTMLDivElement>(chat?.messages.length, !api.reducedMotion);
+
+  useEffect(() => {
+    if (!history) return;
+    history.forEach((line) => {
+      if (line.clueId && !api.state.cluesExamined.includes(line.clueId)) api.examine(line.clueId);
+    });
+  }, [history, api]);
 
   const available = useMemo(
     () => (openId ? presentableClues(api.state, openId) : []),
@@ -136,14 +151,6 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
 
   /* ---------------- conversa viva ---------------- */
   const profile = chatLocale.getCharacter(openId!);
-  const history =
-    openId === "CHAR_002"
-      ? api.packs.act1?.HISTORY_MOTHER
-      : openId === "CHAR_003"
-        ? api.packs.act1?.HISTORY_BOYFRIEND
-        : openId === "CHAR_004"
-          ? api.packs.act1?.HISTORY_FRIEND
-          : undefined;
 
   return (
     <div className="thread">
@@ -152,31 +159,24 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
       </button>
 
       <div className="thread__scroll" ref={scrollRef}>
-        {history && (
-          <details
-            className="thread__history"
-            onToggle={(event) => {
-              if (!event.currentTarget.open) return;
-              history.forEach((line) => {
-                if (line.clueId && !api.state.cluesExamined.includes(line.clueId)) api.examine(line.clueId);
-              });
-            }}
+        {history?.map((line, index) => (
+          <div
+            key={`history-${index}`}
+            className={
+              line.gap
+                ? "bubble bubble--gap"
+                : `bubble bubble--${line.self ? "self" : "them"}${line.clueId ? " bubble--clue" : ""}`
+            }
           >
-            <summary>{t("chat.previousHistory", { count: history.length })}</summary>
-            {history.map((line, index) => (
-              <div
-                key={index}
-                className={
-                  line.gap
-                    ? "bubble bubble--gap"
-                    : `bubble bubble--${line.self ? "self" : "them"}${line.clueId ? " bubble--clue" : ""}`
-                }
-              >
-                <p>{line.text}</p>
-                <span className="bubble__at">{line.at}</span>
-              </div>
-            ))}
-          </details>
+            <p>{line.text}</p>
+            <span className="bubble__at">{line.at}</span>
+          </div>
+        ))}
+
+        {history && (
+          <div className="thread__history-divider" role="separator" aria-label={t("chat.historyDivider")}>
+            <span>{t("chat.historyDivider")}</span>
+          </div>
         )}
 
         {chat?.messages.map((message) => (

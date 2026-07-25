@@ -2959,21 +2959,38 @@ pre {
   background-position: -4px -4px;
 }
 
-.thread__history {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 0.5rem 0.6rem;
-  margin-bottom: 0.6rem;
+.thread__history-divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.5rem 0 0.65rem;
+  color: color-mix(in srgb, var(--app-accent, var(--accent)) 70%, var(--muted));
+  font-size: 0.64rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
-.thread__history summary {
-  font-size: 0.78rem;
-  color: var(--muted);
-  padding: 0.2rem 0;
+.thread__history-divider::before,
+.thread__history-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--app-accent, var(--accent)) 48%, var(--line))
+  );
 }
 
-.thread__history .bubble {
-  margin-top: 0.35rem;
+.thread__history-divider::after {
+  transform: scaleX(-1);
+}
+
+.thread__history-divider span {
+  white-space: nowrap;
 }
 
 .thread__closed {
