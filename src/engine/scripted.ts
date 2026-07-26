@@ -187,6 +187,41 @@ export function leakWarning(characterId: CharacterId, intents: IntentId[]): Scri
   return undefined;
 }
 
+/* ------------------------------------------------------------------ */
+/* A versão oferecida                                                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A amiga entrega, uma vez só e chorando, o caminho de suspeita contra a mãe.
+ * É escrito à mão porque carrega pista — e porque o gesto em si é a pista: a
+ * única pessoa que oferece uma tese sem ser perguntada é ela.
+ */
+export function friendSteerBeat(
+  characterId: CharacterId,
+  context: Pick<BeatContext, "state" | "chat" | "intents">,
+): ScriptedBeat | undefined {
+  if (characterId !== "CHAR_004") return undefined;
+  if (context.state.act < 2) return undefined;
+  if (context.chat.beats.includes("BEAT_MOTHER_STEER")) return undefined;
+
+  const asked = context.intents.some((intent) => ["INT_001", "INT_022", "INT_023"].includes(intent));
+  const shown = context.chat.presented.some((clue) =>
+    ["CLUE_070", "CLUE_071", "CLUE_072", "CLUE_075"].includes(clue),
+  );
+  if (!asked && !shown) return undefined;
+
+  return {
+    id: "BEAT_MOTHER_STEER",
+    clueId: "CLUE_074",
+    lines: [
+      "eu não queria falar isso pra você.",
+      "a dona Regina sabia desde janeiro. a Clara contou pra ela e ela mandou a Clara esquecer.",
+      "eu só tô falando porque você me perguntou do domingo….",
+      "esquece que eu falei, tá? ela já perdeu a filha.",
+    ],
+  };
+}
+
 export function shouldLeakToShared(intents: IntentId[]) {
   return intents.some((intent) => ["INT_005", "INT_006", "INT_007", "INT_011"].includes(intent));
 }

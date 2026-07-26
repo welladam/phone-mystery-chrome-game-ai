@@ -49,6 +49,10 @@ export type EventId = string;
 export type MemoryId = string;
 export type PhotoId = string;
 export type VoiceId = string;
+export type VideoId = string;
+
+/** Linha de transcrição cronometrada, usada por gravações e vídeos. */
+export type TranscriptLine = { t: string; who?: string; text: string };
 
 export type ClueWeight = 1 | 2 | 3 | 4;
 export type ClueKind = "fato" | "testemunhal" | "inferencial" | "falsa";
@@ -191,6 +195,7 @@ export type GameState = {
   notificationsSeen: string[];
   zoomed: PhotoId[];
   playedVoices: VoiceId[];
+  playedVideos: VideoId[];
   accusation: AccusationDraft;
   accusationAttempts: AccusationAttempt[];
   hintsUsed: Record<string, number>;
@@ -212,6 +217,7 @@ export type GameAction =
   | { type: "EXAMINE_CLUE"; clueId: ClueId }
   | { type: "ZOOM_PHOTO"; photoId: PhotoId }
   | { type: "PLAY_VOICE"; voiceId: VoiceId }
+  | { type: "PLAY_VIDEO"; videoId: VideoId }
   | { type: "SOLVE_LOCK"; lockId: LockId }
   | { type: "FAIL_LOCK"; lockId: LockId }
   | { type: "SEE_NOTIFICATION"; notificationId: string }

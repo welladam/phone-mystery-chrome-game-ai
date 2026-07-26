@@ -204,7 +204,8 @@ export const FEEDBACK: Record<string, { title: string; body: string; highlight?:
   FB_MAE: {
     title: "Culpa não é o mesmo que crime.",
     body:
-      "Ela estava num plantão de doze horas com registro biométrico e três medicações carimbadas. E foi ela quem te contratou.\n\nCulpa não é o mesmo que crime. Se fosse, essa mulher já estava presa desde janeiro — e ela sabe disso melhor do que você.",
+      "Ela estava num plantão de doze horas com registro biométrico e três medicações carimbadas. E foi ela quem te contratou.\n\nE antes de você me perguntar da troca de plantão: ela pediu, sim. Em seis de março, para ficar com a filha. Foi indeferida no dia sete, por falta de cobertura. Às 20h14 daquela noite ela assinou uma ficha de reanimação no leito 307.\n\nCulpa não é o mesmo que crime. Se fosse, essa mulher já estava presa desde janeiro — e ela sabe disso melhor do que você.",
+    highlight: "CLUE_073",
   },
   FB_IRMAO: {
     title: "Esse homem não é o segundo cadáver desta história.",
@@ -240,6 +241,8 @@ export const FEEDBACK: Record<string, { title: string; body: string; highlight?:
 /* ------------------------------------------------------------------ */
 
 export const REVEAL_TIMELINE = [
+  { at: "11h52", text: "📸 3s — uma palma cobrindo a lente" },
+  { at: "12h14", text: "🗒 “ela falou que ia me impedir”" },
   { at: "15h48", text: "preciso te falar hoje. pessoalmente. pedra lascada 19h30?" },
   { at: "16h02", text: "ai clara…. tá bom. 19h30" },
   { at: "18h27", text: "to saindo daqui a pouco. me espera lá em cima" },
@@ -280,7 +283,7 @@ export const REVEAL_CARDS = [
     id: "RC_4",
     title: "Regina",
     body:
-      "Nunca falou com a filha às nove da noite. Recebeu um texto às 20h47 e passou dois meses acreditando que tinha ouvido a voz dela uma última vez. Em janeiro, disse à filha: “esquece isso, não estraga a sua vida.” Ela vai carregar isso.",
+      "Pediu para sair daquele plantão em seis de março, para ficar com a filha. O hospital negou por falta de cobertura. Às 19h58 ela estava no terceiro andar; às 20h14 ela fez compressão torácica em um homem de setenta e um anos no leito 307, e o homem sobreviveu.\n\nNunca falou com a filha às nove da noite. Recebeu um texto às 20h47 e passou dois meses acreditando que tinha ouvido a voz dela uma última vez.\n\nEm janeiro disse: “esquece isso, não estraga a sua vida.” No almoço do último dia disse: “se você for, eu vou te impedir.” Nunca soube o nome da menina — a filha não deixou.\n\nEla vai carregar isso.",
   },
   {
     id: "RC_5",
@@ -292,7 +295,7 @@ export const REVEAL_CARDS = [
     id: "RC_6",
     title: "O “Desconhecido”",
     body:
-      "Era Alice. O chip foi comprado em 12 de fevereiro de 2026 — três semanas antes de haver um crime a esconder, e no dia seguinte àquele em que Clara mencionou pela primeira vez ter procurado uma advogada.\n\nEla precisou te contar metade da verdade para você acusar a pessoa errada. Foi assim que você chegou nela.",
+      "Era Alice. O chip foi comprado em 12 de fevereiro de 2026 — três semanas antes de haver um crime a esconder, e no dia seguinte àquele em que Clara mencionou pela primeira vez ter procurado uma advogada.\n\nEla precisou te contar metade da verdade para você acusar a pessoa errada. Foi assim que você chegou nela.\n\nE foi ela quem te ofereceu a mãe. Chorando, uma vez só, pedindo que você fosse gentil.",
   },
 ];
 

@@ -98,6 +98,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (state.playedVoices.includes(action.voiceId)) return state;
       return { ...state, playedVoices: [...state.playedVoices, action.voiceId] };
 
+    case "PLAY_VIDEO":
+      if (state.playedVideos.includes(action.videoId)) return state;
+      return { ...state, playedVideos: [...state.playedVideos, action.videoId] };
+
     case "SOLVE_LOCK": {
       const lock = getLock(action.lockId);
       if (!lock) return state;

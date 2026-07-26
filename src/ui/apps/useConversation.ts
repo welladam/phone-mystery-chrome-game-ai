@@ -186,7 +186,19 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
           }
         }
 
-        // 2c. Contar do atropelamento tem consequência declarada em tela.
+        // 2c. A amiga oferece uma tese sobre outra pessoa — uma vez só. A prova
+        // apresentada agora conta, por isso ela entra na lista antes da checagem.
+        const steer = chatLocale.friendSteerBeat(characterId, {
+          state: current,
+          chat: clueId ? { ...chat, presented: [...chat.presented, clueId] } : chat,
+          intents: intents as IntentId[],
+        });
+        if (steer) {
+          await deliverBeat(characterId, steer, false);
+          return;
+        }
+
+        // 2d. Contar do atropelamento tem consequência declarada em tela.
         const leak = chatLocale.leakWarning(characterId, intents as IntentId[]);
         if (leak && !chat.beats.includes(leak.id)) {
           await deliverBeat(characterId, leak, false);

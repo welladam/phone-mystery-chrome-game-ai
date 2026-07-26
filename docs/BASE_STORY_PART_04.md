@@ -273,16 +273,18 @@ CLUE_067 (furos do despacho) ⇒ MEMORY_012 (opcional, atalho de ato)
 | **FALSE_03** | *"Théo dirigia no atropelamento"* | O carro é dele, o conserto está no nome dele, ele pagou em espécie. Tudo verdadeiro | **Desconhecida — mentira deliberada** | PHOTO_005: mãos femininas com anel; PHOTO_004: Théo bebendo 5 copos | CLUE_061: *"a lice me ligou falando que raspou num poste"* — dito por ele em 22/06/2025, oito meses antes de haver o que esconder | 3 |
 | **FALSE_04** | *"Diego matou Clara por vingança"* | 6 DMs escalando, motivo real, ele descobriu quem ela era | Ninguém — o jogador chega sozinho | CLUE_036: live de 19h20 a 20h05, em Barbacena, 214 espectadores | Nenhuma DM menciona o mirante, o endereço dela ou ameaça física | 2 |
 | **FALSE_05** | *"Théo espionava o celular dela"* → *"logo, foi ele quem usou o telefone"* | CLUE_048 é verdadeiro: ele **desbloqueou** o aparelho às 03h12 de 14/02 e mentiu | Théo (nega até o nível 3) | O desbloqueio de 14/02 durou 6 min no app do banco — motivo: ciúme dos Pix. Ele admite envergonhado no nível 3 | CLUE_019 o exclui fisicamente do dia 08/03 | 3 |
-| **FALSE_06** | *"Regina sabia e mandou calar, logo participou"* | CLUE_033 é real e brutal | O jogador | Ponto biométrico do Hospital Santa Clarice, 18h50–07h10 (Regina fornece no nível 3) | CLUE_008: as 3 chamadas perdidas partiram de dentro do hospital, com célula registrada | 3 |
+| **FALSE_06** | *"Regina sabia e mandou calar, logo participou"* — **promovida a arco inteiro do Ato 2**, ver nota abaixo | CLUE_033, CLUE_071 (áudio de 05/01), CLUE_075 (nota das 12h14: *"ela falou que ia me impedir"*), CLUE_070 (o telefone tomado da mão) e CLUE_072 (troca de plantão anotada) são **todos reais** | O jogador — e, uma vez só e chorando, **Alice** (CLUE_074) | CLUE_073: ofício nº 118/2026 — catraca sem saída, 8 acessos ao prontuário cercando 19h58, ficha de RCP às 20h14 no leito 307, e a troca de plantão **indeferida** em 07/03 | CLUE_008: as 3 chamadas perdidas partiram de dentro do hospital, com célula registrada | 3 |
 | **FALSE_07** | *"O saque de R$ 1.850 prova que Clara pagou o conserto, logo ela dirigia"* | CLUE_057 é real e sai da conta dela | O jogador | CLUE_062: *"ninguém vai olhar pra sua conta"* — mensagem de Alice pedindo o saque | VOICE_002 [03:14] e NOTE_004 (24/06) descrevem o pedido | 2 |
 | **FALSE_08** | *"Alice é a melhor fonte da investigação"* | Ela **de fato** entrega mais informação verificável do que qualquer outro personagem | Alice, deliberadamente | Toda informação que ela dá é sobre **terceiros**; sobre si, só há negativas | CLUE_030 + CLUE_029 + CLUE_026 | 4 |
+
+**[DEV — FALSE_06 como movimento do Ato 2]** A tese contra Regina não é "ela subiu o mirante": é uma tese de *aparelho*, a única que este motor sustenta com justiça. Ela sabia desde janeiro; disse à filha, no almoço do último dia, que ia impedi-la; é uma das três pessoas que conheciam o PIN; pediu para sair daquele plantão de domingo seis dias antes; e manteve a linha da morta ativa por dois meses, escolhendo quando entregar o aparelho. **Toda cláusula é verdadeira** — a inferência errada é do jogador. O pico é a virada do Ato 2 para o Ato 3, quando ele tem motivo, meio, oportunidade e apenas uma negativa não-verificável da mulher que o contratou. A queda é documental (CLUE_073) e ensina a lição que depois condena Alice: **dado vence depoimento**. Acusar Regina no Ato 4 devolve `FEEDBACK.FB_MAE`, na voz da Dra. Yara, e não uma recusa genérica.
 
 **[DEV — princípio]** Nenhuma pista falsa é uma armadilha gratuita. Cada uma é **um fato verdadeiro com uma conclusão errada colada**, e cada conclusão errada tem dono e motivo:
 - FALSE_01 nasce de uma perícia preguiçosa;
 - FALSE_02/05 nascem de mentiras que Théo conta por medo de perder o sustento;
 - FALSE_03 nasce da assassina;
 - FALSE_04 nasce da dor legítima de Diego;
-- FALSE_06 nasce da culpa de Regina;
+- FALSE_06 nasce da culpa de Regina — e, no Ato 2, de Alice apontando para ela;
 - FALSE_07 nasce da manipulação financeira de Alice, oito meses antes;
 - FALSE_08 nasce do jogador querer confiar em alguém.
 

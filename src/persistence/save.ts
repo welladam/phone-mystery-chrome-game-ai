@@ -170,6 +170,9 @@ export function sanitizeState(raw: unknown): GameState | undefined {
     playedVoices: Array.isArray(input.playedVoices)
       ? input.playedVoices.filter((id) => typeof id === "string")
       : [],
+    playedVideos: Array.isArray(input.playedVideos)
+      ? input.playedVideos.filter((id) => typeof id === "string")
+      : [],
     accusation: {
       responsavel: responsible,
     },

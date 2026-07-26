@@ -4,6 +4,79 @@
  */
 
 import type { ClueId } from "../engine/types";
+import type { VideoRecord } from "./shared";
+import type { VoiceRecord } from "./act3";
+
+/* ------------------------------------------------------------------ */
+/* Galeria — foto em movimento                                         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * O trecho de vídeo que o aparelho grava junto com o disparo da foto. Formato
+ * sem faixa de áudio: a pista é o gesto, não a fala. O quadro-chave é a
+ * PHOTO_021, e por isso os dois arquivos dividem o mesmo nome-base.
+ */
+export const VIDEOS: VideoRecord[] = [
+  {
+    id: "VIDEO_001",
+    file: "IMG_20260308_1152.mp4",
+    posterPhoto: "IMG_20260308_1152.jpg",
+    takenAt: "08/03/2026 11:52",
+    album: "Câmera",
+    alt:
+      "Três segundos, câmera imóvel apoiada na mesa. No primeiro segundo, só a mesa servida e a geladeira com a escala ao fundo. Depois entra pela direita um antebraço de uniforme hospitalar azul; o rosto aparece na borda do quadro, desfocado, e vira para a lente. O braço avança e a palma da mão cobre a imagem. O último quadro é pele e madeira de mesa.",
+    duration: "0:03",
+    seconds: 3,
+    silent: true,
+    gps: "Rua Sete Lagoas, 88 — Bom Pastor",
+    systemNote: "Foto em movimento — o formato não registra áudio.",
+    clueId: "CLUE_070",
+    act: 2,
+  },
+];
+
+/* ------------------------------------------------------------------ */
+/* Áudio recuperado                                                    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Recuperado do cache do aparelho, não do Gravador: no Gravador ele abriria o
+ * Ato 4 antes da hora. Reaproveita o formato das gravações do Ato 3.
+ */
+export const VOICES_RECOVERED: VoiceRecord[] = [
+  {
+    id: "VOICE_005",
+    file: "aud_050126_0231.m4a",
+    at: "05/01/2026 02:31",
+    duration: "2:14",
+    seconds: 134,
+    title: "aud_050126_0231 (recuperado)",
+    clueId: "CLUE_071",
+    transcript: [
+      { t: "00:06", text: "mãe, a senhora dorme com o telefone do lado. eu sei que a senhora vai ouvir isso amanhã." },
+      { t: "00:14", text: "eu bebi. eu bebi mas eu não tô mentindo." },
+      {
+        t: "00:21",
+        text: "em junho, na madrugada do dia vinte e dois, eu estava dentro de um carro e o carro bateu numa moto.",
+      },
+      { t: "00:33", text: "o homem da moto morreu, mãe. ele morreu ali." },
+      { t: "00:41", text: "(pausa, 7 segundos)" },
+      {
+        t: "00:48",
+        text: "eu não tava dirigindo. eu tava do lado. eu dormi e eu acordei com o barulho e eu não desci.",
+      },
+      { t: "01:02", text: "eu pedi pra parar. a gente não parou." },
+      { t: "01:08", text: "quem tava dirigindo é uma amiga minha." },
+      { t: "01:13", text: "e eu não vou falar o nome dela. nem pra senhora. nunca. não me pergunta isso." },
+      { t: "01:22", text: "eu vou procurar um advogado. eu vou contar tudo e eu vou assumir a minha parte." },
+      { t: "01:34", text: "eu só não quero que a senhora saiba pela polícia." },
+      { t: "01:41", text: "(pausa longa)" },
+      { t: "01:52", text: "desculpa acordar a senhora duas e meia da manhã pra falar isso." },
+      { t: "01:58", text: "eu te amo. dorme." },
+      { t: "02:05", text: "(o áudio continua nove segundos, só com o som da televisão)" },
+    ],
+  },
+];
 
 /* ------------------------------------------------------------------ */
 /* E-mail — caixa principal                                            */
@@ -289,17 +362,28 @@ export const DRIVE: DriveNode[] = [
     clueId: "CLUE_067",
   },
   { id: "DR_CASO_2", name: "termo_autorizacao_familia.pdf", kind: "arquivo", parent: "DR_CASO", act: 2 },
+  {
+    id: "DR_CASO_3",
+    name: "oficio_hosp_stclarice_0447.pdf",
+    kind: "arquivo",
+    parent: "DR_CASO",
+    act: 3,
+    meta: "juntado 12/05/2026",
+    clueId: "CLUE_073",
+  },
   { id: "DR_P22", name: "PESSOAL/22", kind: "pasta", lock: "LOCK_003", act: 2 },
-  { id: "DR_P22_1", name: "declaracao_final.pdf", kind: "arquivo", parent: "DR_P22", act: 3, clueId: "CLUE_041" },
-  { id: "DR_P22_2", name: "recibos_pix/ (9 comprovantes)", kind: "arquivo", parent: "DR_P22", act: 3 },
-  { id: "DR_P22_3", name: "nota_2214_zedobloco.jpg", kind: "arquivo", parent: "DR_P22", act: 3, clueId: "CLUE_017" },
+  // Estes quatro já são protegidos pelo LOCK_003, então o ato deles é 2: quem
+  // filtra a pasta é o bloqueio, não o ato.
+  { id: "DR_P22_1", name: "declaracao_final.pdf", kind: "arquivo", parent: "DR_P22", act: 2, clueId: "CLUE_041" },
+  { id: "DR_P22_2", name: "recibos_pix/ (9 comprovantes)", kind: "arquivo", parent: "DR_P22", act: 2 },
+  { id: "DR_P22_3", name: "nota_2214_zedobloco.jpg", kind: "arquivo", parent: "DR_P22", act: 2, clueId: "CLUE_017" },
   {
     id: "DR_P22_4",
     name: "chat_backup_2026-03-08_1930.zip",
     kind: "arquivo",
     parent: "DR_P22",
     lock: "LOCK_008",
-    act: 3,
+    act: 2,
     clueId: "CLUE_034",
   },
 ];
@@ -355,6 +439,34 @@ export const DESPACHO_FLAWS = [
   },
 ];
 
+export const DOC_OFICIO_HOSPITAL = `HOSPITAL SANTA CLARICE — SETOR DE PESSOAL
+OFÍCIO Nº 118/2026 — 12/05/2026
+
+Em atenção ao Ofício nº 0447/2026-DH, que requisita informações funcionais referentes à colaboradora REGINA APARECIDA MENDONÇA, matrícula 41.882, Auxiliar de Enfermagem, Clínica Médica — 3º andar, informamos:
+
+1. REGISTRO DE PONTO BIOMÉTRICO
+Entrada: 08/03/2026, 18h50.
+Saída: 09/03/2026, 07h10.
+Não há registro de saída intermediária. Esclarecemos que a catraca do acesso de colaboradores efetua leitura biométrica nos dois sentidos, não sendo possível deixar a edificação sem registro.
+
+2. ACESSOS AO PRONTUÁRIO ELETRÔNICO (credencial da colaboradora, terminal 3A-02)
+08/03: 19h41, 20h03, 20h26, 21h07, 22h19, 23h58.
+09/03: 01h39, 04h12.
+
+3. MEDICAÇÕES CHECADAS E CARIMBADAS
+19h05 — leito 312. 22h20 — leito 309. 01h40 — leito 314.
+
+4. FICHA DE REANIMAÇÃO CARDIOPULMONAR
+Consta ficha de RCP referente a parada cardiorrespiratória no leito 307, iniciada às 20h14 de 08/03, assinada pela colaboradora na condição de primeira socorrista. Paciente de 71 anos, reanimado, alta em 19/03.
+
+5. PEDIDO DE ALTERAÇÃO DE ESCALA
+Protocolo 2026/0331, registrado em 06/03/2026. Motivo declarado: "acompanhar familiar". Situação: INDEFERIDO em 07/03/2026, por ausência de cobertura no turno noturno de domingo. A colaboradora foi comunicada por escrito e cumpriu a escala original.
+
+ANEXO II — informação da operadora de telefonia, juntada a pedido da autoridade: as três chamadas originadas do terminal da colaboradora em 08/03 às 21h35, 22h02 e 22h40 foram atendidas pela ERB que serve o endereço desta unidade hospitalar. Registre-se que este anexo cobre apenas o intervalo a partir das 21h35, razão pela qual foram acostados os itens 1 a 4.
+
+Setor de Pessoal — Hospital Santa Clarice
+Matrícula 41.882 consta ativa desde 12/03/2004.`;
+
 export const DOC_TERMO = `TERMO DE AUTORIZAÇÃO PARA EXAME DE DISPOSITIVO
 
 Eu, REGINA APARECIDA MENDONÇA, CPF 512.774.906-30, na qualidade de genitora e sucessora de CLARA MENDONÇA VASQUES, CPF 145.882.706-98, falecida em 08/03/2026, autorizo o exame integral do aparelho celular de titularidade da falecida, restituído à família em 24/04/2026 após o arquivamento do IP 0447/2026.
@@ -369,7 +481,18 @@ Juiz de Fora, 04/05/2026.`;
 /* Lixeira                                                             */
 /* ------------------------------------------------------------------ */
 
-export const TRASH = [
+export type TrashRecord = {
+  id: string;
+  label: string;
+  deletedAt: string;
+  kind: string;
+  body: string;
+  clueId?: ClueId;
+  /** Áudio recuperado que pode ser ouvido aqui mesmo. */
+  voiceId?: string;
+};
+
+export const TRASH: TrashRecord[] = [
   {
     id: "DEL_001",
     label: "rascunho — sem assunto",
@@ -413,6 +536,16 @@ Não era pra ser assim. Eu sei que isso é a coisa mais idiota que uma pessoa po
     kind: "nota",
     clueId: "CLUE_055",
     body: "hoje eu conto pra Lice.\nse der ruim, tá tudo escrito na outra nota.",
+  },
+  {
+    id: "DEL_006",
+    label: "aud_050126_0231.m4a",
+    deletedAt: "05/01/2026 (expirado no servidor)",
+    kind: "áudio",
+    clueId: "CLUE_071",
+    voiceId: "VOICE_005",
+    body:
+      "Mensagem de voz enviada à mãe às 02h31 de 05/01/2026, duração 2:14.\nO arquivo expirou no servidor de mensagens e não abre mais na conversa. Esta cópia foi recuperada do cache do aparelho na imagem forense de 12/03/2026.",
   },
 ];
 

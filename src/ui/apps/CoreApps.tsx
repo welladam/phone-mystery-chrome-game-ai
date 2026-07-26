@@ -5,8 +5,7 @@
 
 import { useState } from "react";
 import { AlertTriangle, Ghost, Lock, Play } from "lucide-react";
-import { audioSrc } from "../../content/assets";
-import { ClueMark, Empty, PhotoAsset, Row, ZoomBlock } from "../phone/Bits";
+import { ClueMark, Empty, PhotoAsset, Row, VideoAsset, VoicePlayer, ZoomBlock } from "../phone/Bits";
 import PhotoViewerModal from "../phone/PhotoViewerModal";
 import type { AppApi } from "./types";
 import { useLocale } from "../../i18n/LocaleContext";
@@ -104,6 +103,10 @@ export function PhotosApp({ api }: { api: AppApi }) {
   });
 
   const current = PHOTOS.find((photo) => photo.id === selected);
+  // O trecho em movimento vive no pacote do ato: a descrição dele é narrativa.
+  const motion = current?.motionVideo
+    ? api.packs.act2?.VIDEOS?.find((video) => video.id === current.motionVideo)
+    : undefined;
 
   return (
     <div className="photos">
@@ -203,6 +206,31 @@ export function PhotosApp({ api }: { api: AppApi }) {
                 if (current.zoom?.clueId) api.find(current.zoom.clueId);
               }}
             />
+          )}
+
+          {/* Foto em movimento. Não é dica: é conteúdo, e aparece nas duas dificuldades. */}
+          {motion && (
+            <section className="motion-block">
+              <h4>
+                <Play size={14} aria-hidden /> {t("photo.motionLabel")}
+              </h4>
+              <VideoAsset
+                videoId={motion.id}
+                file={motion.file}
+                alt={motion.alt}
+                takenAt={motion.takenAt}
+                album={motion.album}
+                duration={motion.duration}
+                posterPhoto={motion.posterPhoto}
+                silent={motion.silent}
+                onPlay={() => {
+                  api.playVideo(motion.id);
+                  if (motion.clueId) api.find(motion.clueId);
+                }}
+              />
+              {motion.systemNote && <p className="muted">{motion.systemNote}</p>}
+              {api.state.playedVideos.includes(motion.id) && mark(motion.clueId)}
+            </section>
           )}
 
           {mark(current.clueId)}
@@ -349,23 +377,7 @@ export function RecorderApp({ api }: { api: AppApi }) {
 
             {open === voice.id && (
               <div className="voice__body">
-                <audio controls preload="none" src={audioSrc(api.localeId, voice.id)} className="voice__player">
-                  {t("recorder.unsupported")}
-                </audio>
-                <p className="muted voice__note">
-                  {t("recorder.transcriptAuthority")}
-                </p>
-                <ol className="transcript">
-                  {voice.transcript.map((line, index) => (
-                    <li key={index}>
-                      <span className="transcript__t">{line.t}</span>
-                      <span className="transcript__text">
-                        {line.who && <strong>{line.who}: </strong>}
-                        {line.text}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
+                <VoicePlayer localeId={api.localeId} voiceId={voice.id} transcript={voice.transcript} />
 
                 {mark(voice.clueId)}
 
@@ -601,11 +613,14 @@ export function FilesApp({ api }: { api: AppApi }) {
 
   const vaultOpen = api.state.solvedLocks.includes("LOCK_003");
   const zipOpen = api.state.solvedLocks.includes("LOCK_008");
-  const nodes = pack2.DRIVE;
+  // O que a perícia juntou depois só aparece no ato correspondente. Dentro da
+  // pasta trancada quem filtra é o LOCK_003, por isso aqueles nós são de ato 2.
+  const nodes = pack2.DRIVE.filter((node) => node.act <= api.state.act);
 
   const docs: Record<string, string | undefined> = {
     DR_CASO_1: pack2.DOC_DESPACHO,
     DR_CASO_2: pack2.DOC_TERMO,
+    DR_CASO_3: pack2.DOC_OFICIO_HOSPITAL,
     DR_P22_1: pack3?.DOC_DECLARACAO,
   };
 

@@ -7,6 +7,7 @@ export { classifyAll, classifyIntent, HOSTILE_INTENTS } from "../../engine/inten
 export { guardedNameReply, guardPersonMention } from "../../engine/nameGuard";
 export {
   collapseBeat,
+  friendSteerBeat,
   leakWarning,
   metaReply,
   openingBeat,

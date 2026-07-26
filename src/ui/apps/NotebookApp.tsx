@@ -1,6 +1,7 @@
 import { useState, type ReactElement } from "react";
 import { Gavel, Lightbulb, Lock, PencilLine, Sparkles, Users } from "lucide-react";
 import { hintLevel, suggestObstacle } from "../../engine/hints";
+import { getClue } from "../../content/manifest";
 import { canAccuse, deriveContradictions } from "../../engine/rules";
 import type { AppApi } from "./types";
 import { Empty, Row } from "../phone/Bits";
@@ -146,6 +147,10 @@ function AccusationPanel({ api }: { api: AppApi }) {
   const { t } = useLocale();
   const draft = api.state.accusation;
   const lastAttempt = api.state.accusationAttempts[api.state.accusationAttempts.length - 1];
+  // A resposta escrita para aquele nome específico. O pacote do Ato 4 carrega de
+  // forma assíncrona, então o texto genérico continua sendo o fallback.
+  const feedback = lastAttempt ? api.packs.act4?.FEEDBACK[lastAttempt.feedbackId] : undefined;
+  const highlighted = feedback?.highlight ? getClue(feedback.highlight) : undefined;
   return (
     <div className="list accusation accusation--simple notebook-page">
       <section className="panel">
@@ -172,8 +177,14 @@ function AccusationPanel({ api }: { api: AppApi }) {
 
       {lastAttempt?.outcome === "rejeitada" && (
         <section className="panel panel--warn" role="alert">
-          <h3>{t("accusation.invalidTitle")}</h3>
-          <p>{t("accusation.invalidText")}</p>
+          <h3>{feedback ? feedback.title : t("accusation.invalidTitle")}</h3>
+          <p className="accusation-feedback__body">
+            {feedback ? feedback.body : t("accusation.invalidText")}
+          </p>
+          {feedback && <p className="muted">{t("accusation.signedYara")}</p>}
+          {highlighted && (
+            <p className="muted">{t("accusation.reviewClue", { clue: highlighted.label })}</p>
+          )}
         </section>
       )}
 

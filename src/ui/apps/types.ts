@@ -19,6 +19,7 @@ export type AppApi = {
   find: (clueId: string) => void;
   zoom: (photoId: string) => void;
   playVoice: (voiceId: string) => void;
+  playVideo: (videoId: string) => void;
   requestLock: (lockId: LockId) => void;
   openApp: (appId: AppId) => void;
   openChat: (characterId: CharacterId) => void;

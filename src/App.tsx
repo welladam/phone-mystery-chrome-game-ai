@@ -396,6 +396,7 @@ export default function App() {
       find: (clueId: string) => dispatch({ type: "FIND_CLUE", clueId }),
       zoom: (photoId: string) => dispatch({ type: "ZOOM_PHOTO", photoId }),
       playVoice: (voiceId: string) => dispatch({ type: "PLAY_VOICE", voiceId }),
+      playVideo: (videoId: string) => dispatch({ type: "PLAY_VIDEO", videoId }),
       requestLock: (lockId: LockId) => setLockRequest(lockId),
       openApp: (appId: AppId) => setOpenAppId(appId),
       openChat: (characterId: CharacterId) => {

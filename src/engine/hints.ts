@@ -119,6 +119,15 @@ export const HINTS: Hint[] = [
     ],
   },
   {
+    obstacleId: "CHAR_002",
+    title: "A mãe e aquela noite",
+    steps: [
+      "Ela pediu para sair do plantão daquele domingo. Isso é verdade e ela admite.",
+      "O que ninguém te contou é o que aconteceu com o pedido. Pergunte a ela pelo ponto do hospital.",
+      "A perícia juntou o ofício: Drive → CASO → oficio_hosp_stclarice_0447.pdf.",
+    ],
+  },
+  {
     obstacleId: "PAINEL",
     title: "O painel de reconstrução",
     steps: [
@@ -142,6 +151,11 @@ export function suggestObstacle(state: GameState): string {
     return "LOCK_002";
   }
   if (state.act === 3) {
+    // Quem viu a escala e ainda não viu o ofício está perseguindo a mãe. É a
+    // única linha em que a dica precisa desfazer uma suspeita, não abrir uma.
+    if (state.cluesExamined.includes("CLUE_072") && !state.cluesFound.includes("CLUE_073")) {
+      return "CHAR_002";
+    }
     if (!state.solvedLocks.includes("LOCK_004")) return "LOCK_004";
     if (!state.solvedLocks.includes("LOCK_003")) return "LOCK_003";
     if (!state.solvedLocks.includes("LOCK_005")) return "LOCK_005";

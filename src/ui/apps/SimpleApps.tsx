@@ -10,7 +10,7 @@
 
 import { useState } from "react";
 import { AlertTriangle, Mail, PhoneIncoming, PhoneMissed, PhoneOutgoing } from "lucide-react";
-import { ClueMark, Empty, Row } from "../phone/Bits";
+import { ClueMark, Empty, Row, VoicePlayer } from "../phone/Bits";
 import type { AppApi } from "./types";
 import { getLocaleContent } from "../../locales/contentRegistry";
 import { useLocale } from "../../i18n/LocaleContext";
@@ -393,26 +393,40 @@ export function TrashApp({ api }: { api: AppApi }) {
   const mark = useClue(api);
   const [open, setOpen] = useState<string>();
   const items = api.packs.act2?.TRASH ?? [];
+  const recovered = api.packs.act2?.VOICES_RECOVERED ?? [];
 
   return (
     <div className="list">
       <p className="muted">{t("trash.recovered")}</p>
-      {items.map((item) => (
-        <article key={item.id} className="mail__item">
-          <button type="button" className="mail__head" onClick={() => setOpen(open === item.id ? undefined : item.id)}>
-            <AlertTriangle size={14} aria-hidden />
-            <span className="mail__from">{item.label}</span>
-            <span className="mail__subject">{item.kind}</span>
-            <span className="mail__at">{t("trash.deleted", { date: item.deletedAt })}</span>
-          </button>
-          {open === item.id && (
-            <div className="mail__body">
-              <pre>{item.body}</pre>
-              {mark(item.clueId)}
-            </div>
-          )}
-        </article>
-      ))}
+      {items.map((item) => {
+        const voice = item.voiceId ? recovered.find((entry) => entry.id === item.voiceId) : undefined;
+        return (
+          <article key={item.id} className="mail__item">
+            <button
+              type="button"
+              className="mail__head"
+              onClick={() => {
+                setOpen(open === item.id ? undefined : item.id);
+                if (voice) api.playVoice(voice.id);
+              }}
+            >
+              <AlertTriangle size={14} aria-hidden />
+              <span className="mail__from">{item.label}</span>
+              <span className="mail__subject">{item.kind}</span>
+              <span className="mail__at">{t("trash.deleted", { date: item.deletedAt })}</span>
+            </button>
+            {open === item.id && (
+              <div className="mail__body">
+                <pre>{item.body}</pre>
+                {voice && (
+                  <VoicePlayer localeId={api.localeId} voiceId={voice.id} transcript={voice.transcript} />
+                )}
+                {mark(item.clueId)}
+              </div>
+            )}
+          </article>
+        );
+      })}
     </div>
   );
 }

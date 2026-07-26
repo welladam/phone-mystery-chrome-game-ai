@@ -2317,6 +2317,87 @@ pre {
   overflow: hidden;
 }
 
+/* O corpo da resposta da advogada vem com parágrafos escritos à mão. */
+.accusation-feedback__body {
+  white-space: pre-line;
+}
+
+/* Foto em movimento -------------------------------------------------- */
+
+.motion-block {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.motion-block h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.motion-block p { margin: 0; font-size: 0.72rem; }
+
+.video-asset {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.video-asset__player {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  max-height: 52vh;
+  border-radius: var(--radius);
+  background: #000;
+}
+
+.video-asset__note,
+.video-asset__alt {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.video-asset__alt { color: var(--muted); }
+
+.video-placeholder {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  max-height: 52vh;
+  border-radius: var(--radius);
+  display: grid;
+  align-content: center;
+  gap: 0.3rem;
+  padding: 0.8rem;
+  text-align: center;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+}
+
+.video-placeholder__id {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.video-placeholder__meta {
+  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.video-placeholder__alt {
+  font-size: 0.56rem;
+  color: rgba(255, 255, 255, 0.42);
+  line-height: 1.35;
+}
+
 .photo-detail {
   padding: 0.8rem;
   display: grid;
@@ -2836,29 +2917,63 @@ pre {
    ================================================================== */
 
 .chatlist {
-  padding: 0.6rem;
+  padding: 0.65rem;
   display: grid;
-  gap: 0.35rem;
+  gap: 0.4rem;
   align-content: start;
 }
 
+/**
+ * Cada conversa é um cartão, na mesma linguagem de `.row` e `.mail__item`.
+ * A borda vai no atalho `border`, nunca só em `border-bottom`: declarar um lado
+ * só deixa os outros três com a borda cinza padrão do navegador.
+ */
 .chatlist__row {
+  width: 100%;
   display: flex;
   gap: 0.7rem;
   align-items: center;
-  padding: 0.65rem 0.7rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  border-bottom: 1px solid var(--line);
-  background: none;
+  background: var(--panel);
   text-align: left;
 }
 
 .chatlist__row:hover {
-  background: rgba(255, 255, 255, 0.05);
+  border-color: color-mix(in srgb, var(--app-accent, var(--accent)) 38%, var(--line));
+  background: color-mix(in srgb, var(--app-accent, var(--accent)) 7%, var(--panel));
 }
 
+.chatlist__row:active {
+  background: color-mix(in srgb, var(--app-accent, var(--accent)) 11%, var(--panel));
+}
+
+/* Conversa encerrada: continua legível, mas para de chamar atenção. */
+.chatlist__row:has(.chatlist__tag) {
+  background: none;
+  border-style: dashed;
+}
+
+.chatlist__row:has(.chatlist__tag) .chatlist__name {
+  color: var(--muted);
+}
+
+/* Arquivo do aparelho: plano, sem cartão, para o olho separar dos vivos. */
 .chatlist__row--muted {
-  opacity: 0.72;
+  background: none;
+  border-color: color-mix(in srgb, var(--line) 60%, transparent);
+}
+
+.chatlist__row--muted .avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 0.8rem;
+}
+
+.chatlist__row--muted .chatlist__name {
+  font-weight: 500;
+  color: color-mix(in srgb, var(--ink) 78%, transparent);
 }
 
 .avatar {
@@ -2891,9 +3006,22 @@ pre {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  /* Nome comprido corta; a etiqueta de encerrada nunca é empurrada pra outra linha. */
+  min-width: 0;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* O nome encolhe com reticências; a etiqueta guarda o próprio espaço. */
+.chatlist__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chatlist__tag {
+  flex: 0 0 auto;
   font-size: 0.62rem;
   padding: 0.05rem 0.35rem;
   border-radius: 999px;

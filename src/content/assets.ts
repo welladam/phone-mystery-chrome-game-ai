@@ -12,6 +12,7 @@ const PUBLIC_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export const PHOTO_DIR = `${PUBLIC_BASE}/assets/photos`;
 export const AUDIO_DIR = `${PUBLIC_BASE}/assets/audio`;
+export const VIDEO_DIR = `${PUBLIC_BASE}/assets/videos`;
 
 /** Pôster usado como evidência na tela de entrada. */
 export const POSTER_SRC = `${PUBLIC_BASE}/assets/art/clara-poster-v2.png`;
@@ -28,6 +29,15 @@ export function photoSrc(fileName: string) {
 
 export function audioSrc(locale: LocaleId, voiceId: string) {
   return `${AUDIO_DIR}/${locale}/${voiceId}.m4a`;
+}
+
+/**
+ * Carrega o vídeo pelo nome de arquivo real da história (o campo `file` de cada
+ * vídeo — ex.: `IMG_20260308_1152.mp4`), igual às fotos. O pôster não vem daqui:
+ * é uma foto da galeria, resolvida por `photoSrc`.
+ */
+export function videoSrc(fileName: string) {
+  return `${VIDEO_DIR}/${fileName}`;
 }
 
 /** Paleta determinística para o placeholder, derivada do próprio ID. */

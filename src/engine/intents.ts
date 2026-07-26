@@ -33,6 +33,7 @@ export type IntentId =
   | "INT_020"
   | "INT_021"
   | "INT_022"
+  | "INT_023"
   | "INT_000";
 
 type IntentRule = {
@@ -195,6 +196,34 @@ const RULES: IntentRule[] = [
       [/(voce|vc) (e|eh) a alice/],
       [/como (voce|vc) sabe (disso|dessas coisas)/],
       [/se identifi(ca|que)/],
+    ],
+  },
+  {
+    id: "INT_022",
+    label: "O plantão",
+    priority: 57,
+    patterns: [
+      [/plantao/],
+      [/hospital/],
+      [/santa clarice/],
+      [/ponto (biometrico|eletronico)/],
+      [/folha de ponto/],
+      [/cracha/],
+      [/catraca/],
+      [/escala/],
+      [/(troca|trocou|trocar) de (plantao|turno|escala)/],
+    ],
+  },
+  {
+    id: "INT_023",
+    label: "O almoço de domingo",
+    priority: 55,
+    patterns: [
+      [/almoc\w+/],
+      [/casa da (sua |tua )?mae/],
+      [/bom pastor/],
+      [/(o que|oq) (a senhora|voce|vc) (falou|disse) (pra|para) ela/],
+      [/tirou o (telefone|celular) da mao/],
     ],
   },
   {

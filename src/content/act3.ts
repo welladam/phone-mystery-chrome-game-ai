@@ -3,14 +3,15 @@
  * Gravações, e-mails da criminalista, declaração, corridas e o contato anônimo.
  */
 
-import type { ClueId } from "../engine/types";
+import type { ClueId, TranscriptLine } from "../engine/types";
 import type { MailRecord } from "./act2";
 
 /* ------------------------------------------------------------------ */
 /* Gravador                                                            */
 /* ------------------------------------------------------------------ */
 
-export type TranscriptLine = { t: string; who?: string; text: string };
+/** O tipo mora em `engine/types` porque vídeos também o usam. */
+export type { TranscriptLine };
 
 export type VoiceRecord = {
   id: string;

@@ -36,6 +36,7 @@ export function createInitialState(): GameState {
     notificationsSeen: [],
     zoomed: [],
     playedVoices: [],
+    playedVideos: [],
     accusation: {},
     accusationAttempts: [],
     hintsUsed: {},

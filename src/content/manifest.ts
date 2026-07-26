@@ -695,6 +695,15 @@ export const CLUES: Clue[] = [
     kind: "fato",
     weight: 4,
   },
+  {
+    id: "CLUE_074",
+    label: "A versão oferecida",
+    summary: "Uma entrevistada oferece, sem ser perguntada, um caminho de suspeita contra outra pessoa.",
+    app: "APP_002",
+    act: 3,
+    kind: "testemunhal",
+    weight: 3,
+  },
 
   /* Bloco F — contexto, ruído e falsas pistas */
   {
@@ -859,6 +868,60 @@ export const CLUES: Clue[] = [
     kind: "fato",
     weight: 3,
   },
+  {
+    id: "CLUE_070",
+    label: "O gesto na mesa",
+    summary: "Foto em movimento de 08/03, 11h52: uma mão avança e cobre a lente. Três segundos, sem som.",
+    app: "APP_003",
+    act: 2,
+    kind: "fato",
+    weight: 4,
+  },
+  {
+    id: "CLUE_071",
+    label: "Áudio recuperado de 05/01",
+    summary: "Mensagem de voz de 2:14 enviada às 02h31, expirada no servidor e recuperada do aparelho.",
+    app: "APP_013",
+    act: 2,
+    kind: "fato",
+    weight: 4,
+  },
+  {
+    id: "CLUE_072",
+    label: "Escala do plantão de março",
+    summary: "Folha afixada na geladeira, com uma troca de horário anotada à caneta para o dia 08.",
+    app: "APP_003",
+    act: 2,
+    kind: "fato",
+    weight: 3,
+  },
+  {
+    id: "CLUE_073",
+    label: "Folha de ponto do hospital",
+    summary: "Ofício com registro de catraca, acessos ao prontuário e medicações da noite de 08/03.",
+    app: "APP_012",
+    act: 3,
+    kind: "fato",
+    weight: 4,
+  },
+  {
+    id: "CLUE_075",
+    label: "Nota das 12h14",
+    summary: "Anotação escrita por Clara depois do almoço de 08/03, sobre a conversa com a mãe.",
+    app: "APP_010",
+    act: 2,
+    kind: "fato",
+    weight: 4,
+  },
+  {
+    id: "CLUE_076",
+    label: "O carro na garagem",
+    summary: "Foto de 08/03, 12h04: um hatch vermelho-escuro antigo parado no quintal, placa parcial.",
+    app: "APP_003",
+    act: 2,
+    kind: "fato",
+    weight: 2,
+  },
 ];
 
 const CLUE_INDEX = new Map(CLUES.map((clue) => [clue.id, clue]));
@@ -940,6 +1003,26 @@ export const MEMORIES: Memory[] = [
     text: "O despacho de arquivamento se apoia em quatro afirmações que os dados desmentem.",
     requiresAllOf: ["CLUE_067"],
   },
+  {
+    id: "MEMORY_013",
+    label: "O que a mãe sabia",
+    text: "Regina soube em 5 de janeiro que houve uma morte — e pediu silêncio.",
+    requiresAllOf: ["CLUE_071"],
+    requiresAnyOf: ["CLUE_033", "CLUE_075"],
+    requiresCount: 1,
+  },
+  {
+    id: "MEMORY_014",
+    label: "Doze horas de plantão",
+    text: "O ponto biométrico registra entrada às 18h50 de 08/03 e nenhuma saída até as 07h10.",
+    requiresAllOf: ["CLUE_073"],
+  },
+  {
+    id: "MEMORY_015",
+    label: "Dois carros vermelhos",
+    text: "O carro que subiu a estrada do mirante às 19h44 não tem a placa do carro da garagem.",
+    requiresAllOf: ["CLUE_009", "CLUE_076"],
+  },
 ];
 
 /** Contradições detectadas automaticamente quando ambas as pistas forem examinadas. */
@@ -973,5 +1056,20 @@ export const CONTRADICTIONS: Array<{ id: string; pair: [string, string]; text: s
     id: "CONTRA_06",
     pair: ["CLUE_028", "CLUE_069"],
     text: "O número anônimo já existia — e foi discado do próprio aparelho de Clara às 21h18.",
+  },
+  {
+    id: "CONTRA_07",
+    pair: ["CLUE_072", "CLUE_008"],
+    text: "A escala tinha uma troca anotada para as 22h, e as chamadas da mãe começam às 21h35.",
+  },
+  {
+    id: "CONTRA_08",
+    pair: ["CLUE_072", "CLUE_073"],
+    text: "A troca de plantão foi pedida em 06/03 e indeferida em 07/03. O ponto não registra saída.",
+  },
+  {
+    id: "CONTRA_09",
+    pair: ["CLUE_075", "CLUE_046"],
+    text: "Clara falou de advogada no almoço, e às 15h06 a resposta pergunta duas vezes que doutora.",
   },
 ];

@@ -5,7 +5,7 @@
  * dados de saúde: material que o jogador vê logo ao ligar o aparelho.
  */
 
-import type { ClueId, PhotoId } from "../engine/types";
+import type { ActNumber, ClueId, PhotoId, TranscriptLine, VideoId } from "../engine/types";
 
 export type PhotoRecord = {
   id: PhotoId;
@@ -21,10 +21,40 @@ export type PhotoRecord = {
   clueId?: ClueId;
   /** Detalhe revelado ao usar "Aprimorar imagem". */
   zoom?: { label: string; text: string; clueId?: ClueId };
+  /** Foto em movimento: o trecho de vídeo gravado junto com o disparo. */
+  motionVideo?: VideoId;
   /** Ato mínimo para aparecer. */
   act: 1 | 2 | 3 | 4;
   hidden?: boolean;
   deleted?: boolean;
+};
+
+/**
+ * Vídeo do aparelho. Os registros ficam nos pacotes de ato, não aqui: este
+ * módulo entra no bundle inicial e transcrição de vídeo é material narrativo.
+ */
+export type VideoRecord = {
+  id: VideoId;
+  /** Nome real do arquivo, como em `PhotoRecord.file`. */
+  file: string;
+  /** Foto que serve de pôster — reaproveita `photoSrc`, sem asset extra. */
+  posterPhoto?: string;
+  takenAt: string;
+  album: string;
+  caption?: string;
+  /** Descrição objetiva do que se vê. É o texto alternativo e, num vídeo mudo, a própria pista. */
+  alt: string;
+  duration: string;
+  seconds: number;
+  /** Sem faixa de áudio: o player não mostra volume nem transcrição. */
+  silent?: boolean;
+  gps?: string;
+  device?: string;
+  /** Observação do sistema sobre o arquivo (formato, interrupção, recuperação). */
+  systemNote?: string;
+  clueId?: ClueId;
+  act: ActNumber;
+  transcript?: TranscriptLine[];
 };
 
 export const PHOTOS: PhotoRecord[] = [
@@ -308,6 +338,39 @@ export const PHOTOS: PhotoRecord[] = [
     gps: "Independência Shopping",
     narrative: false,
     act: 2,
+  },
+  {
+    id: "PHOTO_021",
+    file: "IMG_20260308_1152.jpg",
+    takenAt: "08/03/2026 11:52",
+    album: "Câmera",
+    caption: "",
+    alt: "Mesa de almoço com dois pratos servidos e intocados. Ao fundo, a porta da geladeira com uma folha impressa presa por ímãs e um relógio de parede marcando 11h52.",
+    gps: "Rua Sete Lagoas, 88 — Bom Pastor",
+    narrative: true,
+    act: 1,
+    motionVideo: "VIDEO_001",
+    zoom: {
+      label: "A folha na geladeira",
+      text: 'HOSPITAL SANTA CLARICE — SETOR DE PESSOAL. "ESCALA — MARÇO/2026". Na linha do dia 08 DOM, a letra N. Sobre ela, à caneta vermelha: "TROCA 19h→22h — pedido 06/03".',
+      clueId: "CLUE_072",
+    },
+  },
+  {
+    id: "PHOTO_022",
+    file: "IMG_20260308_1204.jpg",
+    takenAt: "08/03/2026 12:04",
+    album: "Câmera",
+    caption: "",
+    alt: "Quintal cimentado fotografado de dentro da cozinha, através do vidro da janela. Um hatch antigo de pintura vermelho-escuro desbotada, estacionado de traseira.",
+    gps: "Rua Sete Lagoas, 88 — Bom Pastor",
+    narrative: true,
+    act: 1,
+    zoom: {
+      label: "A placa",
+      text: "A placa traseira está em ângulo e à sombra. Distinguem-se cinco caracteres: GXH 1J.",
+      clueId: "CLUE_076",
+    },
   },
 ];
 

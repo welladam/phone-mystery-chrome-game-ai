@@ -420,6 +420,15 @@ export const NOTES_OPEN: NoteRecord[] = [
     act: 1,
   },
   {
+    id: "NOTE_008",
+    title: "12h14",
+    editedAt: "08/03/2026 12h14",
+    body:
+      "ela falou que ia me impedir.\n\nnão sei o que isso quer dizer. eu acho que ela também não sabe.\nela tirou o telefone da minha mão em cima da mesa e virou pra baixo.\neu falei da advogada. duas vezes.\n\nsegunda eu vou de qualquer jeito.",
+    clueId: "CLUE_075",
+    act: 2,
+  },
+  {
     id: "NOTE_007",
     title: "coisas boas",
     editedAt: "02/2026",

@@ -97,7 +97,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
               <span className={`avatar avatar--${profile.tone}`}>{profile.initials}</span>
               <span className="chatlist__body">
                 <span className="chatlist__name">
-                  {profile.displayName}
+                  <span className="chatlist__label">{profile.displayName}</span>
                   {state?.collapsed && <span className="chatlist__tag">{t("chat.closedTag")}</span>}
                 </span>
                 <span className="chatlist__preview">
@@ -118,7 +118,9 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
           >
             <span className="avatar avatar--cinza">#</span>
             <span className="chatlist__body">
-              <span className="chatlist__name">{thread.title}</span>
+              <span className="chatlist__name">
+                <span className="chatlist__label">{thread.title}</span>
+              </span>
               <span className="chatlist__preview">{thread.subtitle}</span>
             </span>
           </button>

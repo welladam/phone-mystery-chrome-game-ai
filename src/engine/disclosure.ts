@@ -92,10 +92,10 @@ const MOTHER: DisclosureRule[] = [
     id: "REG_JAN",
     character: "CHAR_002",
     factEN:
-      "In January, at 2 AM, your daughter told you there had been an accident involving a friend and that she was there. You told her to forget it and not to ruin her life. You never told the police this. It destroys you.",
+      "In January, at 2 AM, she sent you a voice message saying that a man on a motorcycle had died in June and that she had been inside the car. She refused to tell you who was driving, then and every time after. You told her to forget it and not to ruin her life. You never told the police this. It destroys you.",
     requires: {
-      minAct: 3,
-      anyPresented: ["CLUE_021", "CLUE_033", "CLUE_011"],
+      minAct: 2,
+      anyPresented: ["CLUE_021", "CLUE_033", "CLUE_011", "CLUE_071", "CLUE_075"],
     },
   },
   {
@@ -117,6 +117,64 @@ const MOTHER: DisclosureRule[] = [
       minAct: 4,
       allPresented: ["CLUE_011"],
     },
+  },
+
+  /* O almoço do último dia e o plantão daquela noite. */
+  {
+    id: "REG_LUNCH",
+    character: "CHAR_002",
+    factEN:
+      "At lunch that Sunday you told her she had done nothing, that she was asleep, and that talking would not give the man his life back. You also told her that if she went, you would stop her. You have repeated that sentence to yourself every night since. You do not deny it and you do not explain it away.",
+    requires: { minAct: 2, anyIntent: ["INT_001", "INT_023"] },
+  },
+  {
+    id: "REG_PHONE_GRAB",
+    character: "CHAR_002",
+    factEN:
+      "You took her phone out of her hand at that table and put it face down. It was the last time you touched her hand.",
+    requires: { anyPresented: ["CLUE_070", "CLUE_075"] },
+  },
+  {
+    id: "REG_NO_NAME",
+    character: "CHAR_002",
+    factEN:
+      "You asked her twice at that table who the girl was. She would not say. You still do not know the name, and you have stopped asking anyone.",
+    requires: { anyPresented: ["CLUE_071", "CLUE_075"] },
+  },
+  {
+    id: "REG_SWAP",
+    character: "CHAR_002",
+    factEN:
+      "You asked to be taken off that Sunday night shift on 6 March, to be with her. The hospital refused it on 7 March for lack of cover. You worked all twelve hours. The paperwork exists and you want it looked at.",
+    requires: { minAct: 2, anyIntent: ["INT_022"] },
+  },
+  {
+    id: "REG_SWAP_SHOWN",
+    character: "CHAR_002",
+    factEN:
+      "The schedule on your fridge has that shift swap written on it in red pen. You wrote it. It was refused two days later and you never crossed it out.",
+    requires: { anyPresented: ["CLUE_072"] },
+  },
+  {
+    id: "REG_SHIFT_DETAIL",
+    character: "CHAR_002",
+    factEN:
+      "You work the Clinica Medica ward on the third floor, you clock in and out on a biometric turnstile, and every medication goes into the system under your own credential. You tell the examiner to request the record from the hospital instead of taking your word for it.",
+    requires: { minAct: 2, anyIntent: ["INT_022"] },
+  },
+  {
+    id: "REG_ACCUSED",
+    character: "CHAR_002",
+    factEN:
+      "If the examiner accuses you of killing your daughter, you do not shout. You give the shift, the ward and the clock-in time, you say once that you are the person paying for this investigation, and you ask them to check with the hospital rather than with you. Then you stop writing for a while.",
+    requires: { minAct: 2, anyIntent: ["INT_014"] },
+  },
+  {
+    id: "REG_DOCTOR",
+    character: "CHAR_002",
+    factEN:
+      "When she wrote the word doctor to you that afternoon you thought she meant her psychiatrist, because you are the one who books those appointments. That is why you asked twice which doctor.",
+    requires: { minAct: 2, anyPresented: ["CLUE_075", "CLUE_007B"] },
   },
 ];
 
@@ -189,6 +247,13 @@ const BOYFRIEND: DisclosureRule[] = [
       "Learning what the repair really was destroys you: you paid for it and joked that cars are just cars.",
     requires: { minAct: 4, anyPresented: ["CLUE_010", "CLUE_041", "CLUE_013"] },
   },
+  {
+    id: "THE_MOTHER",
+    character: "CHAR_003",
+    factEN:
+      "Her mother has hated you for two years without ever explaining why. She called you a murderer at the wake, in front of people, and she stopped answering you in January.",
+    requires: { anyIntent: ["INT_001", "INT_018"] },
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -249,6 +314,20 @@ const FRIEND: DisclosureRule[] = [
     factEN:
       "At some point you offer, with a lot of emotion, an invented claim that the boyfriend hit her in January and that she showed you her arm.",
     requires: { minAct: 3, anyIntent: ["INT_013", "INT_018"] },
+  },
+  {
+    id: "ALI_MOTHER_STEER",
+    character: "CHAR_004",
+    factEN:
+      "With visible reluctance, and only once, you pass on something true that she told you: her mother had known since January that something serious had happened, and told her to forget it and speak to nobody. You say you did not want to say this, and you ask the examiner to be gentle with her.",
+    requires: { minAct: 2, anyIntent: ["INT_001", "INT_013", "INT_018", "INT_023"] },
+  },
+  {
+    id: "ALI_MOTHER_STEER_2",
+    character: "CHAR_004",
+    factEN:
+      "If pressed about that Sunday, you mention apologetically that the mother has told the nine o'clock phone call three different ways, and that you would never say that to her face.",
+    requires: { minAct: 3, anyIntent: ["INT_002", "INT_003", "INT_022"] },
   },
 ];
 

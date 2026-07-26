@@ -9,7 +9,13 @@ de som falha, mas um locale só pode ser marcado como jogável quando todos os
 
 Para usar: salve como `public/assets/audio/<locale>/<ID>.m4a`. Por exemplo,
 os arquivos em português brasileiro ficam em
-`public/assets/audio/pt-BR/VOICE_001.m4a` a `VOICE_004.m4a`.
+`public/assets/audio/pt-BR/VOICE_001.m4a` a `VOICE_005.m4a`.
+
+⚠️ `scripts/validate-locales.mjs` tem a lista `requiredVoices` e **quebra o
+build** se um arquivo listado não existir. Hoje ela cobre VOICE_001 a VOICE_004.
+Acrescente `VOICE_005` a essa lista **no mesmo commit** em que o `.m4a` entrar no
+repositório, nunca antes: sem o arquivo, o jogo apenas mostra a transcrição, que
+já é a fonte oficial do conteúdo.
 
 Não existe fallback para o áudio de outro idioma. Um locale só pode ser
 habilitado quando possuir todos os arquivos obrigatórios no próprio diretório.
@@ -20,6 +26,7 @@ habilitado quando possuir todos os arquivos obrigatórios no próprio diretório
 | VOICE_002 | `_.m4a` | 4:51 | Clara, sozinha | Monólogo noturno. Voz baixa, pausas longas, sem choro aberto. |
 | VOICE_003 | `pra eles.m4a` | 7:02 | Clara, sozinha | Carta falada, endereçada a outra pessoa. Formal no começo, quebrando aos poucos. |
 | VOICE_004 | `gravacao_080326_1946.m4a` | 6:12 | Duas mulheres, externa | Vento constante, cascalho, porta de carro. Nada de trilha. |
+| VOICE_005 | `aud_050126_0231.m4a` | 2:14 | Clara, sozinha | Sussurro de madrugada, bêbada e decidida. Televisão em outro quarto, do começo ao fim. |
 
 ## Notas de direção
 
@@ -40,6 +47,11 @@ senha do jogo.
 mão. As vozes chegam desiguais, uma mais perto que a outra. O vento é o
 elemento contínuo. Não use música, não use silêncio artificial: as pausas
 marcadas na transcrição devem ter ruído ambiente.
+
+**VOICE_005** é a única gravação em que Clara fala *para a mãe*, e a única em
+que ela está bêbada. Não é choro: é alívio. Ela ensaiou isso no caminho de casa
+e está finalmente dizendo. Os nove segundos finais só com televisão são o efeito
+mais importante do arquivo — ela esqueceu de parar de gravar.
 
 Nenhum grito, nenhum impacto, nenhum som de queda. A gravação termina seis
 minutos antes da morte, com um clique.
@@ -197,6 +209,49 @@ contraste é a pista central do arquivo, então não achate as configurações):
   firme — Style 30.
 - Fecho ("A gente cai junto. Você que falou." / "Tá. Tô desligando.") —
   cansada, decidida — Style 25.
+
+### VOICE_005 — `aud_050126_0231.m4a`
+
+Só Clara, sussurrando no escuro do próprio quarto às 02h31. Texto de entrada: o
+transcrito completo em `src/content/act2.ts` (constante `VOICES_RECOVERED`).
+
+Base do arquivo: **Stability 40 · Similarity 80 · Style 35 · Speaker boost
+ligado**. É o ponto médio entre o VOICE_002 (achatado) e o VOICE_003
+(quebrando): ela está bêbada e decidida ao mesmo tempo.
+
+Instrução para o campo de contexto/direção, se o modelo aceitar: *"mulher de 24
+anos, sussurrando no escuro do próprio quarto às duas e meia da manhã, meio
+bêbada, gravando um recado para a mãe que ela sabe que só vai ser ouvido no dia
+seguinte. Ela não está chorando: está aliviada por finalmente estar dizendo. A
+articulação escorrega em algumas palavras, nunca ao ponto de ficar
+incompreensível."*
+
+| Trecho | Tags v3 | Stab / Style | Nota |
+|---|---|---|---|
+| "mãe, a senhora dorme com o telefone do lado…" | `[whispers]` | 45 / 25 | Abertura quase prática. Ela testou essa frase de cabeça. |
+| "eu bebi. eu bebi mas eu não tô mentindo." | `[whispers] [slightly slurred]` | 35 / 40 | A repetição é o efeito. A segunda "eu bebi" sai mais baixa que a primeira. |
+| "em junho, na madrugada do dia vinte e dois…" | `[quietly]` | 50 / 20 | **Data e hora saem limpas.** É informação, não emoção. |
+| "o homem da moto morreu, mãe. ele morreu ali." | `[quietly]`, `[shaky breath]` antes de "ele morreu ali" | 35 / 45 | O "ali" é o ponto mais baixo do arquivo. |
+| *(pausa, 7 s)* | — | — | Silêncio montado no editor, com a televisão ao fundo. Não peça a pausa ao modelo. |
+| "eu não tava dirigindo. eu tava do lado…" | `[shaky breath]` no início | 35 / 45 | Frase longa; ela atropela as vírgulas. Gere solta e escolha a tomada que corre. |
+| "eu pedi pra parar. a gente não parou." | `[flat]` | 55 / 15 | Contraste deliberado: sem cor nenhuma. Já foi repetida mil vezes de cabeça. |
+| "quem tava dirigindo é uma amiga minha." | `[hesitant]` | 40 / 35 | Micro-hesitação antes de "amiga". |
+| "e eu não vou falar o nome dela. nem pra senhora. nunca." → "não me pergunta isso." | `[firmly]` … `[quietly]` na última | 55 / 30 | **A frase mais importante do arquivo.** Firme, audível, sem sussurro. Gere várias tomadas. |
+| "eu vou procurar um advogado…" | `[resolute]` | 50 / 30 | Alívio, não medo. Ela já decidiu. |
+| "eu só não quero que a senhora saiba pela polícia." | `[voice breaking]` | 30 / 55 | O único ponto em que a voz cede. Uma vez só, aqui. |
+| *(pausa longa)* | — | — | 6–8 s, televisão ao fundo, montado no editor. |
+| "desculpa acordar a senhora duas e meia da manhã…" | `[sighs] [tired]` | 45 / 30 | Voltou ao normal. Constrangida. |
+| "eu te amo. dorme." | `[softly]` | 50 / 20 | Curta, sem enfeite. |
+| *(9 s finais)* | — | — | **Só televisão.** Ela esqueceu de parar de gravar. Não corte esse trecho. |
+
+**Ambiência:** televisão em outro quarto, loop contínuo a −30/−32 dB, do
+primeiro ao último segundo, inclusive nas pausas e nos nove segundos finais.
+Nada de música, nada de silêncio digital.
+
+**Se a conta não tiver v3:** use Multilingual v2, ignore as tags e gere cada
+trecho da tabela separadamente com os valores de Stability/Style indicados,
+montando no Audacity. O contraste entre `[flat]` (55/15) e `[voice breaking]`
+(30/55) é o que carrega a cena — não achate.
 
 ### Checklist por arquivo
 

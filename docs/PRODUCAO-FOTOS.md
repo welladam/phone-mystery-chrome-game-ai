@@ -199,6 +199,34 @@ Legenda: 🔴 função narrativa · ⚪ cotidiana (realismo de galeria)
 
 ---
 
+### 🔴 PHOTO_021 — `IMG_20260308_1152.jpg` · 08/03/2026 11:52 · Câmera — **quadro-chave da foto em movimento**
+
+É também o primeiro quadro e o pôster do VIDEO_001 (ver `PRODUCAO-VIDEO.md`).
+Produza esta foto primeiro: o vídeo é gerado a partir dela.
+
+**Obrigatório:** folha A4 na geladeira com "ESCALA" e "MARÇO/2026" legíveis; linha do dia 08 DOM marcada com N; anotação à caneta vermelha legível ao ampliar; relógio de parede em 11h52; dois pratos servidos e intocados.
+**Proibido:** pessoas; qualquer mão ou braço; nome de hospital real; texto sobreposto; nitidez cinematográfica.
+**Enquadramento:** vertical 9:16, câmera apoiada na mesa, altura de peito sentado, mesa no terço inferior e geladeira no terço superior.
+
+> Fotografia realista tirada com celular apoiado na mesa, luz natural de meio-dia entrando por uma janela lateral: cozinha de casa brasileira simples e apertada. No terço inferior do quadro, borda de mesa de madeira clara com dois pratos rasos brancos servidos de arroz, frango com quiabo e couve, ainda intocados, e uma jarra de vidro com suco. No terço superior, uma geladeira branca antiga coberta de ímãs variados, com uma folha de papel A4 impressa presa por dois ímãs no centro da porta: cabeçalho "HOSPITAL SANTA CLARICE — SETOR DE PESSOAL" e o título "ESCALA — MARÇO/2026", abaixo uma grade impressa de dias com as letras M, T e N em colunas, a linha do dia 08 DOM com a letra N, e sobre essa linha uma anotação à mão em caneta vermelha, inclinada, onde se lê "TROCA 19h→22h — pedido 06/03". A anotação e o cabeçalho ficam nítidos o suficiente para ler ampliando. À direita, na parede, um relógio redondo de plástico branco marcando 11h52. Vertical 9:16. Qualidade de smartphone comum, leve ruído, foco médio, sem correção de cor profissional, sem estética cinematográfica. Nenhuma pessoa, nenhuma mão e nenhum braço no enquadramento.
+
+---
+
+### 🔴 PHOTO_022 — `IMG_20260308_1204.jpg` · 08/03/2026 12:04 · Câmera
+
+**Obrigatório:** hatch vermelho-escuro claramente antigo e desbotado; placa Mercosul parcialmente legível ao ampliar, lendo-se GXH 1J; moldura da janela da cozinha visível no quadro; reflexo do vidro.
+**Proibido:** Renault Kwid; carro vermelho novo ou brilhante; pessoas; adesivo redondo de balança da justiça no vidro traseiro; qualquer semelhança com o carro da PHOTO_013.
+**Enquadramento:** horizontal 4:3, fotografado de dentro para fora, através do vidro da janela.
+
+> Fotografia de celular tirada de dentro de uma cozinha para fora, através do vidro de uma janela de correr com moldura de alumínio visível nas bordas do quadro e um reflexo suave no vidro: quintal cimentado de casa brasileira simples ao meio-dia, sol alto e sombras curtas. No centro, estacionado de traseira, um carro hatch de dois volumes claramente antigo, modelo dos anos dois mil, pintura vermelho-escuro desbotada e opaca com falhas de sol no teto e no capô, para-choque plástico cinza puído, uma calota diferente das outras. A placa Mercosul traseira aparece em ângulo e à sombra, parcialmente distinguível ao ampliar, lendo-se GXH 1J. Ao fundo, muro de bloco pintado de bege, um tanque de lavar roupa e um portão de ferro. Horizontal 4:3. Qualidade de smartphone comum, contraste alto do sol do meio-dia, leve reflexo do vidro sobre a imagem. Nenhuma pessoa no enquadramento. Nenhum adesivo no vidro traseiro.
+
+> **A placa é a pista.** A PHOTO_013 estabelece `RKA7C21` para o carro da amiga e
+> a PHOTO_014 mostra `RKA 7C` subindo a estrada do mirante. Se este carro sair
+> parecido com aquele, a dedução que o exclui (`MEMORY_015`) deixa de funcionar
+> visualmente. Modelo mais velho, pintura fosca, placa diferente.
+
+---
+
 ## Coerência de metadados
 
 - Todas as fotos de 2026 usam o mesmo modelo de aparelho e a nomenclatura
@@ -207,4 +235,7 @@ Legenda: 🔴 função narrativa · ⚪ cotidiana (realismo de galeria)
   importada de backup.
 - **Nenhuma foto do dia 08/03 existe depois das 19h44.** O contador interno da
   câmera bate com a última foto salva, o que prova que nada foi apagado da
-  galeria naquela noite.
+  galeria naquela noite. PHOTO_021 (11h52) e PHOTO_022 (12h04) são anteriores e
+  não afetam esse argumento.
+- `IMG_20260308_1152.jpg` divide o nome-base com `IMG_20260308_1152.mp4` de
+  propósito: é assim que uma foto em movimento fica no disco.
