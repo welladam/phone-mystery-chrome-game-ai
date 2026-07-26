@@ -27,6 +27,8 @@ export type TurnInput = {
   facts: string[];
   /** Clue attached by the player, described neutrally in English. */
   attachedEvidence?: string;
+  /** Canonical messages delivered outside the model but required for continuity. */
+  scriptedContext: Array<{ role: "player" | "character"; text: string }>;
   act: number;
 };
 
@@ -72,8 +74,15 @@ export class CharacterSessions {
     const session = await this.ensure(input.characterId);
 
     let englishInput: string;
+    let canonicalContext: Array<{ role: "player" | "character"; text: string }>;
     try {
       englishInput = await this.runtime.toModel.translate(input.playerText);
+      canonicalContext = await Promise.all(
+        input.scriptedContext.map(async (message) => ({
+          role: message.role,
+          text: await this.runtime.toModel.translate(message.text),
+        })),
+      );
     } catch (error) {
       throw toAiError(error, "TRANSLATE_TO_MODEL_FAILED");
     }
@@ -81,6 +90,7 @@ export class CharacterSessions {
     const turn = getLocaleChat(this.locale.meta.id).buildTurnPrompt({
       facts: input.facts,
       attachedEvidence: input.attachedEvidence,
+      canonicalContext,
       translatedPlayerText: englishInput,
       sourceLanguageName: this.locale.meta.nativeName,
     });

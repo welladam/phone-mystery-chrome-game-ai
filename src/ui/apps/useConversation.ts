@@ -111,7 +111,7 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
         dispatch({
           type: "CHAT_APPEND",
           characterId,
-          message: makeMessage("player", profile.openingFromPlayer),
+          message: makeMessage("player", profile.openingFromPlayer, { scripted: true }),
         });
       }
 
@@ -213,6 +213,11 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
         // the engine answers and the claim never reaches the model.
         const guardedName = chatLocale.guardPersonMention(trimmed, characterId, current.act, facts);
         if (guardedName) {
+          void logDiagnostic({
+            category: "chat",
+            code: "NAME_GUARD",
+            details: { characterId, name: guardedName.name, reason: guardedName.reason },
+          });
           await deliverBeat(
             characterId,
             {
@@ -232,11 +237,26 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
         dispatch({ type: "SET_TYPING", characterId });
 
         const clue = clueId ? chatLocale.getClue(clueId) : undefined;
+        const guardedReplyLines = new Set(
+          chat.beats.flatMap((beatId) => {
+            const match = /^NAME_GUARD_(?:outside-story|unknown-to-character|concealed)_(.+)$/.exec(beatId);
+            return match ? chatLocale.guardedNameReply(characterId, match[1]) : [];
+          }),
+        );
+        const scriptedContext = chat.messages
+          .filter((message) =>
+            message.scripted &&
+            (message.role === "player" || message.role === "character") &&
+            !guardedReplyLines.has(message.text),
+          )
+          .slice(-8)
+          .map((message) => ({ role: message.role as "player" | "character", text: message.text }));
         const result = await sessions.ask({
           characterId,
           playerText: trimmed,
           facts,
           attachedEvidence: clue ? `${clue.label} — ${clue.summary}` : undefined,
+          scriptedContext,
           act: current.act,
         });
 

@@ -11,6 +11,8 @@ const NON_PERSON_WORDS = new Set(
   [
     "boa", "bom", "noite", "dia", "tarde", "voce", "voces", "senhor", "senhora", "ela", "ele",
     "isso", "essa", "esse", "aquela", "aquele", "como", "quem", "onde", "quando", "porque", "qual",
+    "ainda", "gostaria", "primeiro", "primeiramente", "talvez", "nunca", "entao", "tambem", "sim", "nao",
+    "obrigado", "obrigada", "desculpa", "claro", "certo", "quero", "posso", "pode", "preciso", "acabei",
     "hoje", "ontem", "amanha", "domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado",
     "janeiro", "fevereiro", "marco", "abril", "maio", "junho", "julho", "agosto", "setembro",
     "outubro", "novembro", "dezembro", "policia", "delegado", "doutora", "doutor", "dra", "dr",
@@ -30,6 +32,7 @@ const CONTEXT_NAME_PATTERNS = [
   /(?:conhece(?:u|ia)?|sobre|chamad[oa]|nome (?:é|e|eh|era))(?:\s+(?:o|a))?\s*[,.:;–—-]?\s*([\p{L}'’-]{3,})/giu,
   /(?:amante|namorad[oa]|amig[oa]|irm[aã]o|advogad[oa])(?:\s+(?:dela|dele|da clara|de clara))?\s*[,.:;–—-]?\s+([\p{L}'’-]{3,})/giu,
   /^([\p{L}'’-]{3,})\s+(?:era|é|e|eh|foi|estava|matou|namorava|conhecia)\b/giu,
+  /^([\p{L}'’-]{3,})\s+(?:me\s+)?(?:falou|disse|contou|mandou|ligou|conhece|conheceu|viu|sabe)\b/giu,
 ];
 
 function titleCase(value: string) {
@@ -47,7 +50,14 @@ function candidatesFrom(text: string): string[] {
   const candidates: string[] = [];
 
   for (const match of text.matchAll(/\b[\p{Lu}][\p{L}'’-]{2,}\b/gu)) {
-    candidates.push(match[0]);
+    const candidate = match[0];
+    const prefix = text.slice(0, match.index ?? 0);
+    const startsSentence = !prefix.trim() || /[.!?]\s*$/.test(prefix);
+    const isOnlyWord = normalizeText(text) === normalizeText(candidate);
+
+    // Sentence-initial capitalization is grammatical, not evidence of a name.
+    // Canonical names and explicit name contexts are still collected below.
+    if (!startsSentence || isOnlyWord || canonicalFor(candidate)) candidates.push(candidate);
   }
   for (const pattern of CONTEXT_NAME_PATTERNS) {
     pattern.lastIndex = 0;
