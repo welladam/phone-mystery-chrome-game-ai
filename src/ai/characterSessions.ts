@@ -32,6 +32,8 @@ export type TurnInput = {
   playerText: string;
   /** Facts released by the engine, already in English. */
   facts: string[];
+  /** People the character may already put a name to, already in English. */
+  cast: string[];
   /** Clue attached by the player, described neutrally in English. */
   attachedEvidence?: string;
   /** Canonical messages delivered outside the model but required for continuity. */
@@ -130,6 +132,7 @@ export class CharacterSessions {
 
     const turn = getLocaleChat(this.locale.meta.id).buildTurnPrompt({
       facts: input.facts,
+      cast: input.cast,
       attachedEvidence: input.attachedEvidence,
       canonicalContext,
       translatedPlayerText: englishInput,

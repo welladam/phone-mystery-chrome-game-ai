@@ -287,6 +287,7 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
           characterId,
           playerText: trimmed,
           facts: [...facts, ...guardFacts],
+          cast: chatLocale.knownPeopleFor(characterId, current.act),
           attachedEvidence: clue ? `${clue.label} — ${clue.summary}` : undefined,
           scriptedContext,
           history,
