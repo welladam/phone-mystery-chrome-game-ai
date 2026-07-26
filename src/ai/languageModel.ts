@@ -7,7 +7,11 @@
  * - `signal` is passed only to `prompt()`, not to `create()`.
  * - `contextWindow`/`contextUsage` replaced `inputQuota`/`inputUsage`, and the
  *   event changed from `quotaoverflow` to `contextoverflow`. Both are handled.
- * - Context overflow recreates the session while preserving recent messages.
+ *
+ * The session owns the only copy of its history that the model can see, and
+ * that copy dies with the page. A rolling transcript is kept here so the two
+ * moments that would otherwise erase the character's memory—a context overflow
+ * and a reload—can replay recent turns through `initialPrompts`.
  */
 
 import {
@@ -32,6 +36,34 @@ const MODEL_OPTIONS: LanguageModelCreateOptions = {
  * retry. The first response can be slow while the model loads into memory.
  */
 const PROMPT_TIMEOUT_MS = 55_000;
+
+/** Turns kept in memory for replay. Beyond this the oldest ones are dropped. */
+const TRANSCRIPT_LIMIT = 16;
+
+/**
+ * Turns replayed after a context overflow. Deliberately smaller than the
+ * transcript: the session overflowed once already, so the rebuild has to fit.
+ */
+const REPLAY_MESSAGES = 8;
+
+/**
+ * `initialPrompts` is rejected by some Chrome builds when two messages share a
+ * role in sequence. Merging runs keeps a replay valid without dropping content.
+ */
+function normalizeHistory(messages: AiPromptMessage[]): AiPromptMessage[] {
+  const merged: AiPromptMessage[] = [];
+  for (const message of messages) {
+    const content = message.content.trim();
+    if (!content) continue;
+    const last = merged[merged.length - 1];
+    if (last && last.role === message.role) {
+      last.content = `${last.content}\n${content}`;
+      continue;
+    }
+    merged.push({ role: message.role, content });
+  }
+  return merged;
+}
 
 async function promptWithDeadline(
   session: LanguageModelSession,
@@ -75,23 +107,27 @@ export type ModelSession = {
   prompt(text: string, signal?: AbortSignal): Promise<string>;
   usage(): { used?: number; window?: number };
   destroy(): void;
-  /** Recreates the session from scratch while keeping the same system prompt. */
+  /** Recreates the session from scratch, dropping the history it had. */
   reset(): Promise<void>;
 };
 
 export async function createSession(
   systemPrompt: string,
   onProgress?: (sample: DownloadProgressSample) => void,
+  /** Prior turns, already in the model's language, replayed on creation. */
+  seedHistory: AiPromptMessage[] = [],
 ): Promise<ModelSession> {
   if (!self.LanguageModel) {
     throw new AiError("PROMPT_API_ABSENT");
   }
 
-  const build = async (): Promise<LanguageModelSession> => {
+  let transcript = normalizeHistory(seedHistory).slice(-TRANSCRIPT_LIMIT);
+
+  const build = async (replay: AiPromptMessage[]): Promise<LanguageModelSession> => {
     try {
       return await self.LanguageModel!.create({
         ...MODEL_OPTIONS,
-        initialPrompts: [{ role: "system", content: systemPrompt }],
+        initialPrompts: [{ role: "system", content: systemPrompt }, ...replay],
         monitor(monitor) {
           monitor.addEventListener("downloadprogress", (event) => {
             onProgress?.(readDownloadProgress(event));
@@ -103,7 +139,18 @@ export async function createSession(
     }
   };
 
-  let session = await build();
+  /** Replays what it can; a rejected history costs memory, never the session. */
+  const buildWithHistory = async (history: AiPromptMessage[]): Promise<LanguageModelSession> => {
+    const replay = normalizeHistory(history);
+    if (replay.length === 0) return build([]);
+    try {
+      return await build(replay);
+    } catch {
+      return build([]);
+    }
+  };
+
+  let session = await buildWithHistory(transcript);
   let overflowed = false;
 
   const attachOverflow = (current: LanguageModelSession) => {
@@ -121,28 +168,53 @@ export async function createSession(
 
   attachOverflow(session);
 
+  const closeSession = () => {
+    try {
+      session.destroy?.();
+    } catch {
+      /* already closed */
+    }
+  };
+
+  const remember = (...messages: AiPromptMessage[]) => {
+    transcript = [...transcript, ...messages].slice(-TRANSCRIPT_LIMIT);
+  };
+
   return {
     async prompt(text: string, signal?: AbortSignal) {
+      let answer: string;
       try {
-        const answer = await promptWithDeadline(session, text, signal);
-        return answer;
+        answer = await promptWithDeadline(session, text, signal);
       } catch (error) {
         const mapped = toAiError(error, "SESSION_FAILED");
-        if (mapped.code === "CONTEXT_OVERFLOW" || overflowed) {
-          // Restart the session and retry once. Game state lives elsewhere, so
-          // no progress is lost during this operation.
-          try {
-            session.destroy?.();
-          } catch {
-            /* already closed */
-          }
-          session = await build();
+        if (mapped.code !== "CONTEXT_OVERFLOW" && !overflowed) throw mapped;
+
+        // Restart the session and retry. Game state lives elsewhere, and recent
+        // turns are replayed so the character does not lose the thread.
+        closeSession();
+        session = await buildWithHistory(transcript.slice(-REPLAY_MESSAGES));
+        attachOverflow(session);
+        overflowed = false;
+
+        try {
+          answer = await promptWithDeadline(session, text, signal);
+        } catch (retryError) {
+          const retryMapped = toAiError(retryError, "SESSION_FAILED");
+          if (retryMapped.code !== "CONTEXT_OVERFLOW" && !overflowed) throw retryMapped;
+
+          // The replay itself did not fit. Start clean rather than leaving the
+          // conversation unusable.
+          closeSession();
+          transcript = [];
+          session = await build([]);
           attachOverflow(session);
           overflowed = false;
-          return promptWithDeadline(session, text, signal);
+          answer = await promptWithDeadline(session, text, signal);
         }
-        throw mapped;
       }
+
+      remember({ role: "user", content: text }, { role: "assistant", content: answer });
+      return answer;
     },
     usage() {
       return {
@@ -151,21 +223,14 @@ export async function createSession(
       };
     },
     async reset() {
-      try {
-        session.destroy?.();
-      } catch {
-        /* already closed */
-      }
-      session = await build();
+      closeSession();
+      transcript = [];
+      session = await build([]);
       attachOverflow(session);
       overflowed = false;
     },
     destroy() {
-      try {
-        session.destroy?.();
-      } catch {
-        /* already closed */
-      }
+      closeSession();
     },
   };
 }

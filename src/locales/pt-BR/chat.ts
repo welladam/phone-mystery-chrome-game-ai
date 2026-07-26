@@ -4,7 +4,7 @@
  */
 export { CHARACTERS, getCharacter } from "../../content/characters/base";
 export { classifyAll, classifyIntent, HOSTILE_INTENTS } from "../../engine/intents";
-export { guardedNameReply, guardPersonMention } from "../../engine/nameGuard";
+export { guardedNameFact, guardedNameReply, guardPersonMention } from "../../engine/nameGuard";
 export {
   collapseBeat,
   friendSteerBeat,

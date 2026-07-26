@@ -208,25 +208,32 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
         // 3. Facts allowed now. Nothing beyond these reaches the session.
         const { ids, facts } = chatLocale.allowedFacts(current, characterId, chat, intents as IntentId[]);
 
-        // Names asserted by the player do not become character memories. If a
-        // name is outside the case, cannot be known yet, or must be concealed,
-        // the engine answers and the claim never reaches the model.
+        // Names asserted by the player never become character memories. A name
+        // from outside the case is answered by the engine and never reaches the
+        // model, because there the risk is an invented biography. A name that
+        // does exist in the story but is locked or concealed reaches the model
+        // as an instruction to deny: a fixed line repeated word for word reads
+        // as a wall, and the character has to be able to deflect instead.
         const guardedName = chatLocale.guardPersonMention(trimmed, characterId, current.act, facts);
+        const guardFacts: string[] = [];
         if (guardedName) {
           void logDiagnostic({
             category: "chat",
             code: "NAME_GUARD",
             details: { characterId, name: guardedName.name, reason: guardedName.reason },
           });
-          await deliverBeat(
-            characterId,
-            {
-              id: `NAME_GUARD_${guardedName.reason}_${guardedName.name}`,
-              lines: chatLocale.guardedNameReply(characterId, guardedName.name),
-            },
-            false,
-          );
-          return;
+          if (guardedName.reason === "outside-story") {
+            await deliverBeat(
+              characterId,
+              {
+                id: `NAME_GUARD_${guardedName.reason}_${guardedName.name}`,
+                lines: chatLocale.guardedNameReply(characterId, guardedName.name),
+              },
+              false,
+            );
+            return;
+          }
+          guardFacts.push(chatLocale.guardedNameFact(guardedName));
         }
 
         if (!sessions) {
@@ -237,26 +244,52 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
         dispatch({ type: "SET_TYPING", characterId });
 
         const clue = clueId ? chatLocale.getClue(clueId) : undefined;
+
+        // Deterministic name-guard exchanges are the one thing the model must
+        // never read back: the name inside them is the examiner's claim, and
+        // echoing it is how an invented biography starts. The player message
+        // that provoked the reply is dropped with it.
         const guardedReplyLines = new Set(
           chat.beats.flatMap((beatId) => {
             const match = /^NAME_GUARD_(?:outside-story|unknown-to-character|concealed)_(.+)$/.exec(beatId);
             return match ? chatLocale.guardedNameReply(characterId, match[1]) : [];
           }),
         );
-        const scriptedContext = chat.messages
-          .filter((message) =>
-            message.scripted &&
-            (message.role === "player" || message.role === "character") &&
-            !guardedReplyLines.has(message.text),
-          )
-          .slice(-8)
-          .map((message) => ({ role: message.role as "player" | "character", text: message.text }));
+        const dialogue = chat.messages.filter(
+          (message) => message.role === "player" || message.role === "character",
+        );
+        const visible = dialogue.filter((message, index) => {
+          if (guardedReplyLines.has(message.text)) return false;
+          const next = dialogue[index + 1];
+          return !(message.role === "player" && next !== undefined && guardedReplyLines.has(next.text));
+        });
+
+        // Read only when the session has to be created: after a reload the
+        // player sees the whole conversation and the native session does not.
+        const history = visible.map((message) => ({
+          role: message.role as "player" | "character",
+          text: message.text,
+        }));
+
+        // Canonical beats bypass the model, so it has to be told they happened.
+        // The player message that provoked one travels with it: without the
+        // question, the character reads its own scripted line as an answer to
+        // nothing and starts repeating itself.
+        const scriptedContext = history
+          .filter((message, index) => {
+            if (visible[index].scripted) return true;
+            const next = visible[index + 1];
+            return message.role === "player" && next?.role === "character" && Boolean(next.scripted);
+          })
+          .slice(-8);
+
         const result = await sessions.ask({
           characterId,
           playerText: trimmed,
-          facts,
+          facts: [...facts, ...guardFacts],
           attachedEvidence: clue ? `${clue.label} — ${clue.summary}` : undefined,
           scriptedContext,
+          history,
           act: current.act,
         });
 
