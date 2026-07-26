@@ -12,6 +12,7 @@ import { AiError, toAiError, type AiErrorCode } from "./errors";
 import { createSession, modelAvailability, type ModelSession } from "./languageModel";
 import { createTranslator, translatorAvailability, type TranslatorPair } from "./translator";
 import type { LocaleBundle } from "../locales/types";
+import type { DownloadProgressSample } from "./availability";
 
 export type BootStepId =
   | "contexto"
@@ -37,7 +38,22 @@ export type BootStep = {
   /** 0 a 1 quando há progresso real; undefined = indeterminado. */
   progress?: number;
   detail?: string;
+  download?: DownloadMetrics;
 };
+
+export type DownloadMetrics = {
+  /** Componente cujo evento mais recente atualizou a tela. */
+  component: string;
+  /** Disponíveis apenas se o navegador realmente expuser bytes. */
+  loadedBytes?: number;
+  totalBytes?: number;
+  bytesPerSecond?: number;
+  /** Velocidade agregada real, em fração do download por segundo. */
+  progressPerSecond?: number;
+  etaSeconds?: number;
+};
+
+export type BootStepPatch = Pick<BootStep, "progress" | "detail" | "download">;
 
 function message(locale: LocaleBundle, key: string, values?: Record<string, string>) {
   let text = locale.messages[key] ?? key;
@@ -82,21 +98,44 @@ export type BootOutcome =
   | { kind: "erro"; error: AiError };
 
 export type BootReporter = {
-  step(id: BootStepId, state: BootStepState, patch?: { progress?: number; detail?: string }): void;
+  step(id: BootStepId, state: BootStepState, patch?: BootStepPatch): void;
 };
 
 /** Prompt neutro só para a checagem de comunicação; não é personagem nenhum. */
 const PROBE_PROMPT =
   "You are a diagnostic endpoint. Answer every message with exactly one word: ready.";
 
-type ProgressParts = Record<"modelo" | "to-model" | "from-model", number | undefined>;
+type ProgressPart = "modelo" | "to-model" | "from-model";
+type ProgressState = DownloadProgressSample & { sampledAt?: number; bytesPerSecond?: number };
+type ProgressParts = Record<ProgressPart, ProgressState>;
 
 function makeProgressAggregator(report: BootReporter, locale: LocaleBundle) {
-  const parts: ProgressParts = { modelo: undefined, "to-model": undefined, "from-model": undefined };
+  const parts: ProgressParts = { modelo: {}, "to-model": {}, "from-model": {} };
+  let aggregateSample = { progress: 0, sampledAt: performance.now(), rate: undefined as number | undefined };
 
-  return (part: keyof ProgressParts, value: number | undefined) => {
-    parts[part] = value;
-    const known = Object.values(parts).filter((item): item is number => typeof item === "number");
+  return (part: ProgressPart, sample: DownloadProgressSample) => {
+    const now = performance.now();
+    const previousPart = parts[part];
+    let bytesPerSecond = previousPart.bytesPerSecond;
+    if (
+      typeof sample.loadedBytes === "number" &&
+      typeof previousPart.loadedBytes === "number" &&
+      typeof previousPart.sampledAt === "number"
+    ) {
+      const seconds = (now - previousPart.sampledAt) / 1000;
+      const bytes = sample.loadedBytes - previousPart.loadedBytes;
+      if (seconds >= 0.25 && bytes > 0) {
+        const instantaneous = bytes / seconds;
+        bytesPerSecond = bytesPerSecond === undefined
+          ? instantaneous
+          : bytesPerSecond * 0.65 + instantaneous * 0.35;
+      }
+    }
+    parts[part] = { ...sample, sampledAt: now, bytesPerSecond };
+
+    const known = Object.values(parts)
+      .map((item) => item.progress)
+      .filter((item): item is number => typeof item === "number");
 
     if (known.length === 0) {
       // O navegador não deu porcentagem. Indeterminado, sem inventar número.
@@ -105,7 +144,15 @@ function makeProgressAggregator(report: BootReporter, locale: LocaleBundle) {
     }
 
     const total = known.reduce((sum, item) => sum + item, 0) / 3;
-    const labels: Record<keyof ProgressParts, string> = {
+    const elapsedSeconds = (now - aggregateSample.sampledAt) / 1000;
+    let rate = aggregateSample.rate;
+    if (elapsedSeconds >= 0.25 && total > aggregateSample.progress) {
+      const instantaneous = (total - aggregateSample.progress) / elapsedSeconds;
+      rate = rate === undefined ? instantaneous : rate * 0.65 + instantaneous * 0.35;
+      aggregateSample = { progress: total, sampledAt: now, rate };
+    }
+
+    const labels: Record<ProgressPart, string> = {
       modelo: message(locale, "boot.detail.model"),
       "to-model": message(locale, "boot.detail.toModel", { language: locale.meta.nativeName }),
       "from-model": message(locale, "boot.detail.fromModel", { language: locale.meta.nativeName }),
@@ -113,6 +160,14 @@ function makeProgressAggregator(report: BootReporter, locale: LocaleBundle) {
     report.step("download", "correndo", {
       progress: Math.min(0.999, total),
       detail: message(locale, "boot.detail.downloading", { component: labels[part] }),
+      download: {
+        component: labels[part],
+        loadedBytes: sample.loadedBytes,
+        totalBytes: sample.totalBytes,
+        bytesPerSecond,
+        progressPerSecond: rate,
+        etaSeconds: rate && rate > 0 && total < 1 ? (1 - total) / rate : undefined,
+      },
     });
   };
 }
@@ -277,7 +332,9 @@ export async function prepare(locale: LocaleBundle, report: BootReporter): Promi
   } catch (error) {
     cleanup();
     const mapped = toAiError(error, "DOWNLOAD_INTERRUPTED");
-    report.step("download", "erro");
+    report.step("download", "erro", {
+      detail: locale.errors?.[mapped.code]?.title ?? mapped.info.title,
+    });
     return { kind: "erro", error: mapped };
   }
 

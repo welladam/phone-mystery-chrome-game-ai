@@ -19,9 +19,10 @@ import { AiError, toAiError } from "./errors";
 import {
   TIMED_OUT,
   normalizeAvailability,
-  readProgress,
+  readDownloadProgress,
   withTimeout,
   type Availability,
+  type DownloadProgressSample,
 } from "./availability";
 
 /** Termos que nunca podem ser traduzidos. */
@@ -170,7 +171,7 @@ export async function translatorAvailability(
 
 export async function createTranslator(
   spec: TranslatorSpec,
-  onProgress?: (value: number | undefined) => void,
+  onProgress?: (sample: DownloadProgressSample) => void,
 ): Promise<TranslatorPair> {
   const { sourceLanguage, targetLanguage, failCode } = spec;
   if (sourceLanguage === targetLanguage) return createIdentityTranslator();
@@ -185,7 +186,7 @@ export async function createTranslator(
         targetLanguage,
         monitor(monitor) {
           monitor.addEventListener("downloadprogress", (event) => {
-            onProgress?.(readProgress(event));
+            onProgress?.(readDownloadProgress(event));
           });
         },
       });

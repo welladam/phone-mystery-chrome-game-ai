@@ -85,16 +85,34 @@ export function inspectBrowser() {
   };
 }
 
-/** Lê o progresso do evento sabendo que ele é normalizado de 0 a 1. */
-export function readProgress(event: AiDownloadProgressEvent): number | undefined {
+export type DownloadProgressSample = {
+  /** Progresso normalizado de 0 a 1. */
+  progress?: number;
+  /** Compatibilidade defensiva com implementações que exponham bytes. */
+  loadedBytes?: number;
+  totalBytes?: number;
+};
+
+/**
+ * Lê o progresso sem tratar a fração padrão como se fossem bytes.
+ *
+ * O contrato atual usa `loaded` entre 0 e 1 e `total === 1`; logo, ele não
+ * permite calcular MB ou MB/s. Ainda aceitamos contadores reais caso alguma
+ * implementação os forneça no futuro.
+ */
+export function readDownloadProgress(event: AiDownloadProgressEvent): DownloadProgressSample {
   const loaded = event.loaded;
-  if (typeof loaded !== "number" || Number.isNaN(loaded)) return undefined;
-  if (loaded < 0) return 0;
-  if (loaded > 1) {
-    // Alguma implementação pode reportar bytes; usamos total quando existir.
-    const total = event.total;
-    if (typeof total === "number" && total > 0) return Math.min(1, loaded / total);
-    return undefined;
+  const total = event.total;
+  if (typeof loaded !== "number" || !Number.isFinite(loaded)) return {};
+
+  if (typeof total === "number" && Number.isFinite(total) && total > 1) {
+    const safeLoaded = Math.max(0, loaded);
+    return {
+      progress: Math.min(1, safeLoaded / total),
+      loadedBytes: safeLoaded,
+      totalBytes: total,
+    };
   }
-  return loaded;
+
+  return { progress: Math.min(1, Math.max(0, loaded)) };
 }

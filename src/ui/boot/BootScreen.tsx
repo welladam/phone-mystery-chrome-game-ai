@@ -86,8 +86,28 @@ function useTypedQuote(quotes: string[], reducedMotion: boolean) {
   return text;
 }
 
+function formatBytes(value: number, language: string) {
+  const units = ["B", "KB", "MB", "GB"];
+  let amount = Math.max(0, value);
+  let unit = 0;
+  while (amount >= 1000 && unit < units.length - 1) {
+    amount /= 1000;
+    unit += 1;
+  }
+  return `${new Intl.NumberFormat(language, {
+    maximumFractionDigits: unit === 0 ? 0 : amount >= 100 ? 0 : 1,
+  }).format(amount)} ${units[unit]}`;
+}
+
+function formatDuration(seconds: number, language: string) {
+  const rounded = Math.max(1, Math.round(seconds));
+  if (rounded < 60) return new Intl.NumberFormat(language).format(rounded);
+  const minutes = Math.ceil(rounded / 60);
+  return new Intl.NumberFormat(language).format(minutes);
+}
+
 function StepPill({ step }: { step: BootStep }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const stateLabel: Record<BootStep["state"], string> = {
     espera: t("boot.state.waiting"),
     correndo: t("boot.state.running"),
@@ -96,8 +116,31 @@ function StepPill({ step }: { step: BootStep }) {
     erro: t("boot.state.error"),
   };
   const percent = typeof step.progress === "number" ? Math.round(step.progress * 100) : undefined;
-  const isDownloadDetail = step.detail?.toLowerCase().startsWith("baixando") ?? false;
-  const showBar = step.state === "correndo" && step.id === "download" && (percent !== undefined || isDownloadDetail);
+  const showBar = step.state === "correndo" && step.id === "download";
+  const metrics = step.download;
+  const metricParts: string[] = [];
+  if (metrics?.loadedBytes !== undefined && metrics.totalBytes !== undefined) {
+    metricParts.push(t("boot.download.bytes", {
+      loaded: formatBytes(metrics.loadedBytes, locale.meta.htmlLang),
+      total: formatBytes(metrics.totalBytes, locale.meta.htmlLang),
+    }));
+  }
+  if (metrics?.bytesPerSecond !== undefined) {
+    metricParts.push(t("boot.download.byteSpeed", {
+      speed: formatBytes(metrics.bytesPerSecond, locale.meta.htmlLang),
+    }));
+  } else if (metrics?.progressPerSecond !== undefined && metrics.progressPerSecond > 0) {
+    metricParts.push(t("boot.download.percentSpeed", {
+      speed: new Intl.NumberFormat(locale.meta.htmlLang, { maximumFractionDigits: 1 })
+        .format(metrics.progressPerSecond * 100),
+    }));
+  }
+  if (metrics?.etaSeconds !== undefined && Number.isFinite(metrics.etaSeconds)) {
+    const isMinutes = metrics.etaSeconds >= 60;
+    metricParts.push(t(isMinutes ? "boot.download.etaMinutes" : "boot.download.etaSeconds", {
+      time: formatDuration(metrics.etaSeconds, locale.meta.htmlLang),
+    }));
+  }
 
   return (
     <li className={`boot-steps__item boot-steps__item--${step.state}`}>
@@ -113,17 +156,29 @@ function StepPill({ step }: { step: BootStep }) {
         {step.detail && <span className="boot-steps__detail">{step.detail}</span>}
         {showBar && (
           <span className="boot-progress" role="group" aria-label={t("boot.downloadProgress")}>
-            <span
-              className={`boot-progress__track${percent === undefined ? " boot-progress__track--indeterminate" : ""}`}
-            >
+            <span className="boot-progress__row">
               <span
-                className="boot-progress__fill"
-                style={percent === undefined ? undefined : { width: `${percent}%` }}
-              />
+                className={`boot-progress__track${percent === undefined ? " boot-progress__track--indeterminate" : ""}`}
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={percent}
+              >
+                <span
+                  className="boot-progress__fill"
+                  style={percent === undefined ? undefined : { width: `${percent}%` }}
+                />
+              </span>
+              <span className="boot-progress__value">
+                {percent === undefined ? t("boot.calculating") : `${percent}%`}
+              </span>
             </span>
-            <span className="boot-progress__value">
-              {percent === undefined ? t("boot.calculating") : `${percent}%`}
-            </span>
+            {metricParts.length > 0 && (
+              <span className="boot-progress__metrics">{metricParts.join(" · ")}</span>
+            )}
+            {metrics && metrics.totalBytes === undefined && (
+              <span className="boot-progress__limitation">{t("boot.download.bytesUnavailable")}</span>
+            )}
           </span>
         )}
       </span>

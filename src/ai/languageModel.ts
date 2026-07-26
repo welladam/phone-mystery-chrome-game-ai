@@ -13,9 +13,10 @@
 import {
   TIMED_OUT,
   normalizeAvailability,
-  readProgress,
+  readDownloadProgress,
   withTimeout,
   type Availability,
+  type DownloadProgressSample,
 } from "./availability";
 import { AiError, toAiError } from "./errors";
 
@@ -81,7 +82,7 @@ export type ModelSession = {
 
 export async function createSession(
   systemPrompt: string,
-  onProgress?: (value: number | undefined) => void,
+  onProgress?: (sample: DownloadProgressSample) => void,
 ): Promise<ModelSession> {
   if (!self.LanguageModel) {
     throw new AiError("PROMPT_API_ABSENT");
@@ -94,7 +95,7 @@ export async function createSession(
         initialPrompts: [{ role: "system", content: systemPrompt }],
         monitor(monitor) {
           monitor.addEventListener("downloadprogress", (event) => {
-            onProgress?.(readProgress(event));
+            onProgress?.(readDownloadProgress(event));
           });
         },
       });

@@ -867,10 +867,15 @@ pre {
 }
 
 .boot-progress {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.3rem;
+}
+
+.boot-progress__row {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  margin-top: 0.3rem;
 }
 
 .boot-progress__track {
@@ -898,6 +903,22 @@ pre {
   color: var(--muted);
   min-width: 4.5rem;
   text-align: right;
+}
+
+.boot-progress__metrics,
+.boot-progress__limitation {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.boot-progress__metrics {
+  color: #aabcb1;
+}
+
+.boot-progress__limitation {
+  color: #697a70;
 }
 
 .boot-action-modal {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
-import { inspect, initialSteps, prepare, type BootRuntime, type BootStep } from "./ai/bootstrap";
+import { inspect, initialSteps, prepare, type BootRuntime, type BootStep, type BootStepPatch } from "./ai/bootstrap";
 import { CharacterSessions } from "./ai/characterSessions";
 import { AiError, toAiError } from "./ai/errors";
 import { FolderClosed, Lock, Settings } from "lucide-react";
@@ -129,7 +129,7 @@ export default function App() {
 
   const report = useMemo(
     () => ({
-      step(id: BootStep["id"], stepState: BootStep["state"], patch?: { progress?: number; detail?: string }) {
+      step(id: BootStep["id"], stepState: BootStep["state"], patch?: BootStepPatch) {
         setSteps((current) =>
           current.map((step) =>
             step.id === id ? { ...step, state: stepState, ...patch } : step,
@@ -291,6 +291,7 @@ export default function App() {
       const mapped = toAiError(error);
       setBootError(mapped);
       setPhase("erro");
+      void logDiagnostic({ category: "runtime", code: mapped.code });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locale, report]);
@@ -300,7 +301,17 @@ export default function App() {
     setRestoredNote(undefined);
     setPhase("preparando");
 
-    const outcome = await prepare(locale, report);
+    let outcome: Awaited<ReturnType<typeof prepare>>;
+    try {
+      outcome = await prepare(locale, report);
+    } catch (error) {
+      const mapped = toAiError(error, "DOWNLOAD_INTERRUPTED");
+      report.step("download", "erro", { detail: locale.errors?.[mapped.code]?.title ?? mapped.info.title });
+      setBootError(mapped);
+      setPhase("erro");
+      void logDiagnostic({ category: "download", code: mapped.code });
+      return;
+    }
     if (outcome.kind === "erro") {
       setBootError(outcome.error);
       setPhase("erro");
