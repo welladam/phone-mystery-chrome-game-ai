@@ -1,40 +1,40 @@
 /**
- * Regras determinísticas de progressão.
+ * Deterministic progression rules.
  *
- * Nada aqui depende da IA. O modelo de linguagem interpreta perguntas e
- * representa personagens; quem decide se uma pista foi encontrada, se uma
- * senha foi aceita, se um ato avançou ou se o jogo terminou é este arquivo.
+ * Nothing here depends on AI. The language model interprets questions and
+ * portrays characters; this file decides whether a clue was found, a password
+ * was accepted, an act advanced, or the game ended.
  */
 
 import { CLUES, CONTRADICTIONS, MEMORIES, appsForAct } from "../content/manifest";
 import type { ActNumber, AppId, EventId, GameState, MemoryId } from "./types";
 
-/** Espera antes de liberar os fallbacks anti-bloqueio (8 minutos). */
+/** Delay before anti-blocking fallbacks become available (8 minutes). */
 export const FALLBACK_DELAY_MS = 8 * 60 * 1000;
 
 export const EVENTS = {
-  /** Fim do Ato 1: o jogador percebeu que o telefone foi usado após a morte. */
+  /** End of Act 1: the player realized the phone was used after the death. */
   ACT2: "EVENT_005",
-  /** Fim do Ato 2: o crime de junho foi estabelecido. */
+  /** End of Act 2: the June crime was established. */
   ACT3: "EVENT_011",
-  /** Entrada do contato anônimo. */
+  /** Anonymous contact entry. */
   UNKNOWN: "EVENT_012",
-  /** Fim do Ato 3: a gravação foi aberta. */
+  /** End of Act 3: the recording was opened. */
   ACT4: "EVENT_018",
-  /** O namorado entrega o histórico de corridas. */
+  /** The boyfriend provides the ride history. */
   ALIBI: "EVENT_016",
-  /** O jogador plantou informação exclusiva no canal anônimo. */
+  /** The player planted exclusive information in the anonymous channel. */
   TRAP: "EVENT_024",
-  /** Confronto com a gravação. */
+  /** Confrontation with the recording. */
   COLLAPSE: "EVENT_027",
-  /** Acusação aceita. */
+  /** Accusation accepted. */
   ACCUSED: "EVENT_030",
-  /** Áudio enviado ao irmão da vítima. */
+  /** Audio sent to the victim's brother. */
   AUDIO_SENT: "EVENT_033",
 } as const;
 
 /* ------------------------------------------------------------------ */
-/* Deduções                                                            */
+/* Deductions                                                          */
 /* ------------------------------------------------------------------ */
 
 function memoryUnlocked(state: GameState, id: MemoryId) {
@@ -63,12 +63,12 @@ export function deriveContradictions(state: GameState) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Transição de atos                                                   */
+/* Act transitions                                                     */
 /* ------------------------------------------------------------------ */
 
 /**
- * Cada ato tem mais de uma porta de entrada, exatamente como previsto no
- * documento narrativo: nenhuma progressão depende de uma única pista.
+ * Each act has more than one entry point, exactly as required by the narrative
+ * document: no progression depends on a single clue.
  */
 export function nextAct(state: GameState): ActNumber | undefined {
   const memories = new Set(deriveMemories(state));
@@ -90,17 +90,17 @@ export function appsUnlockedForAct(act: ActNumber): AppId[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Entrada do contato anônimo                                          */
+/* Anonymous contact entry                                             */
 /* ------------------------------------------------------------------ */
 
 const CRIME_CLUES = ["CLUE_011", "CLUE_012", "CLUE_013", "CLUE_014", "CLUE_054", "CLUE_024"];
 
-/** Intenções que, ditas a qualquer personagem, chegam ao contato anônimo. */
+/** Intents that reach the anonymous contact when said to any character. */
 const LEAK_INTENTS = ["INT_005", "INT_006", "INT_007", "INT_008"];
 
 export type UnknownGate = {
   ready: boolean;
-  /** Variante da primeira mensagem. */
+  /** First-message variant. */
   variant: "informado" | "fallback";
 };
 
@@ -125,7 +125,7 @@ export function canAccuse(state: GameState) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Disponibilidade de conteúdo                                         */
+/* Content availability                                                */
 /* ------------------------------------------------------------------ */
 
 export function clueIsReachable(state: GameState, clueId: string) {

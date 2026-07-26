@@ -1,10 +1,10 @@
 /**
- * Manifesto do aparelho: aplicativos, bloqueios e catálogo de pistas.
+ * Device manifest: apps, locks, and clue catalog.
  *
- * Este módulo carrega junto com o bundle inicial porque a tela inicial precisa
- * dele. Por isso ele contém apenas rótulos neutros — nenhum texto de solução,
- * nenhuma transcrição, nenhuma revelação. O material pesado dos atos 2, 3 e 4
- * vive em `act2.ts`, `act3.ts` e `act4.ts`, carregados sob demanda.
+ * This module loads with the initial bundle because the home screen needs it.
+ * It therefore contains only neutral labels—no solution text, transcripts, or
+ * revelations. Heavy material for Acts 2, 3, and 4 lives in `act2.ts`, `act3.ts`,
+ * and `act4.ts`, loaded on demand.
  */
 
 import { normalizeText } from "../engine/text";
@@ -38,7 +38,7 @@ export const APPS: PhoneAppDescriptor[] = [
   { id: "APP_018", name: "Autenticador", icon: "KeyRound", availableFrom: 3, tone: "ambar" },
 ];
 
-/** Apps liberados assim que o aparelho é destravado. */
+/** Apps released as soon as the device is unlocked. */
 export const INITIAL_APPS = APPS.map((app) => app.id);
 
 export function appsForAct(act: number) {
@@ -50,7 +50,7 @@ export function getApp(id: string) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Bloqueios                                                           */
+/* Locks                                                               */
 /* ------------------------------------------------------------------ */
 
 export const LOCKS: Lock[] = [
@@ -140,7 +140,7 @@ export function getLock(id: string) {
   return LOCKS.find((lock) => lock.id === id);
 }
 
-/** Normalizacao tolerante: sem acento, minusculas, sem espacos nas pontas. */
+/** Tolerant normalization: no accents, lowercase, and no surrounding spaces. */
 export const normalizeAnswer = normalizeText;
 
 export function checkLock(lock: Lock, answer: string, secondFactor?: string) {
@@ -155,11 +155,11 @@ export function checkLock(lock: Lock, answer: string, secondFactor?: string) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Catálogo de pistas                                                  */
+/* Clue catalog                                                        */
 /* ------------------------------------------------------------------ */
 
 export const CLUES: Clue[] = [
-  /* Bloco A — presença no mirante */
+  /* Block A—presence at the overlook */
   {
     id: "CLUE_001",
     label: "Notificação das 16h02",
@@ -255,7 +255,7 @@ export const CLUES: Clue[] = [
     block: "A",
   },
 
-  /* Bloco B — horário da morte e uso do aparelho */
+  /* Block B—time of death and device use */
   {
     id: "CLUE_004",
     label: "Última leitura cardíaca",
@@ -369,7 +369,7 @@ export const CLUES: Clue[] = [
     block: "B",
   },
 
-  /* Bloco C — motivo */
+  /* Block C—motive */
   {
     id: "CLUE_011",
     label: "Nota trancada 22/06",
@@ -521,7 +521,7 @@ export const CLUES: Clue[] = [
     block: "C",
   },
 
-  /* Bloco D — coação e relação */
+  /* Block D—coercion and relationship */
   {
     id: "CLUE_025",
     label: 'O apelido "Cacau"',
@@ -613,7 +613,7 @@ export const CLUES: Clue[] = [
     weight: 1,
   },
 
-  /* Bloco E — identidade do contato anônimo */
+  /* Block E—anonymous contact identity */
   {
     id: "CLUE_028",
     label: "Ligação de 3 segundos",
@@ -705,7 +705,7 @@ export const CLUES: Clue[] = [
     weight: 3,
   },
 
-  /* Bloco F — contexto, ruído e falsas pistas */
+  /* Block F—context, noise, and red herrings */
   {
     id: "CLUE_008",
     label: "Três chamadas perdidas",
@@ -935,7 +935,7 @@ export function isKnownClue(id: string) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Deduções                                                            */
+/* Deductions                                                          */
 /* ------------------------------------------------------------------ */
 
 export const MEMORIES: Memory[] = [
@@ -1025,7 +1025,7 @@ export const MEMORIES: Memory[] = [
   },
 ];
 
-/** Contradições detectadas automaticamente quando ambas as pistas forem examinadas. */
+/** Contradictions detected automatically after both clues are examined. */
 export const CONTRADICTIONS: Array<{ id: string; pair: [string, string]; text: string }> = [
   {
     id: "CONTRA_01",

@@ -1,7 +1,7 @@
 /**
- * Textura compartilhada pelas telas de entrada, carregamento e idioma:
- * grão de filme + scanline (desligados com `reducedMotion`) e uma vinheta
- * estática. Sempre absoluto — quem usa precisa ter `position: relative`.
+ * Texture shared by the entry, loading, and language screens: film grain plus
+ * scanline (disabled by `reducedMotion`) and a static vignette. Always absolute,
+ * so consumers must use `position: relative`.
  */
 export default function NoirBackdrop({ reducedMotion }: { reducedMotion: boolean }) {
   return (

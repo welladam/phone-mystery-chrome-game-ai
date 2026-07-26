@@ -1,11 +1,11 @@
 /**
- * Carregamento incremental dos pacotes narrativos.
+ * Incremental narrative-package loading.
  *
- * Cada ato vira um chunk separado no build. O material do desfecho não entra
- * no bundle inicial: ele só é baixado quando o motor confirma que o jogador
- * chegou naquele ponto. Isso não torna o cliente inviolável — apenas evita que
- * a solução esteja disponível para quem abrir as ferramentas do navegador
- * antes de jogar.
+ * Each act becomes a separate build chunk. Ending material is excluded from the
+ * initial bundle and downloaded only when the engine confirms the player reached
+ * that point. This does not make the client tamper-proof; it only prevents the
+ * solution from being immediately available to someone opening browser tools
+ * before playing.
  */
 
 import type { ActNumber } from "../engine/types";
@@ -56,8 +56,8 @@ export const loadAct3 = (locale: LocaleId) => cached(locale, "act3", loaderFor(l
 export const loadAct4 = (locale: LocaleId) => cached(locale, "act4", loaderFor(locale).act4);
 
 /**
- * Os aplicativos e seus registros ficam disponíveis desde o início. O pacote
- * do desfecho continua isolado até o motor confirmar o Ato 4.
+ * Apps and their records are available from the start. The ending package
+ * remains isolated until the engine confirms Act 4.
  */
 export function preloadForAct(locale: LocaleId, act: ActNumber) {
   const jobs: Array<Promise<unknown>> = [loadAct1(locale), loadAct2(locale), loadAct3(locale)];

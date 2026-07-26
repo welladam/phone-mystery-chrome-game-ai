@@ -6,7 +6,7 @@ import type { TranscriptLine } from "../../engine/types";
 import type { LocaleId } from "../../locales/types";
 
 /* ------------------------------------------------------------------ */
-/* Marcador de pista                                                   */
+/* Clue marker                                                         */
 /* ------------------------------------------------------------------ */
 
 type ClueMarkProps = {
@@ -21,14 +21,14 @@ export function ClueMark({ clueId, found, examined, onExamine }: ClueMarkProps) 
     if (!examined) onExamine(clueId);
   }, [clueId, examined, onExamine]);
 
-  // A descoberta acontece ao visualizar o conteúdo. O jogador não precisa
-  // mais apertar um botão artificial para dizer que algo é uma pista.
+  // Discovery happens when content is viewed. The player no longer needs to
+  // press an artificial button to declare that something is a clue.
   void found;
   return null;
 }
 
 /* ------------------------------------------------------------------ */
-/* Foto com placeholder substituível                                   */
+/* Photo with replaceable placeholder                                 */
 /* ------------------------------------------------------------------ */
 
 type PhotoAssetProps = {
@@ -42,10 +42,9 @@ type PhotoAssetProps = {
 };
 
 /**
- * Tenta carregar `public/assets/photos/<file>` (o nome real da foto na
- * história). Se o arquivo ainda não existir, desenha um placeholder com os
- * metadados corretos. Trocar a imagem é soltar o arquivo na pasta — nenhuma
- * linha de código muda.
+ * Tries to load `public/assets/photos/<file>` using the photo's real story name.
+ * If the file does not exist yet, draws a placeholder with the correct metadata.
+ * Replacing the image means dropping the file into the folder; no code changes.
  */
 export function PhotoAsset({ photoId, file, alt, takenAt, album, className, onLoad }: PhotoAssetProps) {
   const [failed, setFailed] = useState(false);
@@ -88,7 +87,7 @@ export function PhotoAsset({ photoId, file, alt, takenAt, album, className, onLo
 }
 
 /* ------------------------------------------------------------------ */
-/* Vídeo com placeholder substituível                                  */
+/* Video with replaceable placeholder                                 */
 /* ------------------------------------------------------------------ */
 
 type VideoAssetProps = {
@@ -98,17 +97,17 @@ type VideoAssetProps = {
   takenAt: string;
   album: string;
   duration: string;
-  /** Foto da galeria usada como pôster. */
+  /** Gallery photo used as the poster. */
   posterPhoto?: string;
   silent?: boolean;
   onPlay?: () => void;
 };
 
 /**
- * Mesmo contrato do `PhotoAsset`: tenta `public/assets/videos/<file>` e, se o
- * arquivo não existir, desenha o placeholder com os metadados. A descrição fica
- * sempre visível abaixo do player — num vídeo sem áudio ela é a própria pista, e
- * é o que substitui a transcrição de uma gravação de voz.
+ * Same contract as `PhotoAsset`: tries `public/assets/videos/<file>` and draws
+ * the metadata placeholder when the file is absent. The description always
+ * remains visible below the player; in a silent video it is the clue itself and
+ * replaces a voice recording transcript.
  */
 export function VideoAsset({
   videoId,
@@ -168,12 +167,12 @@ export function VideoAsset({
 }
 
 /* ------------------------------------------------------------------ */
-/* Áudio com transcrição                                               */
+/* Audio with transcript                                               */
 /* ------------------------------------------------------------------ */
 
 /**
- * Player usado no Gravador e na Lixeira. A transcrição é sempre a autoridade:
- * ela aparece mesmo quando o arquivo de som não existe.
+ * Player used in the Recorder and Trash. The transcript is always authoritative
+ * and appears even when the audio file does not exist.
  */
 export function VoicePlayer({
   localeId,
@@ -207,7 +206,7 @@ export function VoicePlayer({
 }
 
 /* ------------------------------------------------------------------ */
-/* Bloco de zoom                                                       */
+/* Zoom block                                                          */
 /* ------------------------------------------------------------------ */
 
 type ZoomProps = {
@@ -236,7 +235,7 @@ export function ZoomBlock({ label, text, revealed, onZoom }: ZoomProps) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Lista genérica                                                      */
+/* Generic list                                                        */
 /* ------------------------------------------------------------------ */
 
 export function Row({

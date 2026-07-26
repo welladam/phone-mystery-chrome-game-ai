@@ -1,9 +1,9 @@
 /**
- * Catálogo de erros.
+ * Error catalog.
  *
- * O jogador nunca vê exceção, nome de classe ou stack trace: vê uma
- * explicação curta, a causa provável e o que fazer. O código técnico fica
- * apenas no diagnóstico exportável.
+ * The player never sees an exception, class name, or stack trace. They see a
+ * short explanation, the likely cause, and what to do. The technical code is
+ * kept only in the exportable diagnostics.
  */
 
 export type AiErrorCode =
@@ -36,9 +36,9 @@ export type AiErrorInfo = {
   title: string;
   cause: string;
   action: string;
-  /** Se falso, o botão "Tentar novamente" não aparece. */
+  /** When false, the "Try again" button is hidden. */
   retryable: boolean;
-  /** Mostra o lembrete de que a investigação continua salva. */
+  /** Shows the reminder that investigation progress remains saved. */
   keepsProgress: boolean;
 };
 
@@ -258,13 +258,13 @@ export class AiError extends Error {
   }
 }
 
-/** Converte exceções do navegador nos códigos do catálogo. */
+/** Maps browser exceptions to catalog codes. */
 export function toAiError(error: unknown, fallback: AiErrorCode = "UNKNOWN"): AiError {
   if (error instanceof AiError) return error;
 
   if (typeof DOMException !== "undefined" && error instanceof DOMException) {
-    // A mensagem costuma ter o detalhe real ("model execution failed",
-    // "session destroyed", etc.) — guardamos junto do nome, não só o nome.
+    // The message usually contains the actual detail ("model execution failed",
+    // "session destroyed", etc.), so keep it alongside the name.
     const detail = `${error.name}${error.message ? `: ${error.message}` : ""}`;
     switch (error.name) {
       case "NotAllowedError":
@@ -276,10 +276,9 @@ export function toAiError(error: unknown, fallback: AiErrorCode = "UNKNOWN"): Ai
       case "QuotaExceededError":
         return new AiError("CONTEXT_OVERFLOW", detail);
       case "AbortError":
-        // AbortError também é usado por tradução e geração. O chamador sabe
-        // qual operação estava em curso; durante o boot ele passa
-        // DOWNLOAD_INTERRUPTED, e durante o chat passa o erro específico da
-        // tradução ou da sessão.
+        // AbortError is also used by translation and generation. The caller
+        // knows which operation was running: startup passes DOWNLOAD_INTERRUPTED,
+        // while chat passes the translation- or session-specific error.
         return new AiError(fallback, detail);
       case "NetworkError":
         return new AiError("NETWORK_LOST", detail);

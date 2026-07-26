@@ -1,6 +1,6 @@
 /**
- * Pacote narrativo do Ato 2 — carregado sob demanda.
- * Documentos, extratos, navegação, lixeira e a nota trancada.
+ * Act 2 narrative package—loaded on demand.
+ * Documents, statements, browsing history, trash, and the locked note.
  */
 
 import type { ClueId } from "../engine/types";
@@ -8,13 +8,13 @@ import type { VideoRecord } from "./shared";
 import type { VoiceRecord } from "./act3";
 
 /* ------------------------------------------------------------------ */
-/* Galeria — foto em movimento                                         */
+/* Gallery—motion photo                                                */
 /* ------------------------------------------------------------------ */
 
 /**
- * O trecho de vídeo que o aparelho grava junto com o disparo da foto. Formato
- * sem faixa de áudio: a pista é o gesto, não a fala. O quadro-chave é a
- * PHOTO_021, e por isso os dois arquivos dividem o mesmo nome-base.
+ * The video clip recorded by the device alongside the photo. It has no audio
+ * track because the clue is the gesture, not speech. PHOTO_021 is the key frame,
+ * so both files share the same base name.
  */
 export const VIDEOS: VideoRecord[] = [
   {
@@ -36,12 +36,12 @@ export const VIDEOS: VideoRecord[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Áudio recuperado                                                    */
+/* Recovered audio                                                     */
 /* ------------------------------------------------------------------ */
 
 /**
- * Recuperado do cache do aparelho, não do Gravador: no Gravador ele abriria o
- * Ato 4 antes da hora. Reaproveita o formato das gravações do Ato 3.
+ * Recovered from the device cache rather than the Recorder; placing it in the
+ * Recorder would open Act 4 too early. Reuses the Act 3 recording format.
  */
 export const VOICES_RECOVERED: VoiceRecord[] = [
   {
@@ -79,7 +79,7 @@ export const VOICES_RECOVERED: VoiceRecord[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* E-mail — caixa principal                                            */
+/* Email—primary inbox                                                */
 /* ------------------------------------------------------------------ */
 
 export type MailRecord = {
@@ -151,7 +151,7 @@ export const MAIL_MAIN: MailRecord[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Navegador                                                           */
+/* Browser                                                             */
 /* ------------------------------------------------------------------ */
 
 export type HistoryEntry = { id: string; at: string; query: string; clueId?: ClueId };
@@ -177,7 +177,7 @@ export const BROWSER_HISTORY: HistoryEntry[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Mapas                                                               */
+/* Maps                                                                */
 /* ------------------------------------------------------------------ */
 
 export const LOCATION_DAY = [
@@ -212,7 +212,7 @@ export const FREQUENT_PLACES = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Banco                                                               */
+/* Bank                                                                */
 /* ------------------------------------------------------------------ */
 
 export const BANK_STATEMENT = [
@@ -262,7 +262,7 @@ export const PIX_RECEIPTS = [
 }));
 
 /* ------------------------------------------------------------------ */
-/* Rede social                                                         */
+/* Social network                                                      */
 /* ------------------------------------------------------------------ */
 
 export const DM_DIEGO = [
@@ -304,7 +304,7 @@ export const SOCIAL_PROFILE = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Tarefas                                                             */
+/* Tasks                                                               */
 /* ------------------------------------------------------------------ */
 
 export const TASKS = [
@@ -332,7 +332,7 @@ export const TASKS = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Nuvem                                                               */
+/* Cloud storage                                                       */
 /* ------------------------------------------------------------------ */
 
 export type DriveNode = {
@@ -372,8 +372,8 @@ export const DRIVE: DriveNode[] = [
     clueId: "CLUE_073",
   },
   { id: "DR_P22", name: "PESSOAL/22", kind: "pasta", lock: "LOCK_003", act: 2 },
-  // Estes quatro já são protegidos pelo LOCK_003, então o ato deles é 2: quem
-  // filtra a pasta é o bloqueio, não o ato.
+  // These four are already protected by LOCK_003, so their act is 2: the lock,
+  // not the act, filters the folder.
   { id: "DR_P22_1", name: "declaracao_final.pdf", kind: "arquivo", parent: "DR_P22", act: 2, clueId: "CLUE_041" },
   { id: "DR_P22_2", name: "recibos_pix/ (9 comprovantes)", kind: "arquivo", parent: "DR_P22", act: 2 },
   { id: "DR_P22_3", name: "nota_2214_zedobloco.jpg", kind: "arquivo", parent: "DR_P22", act: 2, clueId: "CLUE_017" },
@@ -478,7 +478,7 @@ Autorizo o contato com terceiros por meio da linha (32) 99114-2087, mantida ativ
 Juiz de Fora, 04/05/2026.`;
 
 /* ------------------------------------------------------------------ */
-/* Lixeira                                                             */
+/* Trash                                                               */
 /* ------------------------------------------------------------------ */
 
 export type TrashRecord = {
@@ -488,7 +488,7 @@ export type TrashRecord = {
   kind: string;
   body: string;
   clueId?: ClueId;
-  /** Áudio recuperado que pode ser ouvido aqui mesmo. */
+  /** Recovered audio that can be played directly here. */
   voiceId?: string;
 };
 
@@ -550,7 +550,7 @@ Não era pra ser assim. Eu sei que isso é a coisa mais idiota que uma pessoa po
 ];
 
 /* ------------------------------------------------------------------ */
-/* Nota trancada                                                       */
+/* Locked note                                                         */
 /* ------------------------------------------------------------------ */
 
 export const NOTE_LOCKED = {

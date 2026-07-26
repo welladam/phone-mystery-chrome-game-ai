@@ -1,9 +1,9 @@
 /**
- * Camada IndexedDB.
+ * IndexedDB layer.
  *
- * Erros de armazenamento são comuns em navegação privada, com cota cheia ou
- * com políticas corporativas. Aqui eles viram códigos previsíveis para o
- * catálogo de erros, em vez de exceções cruas.
+ * Storage errors are common in private browsing, with a full quota, or under
+ * corporate policies. They become predictable error-catalog codes here instead
+ * of leaking raw exceptions.
  */
 
 const DB_NAME = "clara-caso-0447";

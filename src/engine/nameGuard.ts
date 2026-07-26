@@ -56,7 +56,7 @@ function candidatesFrom(text: string): string[] {
     }
   }
 
-  // Reconhece também nomes canônicos digitados inteiramente em minúsculas.
+  // Also recognizes canonical names typed entirely in lowercase.
   const normalizedText = ` ${normalizeText(text)} `;
   for (const person of CANONICAL_PEOPLE) {
     for (const alias of person.aliases) {
@@ -72,7 +72,7 @@ function candidatesFrom(text: string): string[] {
     .filter((candidate) => {
       const normalized = normalizeText(candidate);
       if (NON_PERSON_WORDS.has(normalized)) return false;
-      // "Nau" é apelido de Nayara, mas "Bar Nau" é um estabelecimento.
+      // "Nau" is Nayara's nickname, but "Bar Nau" is a venue.
       if (normalized === "nau" && normalizedText.includes(" bar nau ")) return false;
       return true;
     });
@@ -83,7 +83,7 @@ function factsMention(person: CanonicalPerson, facts: string[]) {
   return person.aliases.some((alias) => normalizedFacts.includes(normalizeText(alias)));
 }
 
-/** Retorna o primeiro nome que não pode chegar ao modelo como fato confiável. */
+/** Returns the first name that cannot reach the model as a trusted fact. */
 export function guardPersonMention(
   text: string,
   characterId: CharacterId,
@@ -96,7 +96,7 @@ export function guardPersonMention(
       return { name: titleCase(candidate), reason: "outside-story" };
     }
 
-    // Um fato liberado pelo motor sempre vence a lista estática.
+    // A fact released by the engine always overrides the static list.
     if (factsMention(person, facts)) continue;
 
     const knowledge = person.knowledge[characterId];
@@ -110,7 +110,7 @@ export function guardPersonMention(
   return undefined;
 }
 
-/** Resposta determinística; nenhum detalhe inventado é enviado ou aceito. */
+/** Deterministic response; no invented detail is sent or accepted. */
 export function guardedNameReply(characterId: CharacterId, name: string): string[] {
   switch (characterId) {
     case "CHAR_002":

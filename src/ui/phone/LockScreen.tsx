@@ -21,8 +21,8 @@ export default function LockScreen({ onUnlock, reducedMotion }: Props) {
   const lock = getLock("LOCK_001");
 
   /**
-   * A verificação acontece dentro do atualizador funcional: digitação rápida
-   * (ou teclado físico) não pode perder dígitos por ler um estado antigo.
+   * Verification happens inside the functional updater so fast typing or a
+   * physical keyboard cannot lose digits by reading stale state.
    */
   function press(digit: string) {
     setMessage(undefined);
@@ -49,7 +49,7 @@ export default function LockScreen({ onUnlock, reducedMotion }: Props) {
     });
   }
 
-  // Teclado físico funciona igual ao teclado da tela.
+  // The physical keyboard behaves like the on-screen keypad.
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if (/^[0-9]$/.test(event.key)) {

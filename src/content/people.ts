@@ -1,9 +1,9 @@
 import type { ActNumber, CharacterId } from "../engine/types";
 
 export type PersonKnowledge = {
-  /** Primeiro ato em que o personagem pode falar naturalmente sobre o nome. */
+  /** First act in which the character may speak naturally about the name. */
   fromAct: ActNumber;
-  /** O personagem conhece a pessoa, mas precisa fingir que não conhece. */
+  /** The character knows the person but must pretend not to. */
   conceals?: boolean;
 };
 
@@ -15,11 +15,11 @@ export type CanonicalPerson = {
 };
 
 /**
- * Lista canônica de pessoas mencionáveis nos chats.
+ * Canonical list of people who may be mentioned in chats.
  *
- * Fonte narrativa: `docs/BASE_STORY_PART_01.md`, seções 7 e 13, e
- * `docs/BASE_STORY_PART_04.md`, seção 25. Um nome ausente daqui é externo ao
- * caso e nunca deve ganhar biografia improvisada do modelo.
+ * Narrative sources: `docs/BASE_STORY_PART_01.md`, sections 7 and 13, and
+ * `docs/BASE_STORY_PART_04.md`, section 25. A name absent from this list is
+ * outside the case and must never receive a model-invented biography.
  */
 export const CANONICAL_PEOPLE: CanonicalPerson[] = [
   {
@@ -63,7 +63,7 @@ export const CANONICAL_PEOPLE: CanonicalPerson[] = [
       CHAR_002: { fromAct: 1 },
       CHAR_003: { fromAct: 1 },
       CHAR_004: { fromAct: 1 },
-      // A Desconhecida é Alice, mas nunca pode reconhecer essa ligação.
+      // The Unknown is Alice but must never acknowledge that connection.
       CHAR_005: { fromAct: 3, conceals: true },
     },
   },

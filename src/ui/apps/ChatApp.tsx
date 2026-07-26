@@ -31,7 +31,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
 
   useEffect(() => {
     if (openId) void conversation.greet(openId);
-    // Abrir a conversa do contato anônimo limpa o aviso do ícone do Chat.
+    // Opening the anonymous contact conversation clears the Chat icon badge.
     if (openId === "CHAR_005") api.markUnknownRead();
   }, [openId, conversation, api]);
 
@@ -84,7 +84,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
     setAttached(undefined);
   }
 
-  /* ---------------- lista de conversas ---------------- */
+  /* ---------------- conversation list ---------------- */
   if (!openId && !archived) {
     return (
       <div className="chatlist">
@@ -129,7 +129,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
     );
   }
 
-  /* ---------------- conversa arquivada ---------------- */
+  /* ---------------- archived conversation ---------------- */
   if (archived) {
     const thread = threads.find((item) => item.id === archived);
     if (!thread) return <Empty>{t("chat.notFound")}</Empty>;
@@ -151,7 +151,7 @@ export default function ChatApp({ api, conversation, initialCharacter, requestKe
     );
   }
 
-  /* ---------------- conversa viva ---------------- */
+  /* ---------------- live conversation ---------------- */
   const profile = chatLocale.getCharacter(openId!);
 
   return (

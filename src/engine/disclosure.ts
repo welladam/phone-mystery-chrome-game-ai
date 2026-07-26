@@ -1,12 +1,12 @@
 /**
- * Regras de divulgação.
+ * Disclosure rules.
  *
- * Esta é a proteção central contra vazamento narrativo: um fato só é injetado
- * na sessão de IA de um personagem quando o motor confirma que aquele
- * personagem já pode dizê-lo. Fato bloqueado nunca sai daqui.
+ * This is the central protection against narrative leaks: a fact is injected
+ * into a character's AI session only after the engine confirms that the
+ * character may reveal it. Locked facts never leave this module.
  *
- * Não existe pontuação de confiança. A personalidade é integral desde a
- * primeira mensagem; o que muda é apenas o conjunto de fatos disponíveis.
+ * There is no trust score. Personality is complete from the first message;
+ * only the set of available facts changes.
  */
 
 import type { IntentId } from "./intents";
@@ -15,23 +15,23 @@ import type { ActNumber, CharacterId, ChatState, GameState } from "./types";
 export type DisclosureRule = {
   id: string;
   character: CharacterId;
-  /** Fato em inglês, escrito para o modelo. Nunca aparece na tela. */
+  /** Fact written in English for the model. Never shown on screen. */
   factEN: string;
   requires?: {
     minAct?: ActNumber;
-    /** Basta uma destas intenções ter aparecido na conversa. */
+    /** At least one of these intents must have appeared in the conversation. */
     anyIntent?: IntentId[];
-    /** Basta uma destas pistas ter sido apresentada a este personagem. */
+    /** At least one of these clues must have been presented to this character. */
     anyPresented?: string[];
-    /** Todas estas pistas precisam ter sido apresentadas. */
+    /** All of these clues must have been presented. */
     allPresented?: string[];
-    /** Estes eventos precisam ter ocorrido. */
+    /** These events must have occurred. */
     events?: string[];
   };
 };
 
 /* ------------------------------------------------------------------ */
-/* CHAR_002 — a mãe                                                    */
+/* CHAR_002—the mother                                                  */
 /* ------------------------------------------------------------------ */
 
 const MOTHER: DisclosureRule[] = [
@@ -119,7 +119,7 @@ const MOTHER: DisclosureRule[] = [
     },
   },
 
-  /* O almoço do último dia e o plantão daquela noite. */
+  /* Lunch on the final day and that night's shift. */
   {
     id: "REG_LUNCH",
     character: "CHAR_002",
@@ -179,7 +179,7 @@ const MOTHER: DisclosureRule[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* CHAR_003 — o namorado                                               */
+/* CHAR_003—the boyfriend                                               */
 /* ------------------------------------------------------------------ */
 
 const BOYFRIEND: DisclosureRule[] = [
@@ -257,7 +257,7 @@ const BOYFRIEND: DisclosureRule[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* CHAR_004 — a melhor amiga                                           */
+/* CHAR_004—the best friend                                             */
 /* ------------------------------------------------------------------ */
 
 const FRIEND: DisclosureRule[] = [
@@ -332,7 +332,7 @@ const FRIEND: DisclosureRule[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* CHAR_005 — o contato anônimo                                        */
+/* CHAR_005—the anonymous contact                                       */
 /* ------------------------------------------------------------------ */
 
 const UNKNOWN: DisclosureRule[] = [
@@ -394,8 +394,8 @@ const UNKNOWN: DisclosureRule[] = [
 export const DISCLOSURE_RULES: DisclosureRule[] = [...MOTHER, ...BOYFRIEND, ...FRIEND, ...UNKNOWN];
 
 /**
- * Calcula os fatos que o personagem pode usar agora.
- * Tudo o que não sair desta função simplesmente não existe para a IA.
+ * Calculates the facts the character may use now.
+ * Anything not returned by this function simply does not exist for the AI.
  */
 export function allowedFacts(
   state: GameState,

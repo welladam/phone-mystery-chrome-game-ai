@@ -1,13 +1,13 @@
 /**
- * Adaptador da Prompt API.
+ * Prompt API adapter.
  *
- * Pontos que a documentação atual exige e que estão implementados aqui:
- * - `create()` precisa de ativação do usuário; a falta dela vira um erro
- *   específico com botão de continuar, não uma exceção crua.
- * - `signal` não é passado para `create()`, apenas para `prompt()`.
- * - `contextWindow`/`contextUsage` substituíram `inputQuota`/`inputUsage`, e o
- *   evento passou de `quotaoverflow` para `contextoverflow`. Lemos os dois.
- * - Estouro de contexto recria a sessão preservando as mensagens recentes.
+ * Requirements from the current documentation implemented here:
+ * - `create()` requires user activation; missing activation becomes a specific
+ *   error with a continue button instead of a raw exception.
+ * - `signal` is passed only to `prompt()`, not to `create()`.
+ * - `contextWindow`/`contextUsage` replaced `inputQuota`/`inputUsage`, and the
+ *   event changed from `quotaoverflow` to `contextoverflow`. Both are handled.
+ * - Context overflow recreates the session while preserving recent messages.
  */
 
 import {
@@ -26,11 +26,10 @@ const MODEL_OPTIONS: LanguageModelCreateOptions = {
 };
 
 /**
- * Teto de tempo para uma resposta do modelo. Sem isto, uma chamada que nunca
- * resolve (já observado com estas APIs experimentais) deixa a conversa
- * travada para sempre, e o jogador não consegue mais falar com ninguém. Com o
- * teto, a chamada vira um erro recuperável e o jogador pode tentar de novo.
- * A primeira resposta pode ser lenta porque o modelo carrega na memória.
+ * Maximum wait for a model response. Without it, a call that never resolves
+ * (already observed with these experimental APIs) would lock the conversation
+ * forever. The deadline turns it into a recoverable error so the player can
+ * retry. The first response can be slow while the model loads into memory.
  */
 const PROMPT_TIMEOUT_MS = 55_000;
 
@@ -54,7 +53,7 @@ async function promptWithDeadline(
   if (signal) signal.removeEventListener("abort", onAbort);
 
   if (raced === TIMED_OUT) {
-    // Encerra a chamada pendente para não vazar trabalho em segundo plano.
+    // Abort the pending call so work does not leak into the background.
     controller.abort();
     throw new AiError("SESSION_FAILED", "prompt-timeout");
   }
@@ -76,7 +75,7 @@ export type ModelSession = {
   prompt(text: string, signal?: AbortSignal): Promise<string>;
   usage(): { used?: number; window?: number };
   destroy(): void;
-  /** Recria a sessão do zero, mantendo o mesmo prompt de sistema. */
+  /** Recreates the session from scratch while keeping the same system prompt. */
   reset(): Promise<void>;
 };
 
@@ -113,10 +112,10 @@ export async function createSession(
     };
     try {
       current.addEventListener("contextoverflow", handler);
-      // Alias legado, ainda presente em versões mais antigas do Chrome.
+      // Legacy alias still present in older Chrome versions.
       current.addEventListener("quotaoverflow", handler);
     } catch {
-      // Sessão sem EventTarget completo: seguimos sem o aviso antecipado.
+      // Session without a complete EventTarget: continue without the early warning.
     }
   };
 
@@ -130,12 +129,12 @@ export async function createSession(
       } catch (error) {
         const mapped = toAiError(error, "SESSION_FAILED");
         if (mapped.code === "CONTEXT_OVERFLOW" || overflowed) {
-          // Recomeça a sessão e repete uma única vez. O estado do jogo vive
-          // fora daqui, então nada de progresso se perde nesta operação.
+          // Restart the session and retry once. Game state lives elsewhere, so
+          // no progress is lost during this operation.
           try {
             session.destroy?.();
           } catch {
-            /* já encerrada */
+            /* already closed */
           }
           session = await build();
           attachOverflow(session);
@@ -155,7 +154,7 @@ export async function createSession(
       try {
         session.destroy?.();
       } catch {
-        /* já encerrada */
+        /* already closed */
       }
       session = await build();
       attachOverflow(session);
@@ -165,7 +164,7 @@ export async function createSession(
       try {
         session.destroy?.();
       } catch {
-        /* já encerrada */
+        /* already closed */
       }
     },
   };

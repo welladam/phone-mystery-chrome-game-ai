@@ -1,10 +1,10 @@
 /**
- * Sequência de inicialização do aparelho.
+ * Device startup sequence.
  *
- * O celular não liga enquanto conversa e tradução não estiverem verificadas e
- * funcionando. Nada é baixado sem autorização explícita, e cada etapa reporta
- * o próprio estado para a interface — com porcentagem real quando o navegador
- * fornece uma, e indeterminado quando não fornece. Nunca com número inventado.
+ * The phone does not turn on until conversation and translation have been
+ * verified and are working. Nothing is downloaded without explicit permission,
+ * and every step reports its own state to the UI—using a real percentage when
+ * the browser provides one and an indeterminate state otherwise. Never a made-up number.
  */
 
 import { hasLanguageModel, hasTranslator, inspectBrowser, isSecure } from "./availability";
@@ -35,20 +35,20 @@ export type BootStep = {
   id: BootStepId;
   label: string;
   state: BootStepState;
-  /** 0 a 1 quando há progresso real; undefined = indeterminado. */
+  /** 0 to 1 when real progress is available; undefined = indeterminate. */
   progress?: number;
   detail?: string;
   download?: DownloadMetrics;
 };
 
 export type DownloadMetrics = {
-  /** Componente cujo evento mais recente atualizou a tela. */
+  /** Component whose most recent event updated the screen. */
   component: string;
-  /** Disponíveis apenas se o navegador realmente expuser bytes. */
+  /** Available only if the browser actually exposes bytes. */
   loadedBytes?: number;
   totalBytes?: number;
   bytesPerSecond?: number;
-  /** Velocidade agregada real, em fração do download por segundo. */
+  /** Actual aggregate speed as a fraction of the download per second. */
   progressPerSecond?: number;
   etaSeconds?: number;
 };
@@ -82,9 +82,9 @@ export function bootSteps(locale: LocaleBundle): Array<{ id: BootStepId; label: 
 }
 
 /**
- * O que sobrevive ao boot: apenas os tradutores, que são compartilhados por
- * todas as conversas. As sessões de personagem nascem depois, uma por
- * conversa, cada uma com o próprio prompt de sistema e o próprio histórico.
+ * Only the translators survive startup, shared by all conversations. Character
+ * sessions are created later, one per conversation, each with its own system
+ * prompt and history.
  */
 export type BootRuntime = {
   toModel: TranslatorPair;
@@ -101,7 +101,7 @@ export type BootReporter = {
   step(id: BootStepId, state: BootStepState, patch?: BootStepPatch): void;
 };
 
-/** Prompt neutro só para a checagem de comunicação; não é personagem nenhum. */
+/** Neutral prompt used only for the communication check; it is not a character. */
 const PROBE_PROMPT =
   "You are a diagnostic endpoint. Answer every message with exactly one word: ready.";
 
@@ -138,7 +138,7 @@ function makeProgressAggregator(report: BootReporter, locale: LocaleBundle) {
       .filter((item): item is number => typeof item === "number");
 
     if (known.length === 0) {
-      // O navegador não deu porcentagem. Indeterminado, sem inventar número.
+      // The browser did not provide a percentage. Stay indeterminate rather than inventing one.
       report.step("download", "correndo", { progress: undefined, detail: message(locale, "boot.detail.processing") });
       return;
     }
@@ -173,8 +173,8 @@ function makeProgressAggregator(report: BootReporter, locale: LocaleBundle) {
 }
 
 /**
- * Fase 1 — verificação. Não baixa nada.
- * Pode ser executada sem gesto do usuário.
+ * Phase 1—inspection. Downloads nothing.
+ * Can run without a user gesture.
  */
 export async function inspect(locale: LocaleBundle, report: BootReporter): Promise<
   | { kind: "tudo-pronto" }
@@ -272,8 +272,8 @@ export async function inspect(locale: LocaleBundle, report: BootReporter): Promi
 }
 
 /**
- * Fase 2 — preparação. Precisa ser chamada a partir de um clique, porque
- * `create()` exige ativação do usuário quando há download envolvido.
+ * Phase 2—preparation. Must be called from a click because `create()` requires
+ * user activation when a download is involved.
  */
 export async function prepare(locale: LocaleBundle, report: BootReporter): Promise<BootOutcome> {
   report.step("autorizacao", "ok");
@@ -295,9 +295,9 @@ export async function prepare(locale: LocaleBundle, report: BootReporter): Promi
   };
 
   try {
-    // Todas as chamadas `create()` precisam nascer diretamente do mesmo clique.
-    // Se aguardarmos uma antes de iniciar a seguinte, a ativação transitória do
-    // usuário pode expirar e o Chrome pede uma segunda confirmação.
+    // Every `create()` call must originate directly from the same click. If one
+    // is awaited before the next starts, transient user activation may expire
+    // and Chrome will ask for a second confirmation.
     const sessionJob = createSession(PROBE_PROMPT, (value) => track("modelo", value));
     const toModelJob = createTranslator({
       sourceLanguage: locale.meta.translatorLanguage,
@@ -324,8 +324,8 @@ export async function prepare(locale: LocaleBundle, report: BootReporter): Promi
     if (toModelResult.status === "rejected") throw toModelResult.reason;
     if (fromModelResult.status === "rejected") throw fromModelResult.reason;
 
-    // Os testes acima também informam ao TypeScript que os três resultados
-    // abaixo estão necessariamente disponíveis.
+    // The checks above also tell TypeScript that all three results below are
+    // necessarily available.
     session = sessionResult.value;
     toModel = toModelResult.value;
     fromModel = fromModelResult.value;
@@ -338,7 +338,7 @@ export async function prepare(locale: LocaleBundle, report: BootReporter): Promi
     return { kind: "erro", error: mapped };
   }
 
-  // loaded === 1 não significa pronto: ainda há extração e carga em memória.
+  // loaded === 1 does not mean ready: extraction and memory loading still remain.
   report.step("download", "ok", { progress: 1 });
   report.step("instalacao", "correndo", { progress: undefined });
   report.step("instalacao", "ok");
@@ -361,8 +361,8 @@ export async function prepare(locale: LocaleBundle, report: BootReporter): Promi
   }
   report.step("verificacao", "ok");
 
-  // A sessão de diagnóstico não é reaproveitada como personagem: cada
-  // conversa nasce com o próprio prompt de sistema e o próprio histórico.
+  // The diagnostic session is not reused as a character: every conversation
+  // starts with its own system prompt and history.
   session.destroy();
 
   const readyToModel = toModel;

@@ -1,14 +1,14 @@
 /**
- * Utilidades de texto compartilhadas.
+ * Shared text utilities.
  *
- * A faixa de marcas combinantes é montada por escape ASCII de propósito: o
- * arquivo fonte não contém caracteres combinantes literais, que costumam ser
- * corrompidos por editores e ferramentas de diff.
+ * The combining-mark range is deliberately built with an ASCII escape: the
+ * source file contains no literal combining characters, which editors and diff
+ * tools often corrupt.
  */
 
 const DIACRITICS = new RegExp("[\\u0300-\\u036f]", "g");
 
-/** Minúsculas, sem acento, espaços colapsados. */
+/** Lowercase, without accents, with collapsed whitespace. */
 export function normalizeText(value: string): string {
   return value
     .normalize("NFD")
@@ -18,12 +18,12 @@ export function normalizeText(value: string): string {
     .trim();
 }
 
-/** Igual a normalizeText, mas também remove espaços internos. */
+/** Same as normalizeText, but also removes internal whitespace. */
 export function normalizeCompact(value: string): string {
   return normalizeText(value).replace(/\s/g, "");
 }
 
-/** Hash estável e barato para checksum de save. */
+/** Stable, inexpensive hash for save checksums. */
 export function fnv1a(input: string): string {
   let hash = 0x811c9dc5;
   for (let index = 0; index < input.length; index += 1) {

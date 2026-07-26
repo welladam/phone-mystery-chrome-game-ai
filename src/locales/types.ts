@@ -4,7 +4,7 @@ export type LocaleId = "pt-BR" | "en-US";
 
 export type LocaleDescriptor = {
   id: LocaleId;
-  /** Nome apresentado no seletor, sempre escrito no próprio idioma. */
+  /** Name shown in the selector, always written in its own language. */
   nativeName: string;
   htmlLang: string;
   translatorLanguage: string;
@@ -21,9 +21,9 @@ export type LocaleBundle = {
     unavailableLabel?: string;
   };
   messages: Record<string, string>;
-  /** Itens do checklist "como funciona" na tela de entrada. */
+  /** "How it works" checklist items on the entry screen. */
   bootHowItems: string[];
-  /** Citações atmosféricas exibidas "digitando" durante o carregamento. */
+  /** Atmospheric quotes shown with a typing effect during loading. */
   bootAtmosphere: string[];
   errors?: Record<string, {
     title: string;
@@ -32,6 +32,6 @@ export type LocaleBundle = {
     retryable: boolean;
     keepsProgress: boolean;
   }>;
-  /** Texto usado na verificação de ida até o idioma do modelo. */
+  /** Text used to verify translation into the model language. */
   modelProbe: string;
 };

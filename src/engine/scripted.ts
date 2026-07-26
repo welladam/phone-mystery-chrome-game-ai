@@ -1,12 +1,12 @@
 /**
- * Falas canônicas.
+ * Canonical lines.
  *
- * Toda linha que carrega pista é escrita à mão em português e entregue
- * diretamente, sem passar pelo modelo nem pela tradução. Isso garante três
- * coisas: o apelido sai exato, os deslizes acontecem quando devem acontecer, e
- * o desfecho não muda de forma se o modelo variar.
+ * Every clue-bearing line is hand-written in Portuguese and delivered directly,
+ * without passing through the model or translation. This guarantees that the
+ * nickname is exact, slips happen at the intended moment, and the ending does
+ * not change shape when the model varies.
  *
- * A IA continua responsável por toda a conversa livre.
+ * AI remains responsible for all free-form conversation.
  */
 
 import { getCharacter } from "../content/characters/base";
@@ -17,11 +17,11 @@ export type ScriptedBeat = {
   id: string;
   lines: string[];
   clueId?: string;
-  /** Silêncio narrativo depois da fala, em milissegundos. */
+  /** Narrative silence after the line, in milliseconds. */
   silenceMs?: number;
-  /** Encerra a conversa definitivamente. */
+  /** Permanently ends the conversation. */
   closes?: boolean;
-  /** Texto de rodapé exibido depois de fechar. */
+  /** Footer text displayed after closing. */
   closingNote?: string;
 };
 
@@ -30,12 +30,12 @@ type BeatContext = {
   chat: ChatState;
   characterId: CharacterId;
   intents: IntentId[];
-  /** Quantas vezes o jogador já perguntou sobre a origem do valor. */
+  /** Number of times the player has asked about the source of the amount. */
   sourcePresses: number;
 };
 
 /* ------------------------------------------------------------------ */
-/* Respostas fixas de comportamento                                    */
+/* Fixed behavioral responses                                         */
 /* ------------------------------------------------------------------ */
 
 export function metaReply(characterId: CharacterId): ScriptedBeat {
@@ -52,12 +52,12 @@ export function threatReply(characterId: CharacterId): ScriptedBeat {
 }
 
 /* ------------------------------------------------------------------ */
-/* Beats dependentes do ato                                            */
+/* Act-dependent beats                                                 */
 /* ------------------------------------------------------------------ */
 
 /**
- * Beats do contato anônimo, carregados junto com o pacote do Ato 3.
- * Recebem o pacote já resolvido para não forçar import estático do conteúdo.
+ * Anonymous-contact beats loaded with the Act 3 package. They receive the
+ * resolved package to avoid forcing a static content import.
  */
 export type UnknownPack = {
   UNKNOWN_SCRIPTED: {
@@ -76,22 +76,22 @@ export function unknownBeat(pack: UnknownPack, context: BeatContext): ScriptedBe
   const fired = new Set(context.chat.beats);
   const has = (id: string) => fired.has(id);
 
-  // Escrever o nome da amiga faz o número sumir por seis minutos.
+  // Writing the friend's name makes the number disappear for six minutes.
   if (context.intents.includes("INT_016") && !has(beats.nameRefusal.id)) {
     return { ...beats.nameRefusal };
   }
 
-  // Concessão sobre a fonte do valor, na segunda insistência.
+  // Concession about the source of the amount after the second insistence.
   if (context.sourcePresses >= 2 && has(beats.amount.id) && !has(beats.concession.id)) {
     return { ...beats.concession };
   }
 
-  // O valor exato, quando o assunto é o conserto.
+  // The exact amount when the subject is the repair.
   if (context.intents.includes("INT_008") && !has(beats.amount.id)) {
     return { ...beats.amount };
   }
 
-  // O casaco: detalhe que nunca foi divulgado.
+  // The coat: a detail that was never disclosed.
   if (
     !has(beats.coat.id) &&
     context.intents.some((intent) => ["INT_002", "INT_003", "INT_014"].includes(intent))
@@ -99,14 +99,14 @@ export function unknownBeat(pack: UnknownPack, context: BeatContext): ScriptedBe
     return { ...beats.coat };
   }
 
-  // O apelido só escapa depois de empatia genuína, duas vezes.
+  // The nickname slips out only after genuine empathy, twice.
   const empathyCount = context.chat.intents.filter((intent) => intent === "INT_013").length;
   const empathyNow = context.intents.includes("INT_013") ? 1 : 0;
   if (!has(beats.nickname.id) && empathyCount + empathyNow >= 2) {
     return { ...beats.nickname };
   }
 
-  // A pergunta obsessiva: aparece sozinha de tempos em tempos.
+  // The obsessive question appears on its own from time to time.
   if (!has(beats.recordings.id) && context.chat.messages.length >= 6) {
     return { ...beats.recordings };
   }
@@ -115,7 +115,7 @@ export function unknownBeat(pack: UnknownPack, context: BeatContext): ScriptedBe
 }
 
 /* ------------------------------------------------------------------ */
-/* Colapsos                                                            */
+/* Collapses                                                           */
 /* ------------------------------------------------------------------ */
 
 export type CollapsePack = {
@@ -144,7 +144,7 @@ export function collapseBeat(pack: CollapsePack, characterId: CharacterId): Scri
 }
 
 /* ------------------------------------------------------------------ */
-/* Abertura                                                            */
+/* Opening                                                             */
 /* ------------------------------------------------------------------ */
 
 export function openingBeat(characterId: CharacterId): ScriptedBeat | undefined {
@@ -154,13 +154,14 @@ export function openingBeat(characterId: CharacterId): ScriptedBeat | undefined 
 }
 
 /* ------------------------------------------------------------------ */
-/* Aviso de vazamento entre personagens                                */
+/* Cross-character leak warning                                       */
 /* ------------------------------------------------------------------ */
 
 /**
- * Contar o atropelamento ao namorado tem consequência: ele liga para a amiga
- * e avisa o perito que ligou. É assim que o contato anônimo fica sabendo que a
- * investigação avançou — sem nenhuma sessão de IA ver a conversa da outra.
+ * Telling the boyfriend about the hit-and-run has consequences: he calls the
+ * friend and warns her that the investigator called. This is how the anonymous
+ * contact learns the investigation advanced—without either AI session seeing
+ * the other's conversation.
  */
 export function leakWarning(characterId: CharacterId, intents: IntentId[]): ScriptedBeat | undefined {
   const touched = intents.some((intent) => ["INT_005", "INT_006", "INT_007"].includes(intent));
@@ -188,13 +189,13 @@ export function leakWarning(characterId: CharacterId, intents: IntentId[]): Scri
 }
 
 /* ------------------------------------------------------------------ */
-/* A versão oferecida                                                  */
+/* The volunteered theory                                              */
 /* ------------------------------------------------------------------ */
 
 /**
- * A amiga entrega, uma vez só e chorando, o caminho de suspeita contra a mãe.
- * É escrito à mão porque carrega pista — e porque o gesto em si é a pista: a
- * única pessoa que oferece uma tese sem ser perguntada é ela.
+ * The friend tearfully offers the path of suspicion against the mother once.
+ * It is hand-written because it carries a clue—and because the gesture itself
+ * is the clue: she is the only person who offers a theory without being asked.
  */
 export function friendSteerBeat(
   characterId: CharacterId,

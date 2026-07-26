@@ -1,10 +1,9 @@
 /**
- * Efeitos sonoros da interface.
+ * Interface sound effects.
  *
- * Tudo é sintetizado pela Web Audio API — nenhum arquivo de som é baixado.
- * Os toques são curtos e discretos, no espírito de um celular sóbrio. O áudio
- * só começa depois do primeiro gesto do usuário (política de autoplay) e pode
- * ser desligado nas opções.
+ * Everything is synthesized by the Web Audio API; no sound files are downloaded.
+ * Tones are short and subtle, fitting a restrained phone UI. Audio starts only
+ * after the first user gesture under autoplay policy and can be disabled in settings.
  */
 
 export type SoundKind = "tap" | "back" | "notify" | "unlock" | "clue" | "error" | "send";
@@ -35,7 +34,7 @@ export function isSoundEnabled() {
   return enabled;
 }
 
-/** Desperta o contexto de áudio no primeiro gesto (chamado uma vez). */
+/** Wakes the audio context on the first gesture; called once. */
 export function primeSound() {
   ensureContext();
 }
@@ -43,32 +42,32 @@ export function primeSound() {
 type Note = { freq: number; start: number; dur: number; gain: number; type?: OscillatorType };
 
 const RECIPES: Record<SoundKind, Note[]> = {
-  // Toque seco e curto para navegação comum.
+  // Short, dry tone for ordinary navigation.
   tap: [{ freq: 420, start: 0, dur: 0.045, gain: 0.05, type: "sine" }],
-  // Voltar: um tom levemente mais grave.
+  // Back: a slightly lower tone.
   back: [{ freq: 300, start: 0, dur: 0.05, gain: 0.05, type: "sine" }],
-  // Enviar mensagem: subida curta.
+  // Send message: short rise.
   send: [
     { freq: 520, start: 0, dur: 0.05, gain: 0.05, type: "sine" },
     { freq: 700, start: 0.05, dur: 0.05, gain: 0.045, type: "sine" },
   ],
-  // Pista registrada: dois tons ascendentes suaves.
+  // Clue recorded: two soft ascending tones.
   clue: [
     { freq: 587, start: 0, dur: 0.08, gain: 0.06, type: "triangle" },
     { freq: 784, start: 0.08, dur: 0.1, gain: 0.05, type: "triangle" },
   ],
-  // Desbloqueio: acorde curto e claro.
+  // Unlock: short, clear chord.
   unlock: [
     { freq: 523, start: 0, dur: 0.09, gain: 0.06, type: "triangle" },
     { freq: 659, start: 0.06, dur: 0.09, gain: 0.055, type: "triangle" },
     { freq: 880, start: 0.12, dur: 0.12, gain: 0.05, type: "triangle" },
   ],
-  // Chegada de mensagem do contato anônimo: grave e inquietante.
+  // Anonymous contact message arrival: low and unsettling.
   notify: [
     { freq: 330, start: 0, dur: 0.16, gain: 0.07, type: "sine" },
     { freq: 247, start: 0.16, dur: 0.22, gain: 0.06, type: "sine" },
   ],
-  // Erro: duas notas descendentes.
+  // Error: two descending notes.
   error: [
     { freq: 300, start: 0, dur: 0.09, gain: 0.06, type: "sawtooth" },
     { freq: 200, start: 0.1, dur: 0.14, gain: 0.05, type: "sawtooth" },
@@ -89,7 +88,7 @@ export function playSound(kind: SoundKind) {
 
     const t0 = now + note.start;
     const t1 = t0 + note.dur;
-    // Envelope curto para não estalar.
+    // Short envelope to prevent clicks.
     gain.gain.setValueAtTime(0, t0);
     gain.gain.linearRampToValueAtTime(note.gain, t0 + 0.008);
     gain.gain.exponentialRampToValueAtTime(0.0001, t1);

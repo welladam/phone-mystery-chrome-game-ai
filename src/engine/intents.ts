@@ -1,9 +1,9 @@
 /**
- * Classificador semântico de intenções em português.
+ * Semantic classifier for Portuguese intents.
  *
- * Nenhuma revelação do jogo depende de uma frase exata. Cada intenção reúne
- * várias formulações equivalentes; a interface também oferece o botão
- * "Apresentar prova", que é o caminho determinístico e à prova de sinônimos.
+ * No game revelation depends on an exact phrase. Each intent groups multiple
+ * equivalent phrasings; the UI also offers a "Present evidence" button as a
+ * deterministic, synonym-proof path.
  */
 
 import { normalizeText } from "./text";
@@ -39,7 +39,7 @@ export type IntentId =
 type IntentRule = {
   id: IntentId;
   label: string;
-  /** Basta um destes grupos casar. Dentro do grupo, todos precisam casar. */
+  /** At least one group must match; within a group, every term must match. */
   patterns: RegExp[][];
   priority: number;
 };
@@ -301,7 +301,7 @@ export function classifyIntent(raw: string): IntentMatch {
   return { id: best.id, label: best.label };
 }
 
-/** Todas as intenções detectadas, úteis para o gating de divulgação. */
+/** All detected intents, used by disclosure gating. */
 export function classifyAll(raw: string): IntentId[] {
   const text = normalize(raw);
   return RULES.filter((rule) =>

@@ -1,15 +1,15 @@
 /**
- * Sessões de personagem.
+ * Character sessions.
  *
- * Cada personagem tem uma sessão própria do Prompt API, criada só quando o
- * jogador abre aquela conversa. As sessões nunca se cruzam:
+ * Each character has a dedicated Prompt API session, created only when the
+ * player opens that conversation. Sessions never overlap:
  *
- * - prompt de sistema próprio;
- * - histórico próprio, mantido pela própria sessão;
- * - fatos permitidos calculados pelo motor e injetados um a um.
+ * - a dedicated system prompt;
+ * - dedicated history maintained by the session itself;
+ * - allowed facts calculated by the engine and injected one by one.
  *
- * Nada que o personagem ainda não possa dizer é enviado para cá. Um fato
- * bloqueado simplesmente não existe do ponto de vista da sessão.
+ * Nothing the character is not yet allowed to say is sent here. From the
+ * session's perspective, a locked fact simply does not exist.
  */
 
 import type { CharacterId } from "../engine/types";
@@ -21,17 +21,17 @@ import { createSession, type ModelSession } from "./languageModel";
 
 export type TurnInput = {
   characterId: CharacterId;
-  /** Mensagem do jogador, em português. */
+  /** Player message in Portuguese. */
   playerText: string;
-  /** Fatos liberados pelo motor, já em inglês. */
+  /** Facts released by the engine, already in English. */
   facts: string[];
-  /** Pista anexada pelo jogador, descrita em inglês de forma neutra. */
+  /** Clue attached by the player, described neutrally in English. */
   attachedEvidence?: string;
   act: number;
 };
 
 export type TurnResult = {
-  /** Linhas em português, prontas para virar balões. */
+  /** Portuguese lines ready to become chat bubbles. */
   lines: string[];
   raw: string;
 };
@@ -44,7 +44,7 @@ export class CharacterSessions {
 
   constructor(private runtime: BootRuntime, private locale: LocaleBundle) {}
 
-  /** Abre a sessão sob demanda. Chamado a partir de um clique do jogador. */
+  /** Opens the session on demand. Called from a player click. */
   async ensure(characterId: CharacterId): Promise<ModelSession> {
     const existing = this.sessions.get(characterId);
     if (existing) return existing;
@@ -123,7 +123,7 @@ export class CharacterSessions {
   }
 }
 
-/** Quebra a resposta em balões curtos e descarta ruído de formatação. */
+/** Splits the response into short bubbles and discards formatting noise. */
 export function splitLines(text: string): string[] {
   const cleaned = text
     .replace(/\r/g, "")
@@ -140,7 +140,7 @@ export function splitLines(text: string): string[] {
   if (lines.length === 0) return [];
   if (lines.length <= MAX_LINES) return lines;
 
-  // Junta o excedente na última bolha em vez de descartar conteúdo.
+  // Merge overflow into the last bubble instead of discarding content.
   const head = lines.slice(0, MAX_LINES - 1);
   const tail = lines.slice(MAX_LINES - 1).join(" ");
   return [...head, tail];

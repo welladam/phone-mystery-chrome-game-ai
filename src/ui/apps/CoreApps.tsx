@@ -1,6 +1,6 @@
 /**
- * Aplicativos com tela dedicada.
- * São os que carregam as pistas estruturais e precisam de leitura própria.
+ * Apps with dedicated screens.
+ * These carry structural clues and require specialized presentation.
  */
 
 import { useState } from "react";
@@ -24,7 +24,7 @@ function marker(api: AppApi) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Notificações                                                        */
+/* Notifications                                                       */
 /* ------------------------------------------------------------------ */
 
 export function NotificationsApp({ api }: { api: AppApi }) {
@@ -72,7 +72,7 @@ export function NotificationsApp({ api }: { api: AppApi }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Galeria                                                             */
+/* Gallery                                                             */
 /* ------------------------------------------------------------------ */
 
 export function PhotosApp({ api }: { api: AppApi }) {
@@ -103,7 +103,7 @@ export function PhotosApp({ api }: { api: AppApi }) {
   });
 
   const current = PHOTOS.find((photo) => photo.id === selected);
-  // O trecho em movimento vive no pacote do ato: a descrição dele é narrativa.
+  // The motion clip lives in the act package because its description is narrative.
   const motion = current?.motionVideo
     ? api.packs.act2?.VIDEOS?.find((video) => video.id === current.motionVideo)
     : undefined;
@@ -208,7 +208,7 @@ export function PhotosApp({ api }: { api: AppApi }) {
             />
           )}
 
-          {/* Foto em movimento. Não é dica: é conteúdo, e aparece nas duas dificuldades. */}
+          {/* Motion photo. This is content, not a hint, and appears at both difficulty levels. */}
           {motion && (
             <section className="motion-block">
               <h4>
@@ -257,7 +257,7 @@ export function PhotosApp({ api }: { api: AppApi }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Notas                                                               */
+/* Notes                                                               */
 /* ------------------------------------------------------------------ */
 
 export function NotesApp({ api }: { api: AppApi }) {
@@ -317,7 +317,7 @@ export function NotesApp({ api }: { api: AppApi }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Gravador                                                            */
+/* Recorder                                                            */
 /* ------------------------------------------------------------------ */
 
 export function RecorderApp({ api }: { api: AppApi }) {
@@ -417,7 +417,7 @@ export function RecorderApp({ api }: { api: AppApi }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Saúde                                                               */
+/* Health                                                              */
 /* ------------------------------------------------------------------ */
 
 export function HealthApp({ api }: { api: AppApi }) {
@@ -485,7 +485,7 @@ export function HealthApp({ api }: { api: AppApi }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Ajustes                                                             */
+/* Settings                                                            */
 /* ------------------------------------------------------------------ */
 
 export function SettingsApp({ api }: { api: AppApi }) {
@@ -530,7 +530,7 @@ export function SettingsApp({ api }: { api: AppApi }) {
       <section className="panel">
         <h3>{t("device.networks")}</h3>
         {WIFI_NETWORKS.map((net) => {
-          // A rede com sobrenome só vira pista quando há a quem associá-la.
+          // The network name with a surname becomes a clue only when someone can be linked to it.
           const registrable = Boolean(net.clueId);
           return (
             <Row key={net.ssid} title={net.ssid} meta={net.note} flag={registrable}>
@@ -553,7 +553,7 @@ export function SettingsApp({ api }: { api: AppApi }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Mapas                                                               */
+/* Maps                                                                */
 /* ------------------------------------------------------------------ */
 
 export function MapsApp({ api }: { api: AppApi }) {
@@ -597,14 +597,14 @@ export function MapsApp({ api }: { api: AppApi }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Nuvem                                                               */
+/* Cloud storage                                                       */
 /* ------------------------------------------------------------------ */
 
 export function FilesApp({ api }: { api: AppApi }) {
   const { t } = useLocale();
   const mark = marker(api);
-  // Pasta aberta e arquivo aberto são estados independentes: abrir um arquivo
-  // não pode fechar a pasta que o contém.
+  // Open-folder and open-file are independent states: opening a file must not
+  // close the folder that contains it.
   const [openFolder, setOpenFolder] = useState<string>();
   const [openFile, setOpenFile] = useState<string>();
   const pack2 = api.packs.act2;
@@ -613,8 +613,8 @@ export function FilesApp({ api }: { api: AppApi }) {
 
   const vaultOpen = api.state.solvedLocks.includes("LOCK_003");
   const zipOpen = api.state.solvedLocks.includes("LOCK_008");
-  // O que a perícia juntou depois só aparece no ato correspondente. Dentro da
-  // pasta trancada quem filtra é o LOCK_003, por isso aqueles nós são de ato 2.
+  // Material collected later by forensics appears only in its corresponding act.
+  // Inside the locked folder, LOCK_003 filters content, so those nodes belong to Act 2.
   const nodes = pack2.DRIVE.filter((node) => node.act <= api.state.act);
 
   const docs: Record<string, string | undefined> = {

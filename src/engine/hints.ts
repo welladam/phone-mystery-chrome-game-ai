@@ -1,8 +1,8 @@
 /**
- * Dicas em três degraus: direção, foco e resposta.
+ * Hints in three stages: direction, focus, and answer.
  *
- * Nunca punem, nunca cobram, nunca envergonham. Cada degrau exige um pedido
- * novo do jogador. A voz é a da advogada — técnica e sem julgamento.
+ * They never punish, pressure, or shame. Each stage requires a new request from
+ * the player. The voice is the lawyer's—technical and nonjudgmental.
  */
 
 import type { GameState } from "./types";
@@ -142,7 +142,7 @@ export function hintFor(obstacleId: string) {
   return HINTS.find((hint) => hint.obstacleId === obstacleId);
 }
 
-/** Qual obstáculo faz sentido oferecer agora, dado o estado. */
+/** Selects the obstacle that makes sense to offer for the current state. */
 export function suggestObstacle(state: GameState): string {
   if (state.act === 1) return "ATO_1";
   if (state.act === 2) {
@@ -151,8 +151,8 @@ export function suggestObstacle(state: GameState): string {
     return "LOCK_002";
   }
   if (state.act === 3) {
-    // Quem viu a escala e ainda não viu o ofício está perseguindo a mãe. É a
-    // única linha em que a dica precisa desfazer uma suspeita, não abrir uma.
+    // A player who saw the schedule but not the official letter is pursuing the
+    // mother. This is the only path where the hint must dispel rather than open suspicion.
     if (state.cluesExamined.includes("CLUE_072") && !state.cluesFound.includes("CLUE_073")) {
       return "CHAR_002";
     }

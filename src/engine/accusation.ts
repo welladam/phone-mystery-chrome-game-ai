@@ -1,4 +1,4 @@
-/** Avaliação mínima da acusação final, sem oferecer uma lista de suspeitos. */
+/** Minimal final-accusation evaluation without offering a suspect list. */
 
 import { normalizeText } from "./text";
 import type { AccusationDraft } from "./types";
@@ -17,9 +17,9 @@ const ACCEPTED_NAMES = new Set([
 ]);
 
 /**
- * Cada nome errado que o jogador chegou a considerar tem uma resposta escrita
- * pela advogada, em `act4.ts`. Errar não devolve um aviso genérico: devolve o
- * dado que derruba aquela tese específica.
+ * Every incorrect name the player might consider has a response written by
+ * the lawyer in `act4.ts`. A wrong answer does not return a generic warning;
+ * it returns the fact that disproves that specific theory.
  */
 const NAMED_REJECTIONS: Array<{ feedbackId: string; names: string[] }> = [
   {

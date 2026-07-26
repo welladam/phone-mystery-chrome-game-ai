@@ -1,17 +1,17 @@
 /**
- * Pacote narrativo do Ato 4 — carregado somente quando o ato começa.
+ * Act 4 narrative package—loaded only when the act begins.
  *
- * Este módulo é o único lugar do projeto onde o desfecho existe por extenso.
- * Enquanto o jogador não chegar aqui, este arquivo não é baixado.
+ * This module is the only place in the project where the full ending exists.
+ * The file is not downloaded until the player reaches this point.
  */
 
 /* ------------------------------------------------------------------ */
-/* Colapso da conversa principal                                       */
+/* Main-conversation collapse                                         */
 /* ------------------------------------------------------------------ */
 
 export const COLLAPSE_SILENCE_MS = 11 * 60 * 1000;
 
-/** Falas finais em português, jamais geradas nem traduzidas pela IA. */
+/** Final Portuguese lines, never generated or translated by AI. */
 export const COLLAPSE_LINES = [
   { at: "23:58", text: "onde vc achou isso" },
   { at: "23:58", text: "onde" },
@@ -57,7 +57,7 @@ export const UNKNOWN_COLLAPSE_LINES = [
 export const UNKNOWN_COLLAPSE_CLOSING = "O número saiu do ar. Última visualização: 00:24.";
 
 /* ------------------------------------------------------------------ */
-/* Formulário de acusação                                              */
+/* Accusation form                                                     */
 /* ------------------------------------------------------------------ */
 
 export type ChoiceField = {
@@ -161,7 +161,7 @@ export const ACCUSATION_FIELDS: ChoiceField[] = [
   },
 ];
 
-/** As quatro explicações são verdadeiras; qualquer uma é aceita. */
+/** All four explanations are true; any one is accepted. */
 export const CONTRADICTION_ALL_VALID = true;
 
 export const DESCONHECIDA_FIELD = {
@@ -191,7 +191,7 @@ export const SEQUENCE_CARDS = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Feedback da acusação — voz da Dra. Yara                             */
+/* Accusation feedback—Dr. Yara's voice                               */
 /* ------------------------------------------------------------------ */
 
 export const FEEDBACK: Record<string, { title: string; body: string; highlight?: string }> = {
@@ -237,7 +237,7 @@ export const FEEDBACK: Record<string, { title: string; body: string; highlight?:
 };
 
 /* ------------------------------------------------------------------ */
-/* Revelação                                                           */
+/* Revelation                                                          */
 /* ------------------------------------------------------------------ */
 
 export const REVEAL_TIMELINE = [
@@ -318,7 +318,7 @@ export const REVEAL_EPILOGUE = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Dado tardio                                                         */
+/* Late-arriving fact                                                  */
 /* ------------------------------------------------------------------ */
 
 export const LINE_ACTIVATION = {

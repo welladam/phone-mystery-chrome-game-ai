@@ -1,4 +1,4 @@
-/** Catálogos visíveis e narrativa compartilhada do locale pt-BR. */
+/** Visible catalogs and shared narrative for the pt-BR locale. */
 import * as manifest from "../../content/manifest";
 import * as shared from "../../content/shared";
 import * as dossier from "../../content/dossier";

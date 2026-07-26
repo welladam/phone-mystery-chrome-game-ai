@@ -1,9 +1,9 @@
 /**
- * Save do jogo: versão, checksum, sanitização e migração.
+ * Game save: versioning, checksum, sanitization, and migration.
  *
- * O save guarda apenas IDs e estados já alcançados. Não há texto de solução,
- * não há segredo bloqueado e nenhuma chave tem nome revelador. Um save
- * adulterado é recusado com mensagem amigável, nunca com stack trace.
+ * The save stores only IDs and states already reached. It contains no solution
+ * text, no locked secret, and no revealing key names. A tampered save is
+ * rejected with a friendly message, never a stack trace.
  */
 
 import { APPS, LOCKS, isKnownClue } from "../content/manifest";
@@ -32,7 +32,7 @@ export type LoadResult =
 const VALID_APPS = new Set<string>(APPS.map((app) => app.id));
 const VALID_LOCKS = new Set<string>(LOCKS.map((lock) => lock.id));
 
-/** Campos que entram no checksum — só progressão, nunca conteúdo. */
+/** Fields included in the checksum—progress only, never content. */
 function checksumInput(state: GameState) {
   return [
     state.saveVersion,
@@ -55,7 +55,7 @@ export function signState(state: GameState) {
   return fnv1a(checksumInput(state));
 }
 
-/** Assinatura usada pelos saves v2, antes de existir modo de dificuldade. */
+/** Signature used by v2 saves before difficulty modes existed. */
 function signLegacyV2(raw: unknown) {
   if (!raw || typeof raw !== "object") return "";
   const state = raw as Partial<GameState>;
@@ -103,9 +103,9 @@ function sanitizeChat(raw: unknown): ChatState {
 }
 
 /**
- * Remove qualquer coisa que não exista no registro atual e garante que a
- * progressão seja coerente. Um save que aponte para um ato impossível ou para
- * pistas inexistentes é normalizado, não aceito às cegas.
+ * Removes anything absent from the current registry and ensures coherent
+ * progression. A save pointing to an impossible act or nonexistent clues is
+ * normalized rather than accepted blindly.
  */
 export function sanitizeState(raw: unknown): GameState | undefined {
   if (!raw || typeof raw !== "object") return undefined;
@@ -190,17 +190,17 @@ export function sanitizeState(raw: unknown): GameState | undefined {
 }
 
 /**
- * Migração de versões.
- * A v1 é o protótipo antigo de chat único, cuja história não existe mais.
- * Ele é descartado de propósito — manter aquele progresso significaria
- * ressuscitar um caso que contradiz este.
+ * Version migration.
+ * v1 is the old single-chat prototype whose story no longer exists. It is
+ * deliberately discarded—keeping that progress would resurrect a case that
+ * contradicts this one.
  */
 export async function loadSave(locale: LocaleId): Promise<LoadResult> {
   let envelope: SaveEnvelope | undefined;
   let readLegacySlot = false;
   try {
     envelope = await withStore<SaveEnvelope | undefined>("saves", "readonly", (store) => store.get(saveKey(locale)));
-    // O slot anterior à internacionalização sempre foi escrito em pt-BR.
+    // The pre-internationalization slot was always written in pt-BR.
     if (!envelope && locale === "pt-BR") {
       envelope = await withStore<SaveEnvelope | undefined>("saves", "readonly", (store) => store.get(LEGACY_SAVE_KEY));
       readLegacySlot = Boolean(envelope);
@@ -279,7 +279,7 @@ export async function clearSave(locale: LocaleId): Promise<void> {
   }
 }
 
-/** Escrita com atraso, para não gravar a cada tecla. */
+/** Debounced writing so storage is not updated on every keystroke. */
 export function createAutoSaver(locale: LocaleId, delayMs = 400) {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let pending: GameState | undefined;

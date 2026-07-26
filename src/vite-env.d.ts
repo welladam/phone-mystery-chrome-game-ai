@@ -1,14 +1,14 @@
 /// <reference types="vite/client" />
 
 /**
- * Tipagem mínima das APIs experimentais do Chrome.
+ * Minimal typings for Chrome's experimental APIs.
  *
- * A assinatura destas APIs mudou mais de uma vez. Aceitamos deliberadamente
- * tanto os nomes atuais quanto os legados, e todo acesso passa pelos
- * adaptadores em `src/ai/`, que normalizam as diferenças num único lugar.
+ * These API signatures have changed more than once. Current and legacy names
+ * are deliberately accepted, and all access passes through adapters in `src/ai/`
+ * that normalize differences in one place.
  */
 declare global {
-  /** Valores atuais da especificação e os legados ainda presentes em docs. */
+  /** Current specification values and legacy values still present in documentation. */
   type AiAvailabilityRaw =
     | "available"
     | "downloadable"
@@ -19,7 +19,7 @@ declare global {
     | "no";
 
   type AiDownloadProgressEvent = Event & {
-    /** Progresso normalizado de 0 a 1 — não é contagem de bytes. */
+    /** Progress normalized from 0 to 1; this is not a byte count. */
     readonly loaded?: number;
     readonly total?: number;
   };

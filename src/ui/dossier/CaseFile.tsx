@@ -5,7 +5,7 @@ import { useLocale } from "../../i18n/LocaleContext";
 import { getLocaleContent } from "../../locales/contentRegistry";
 
 type Props = {
-  /** "entrada" mostra a pasta fechada primeiro; "consulta" abre direto. */
+  /** "entrada" shows the closed file first; "consulta" opens it directly. */
   mode: "entrada" | "consulta";
   reducedMotion: boolean;
   onClose: () => void;

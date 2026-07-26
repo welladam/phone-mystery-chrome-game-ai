@@ -1,18 +1,17 @@
 /**
- * Adaptador da Translator API.
+ * Translator API adapter.
  *
- * Duas preocupações que não são triviais e que o jogo depende:
+ * Two non-trivial concerns the game depends on:
  *
- * 1. GLOSSÁRIO PROTEGIDO. "Cacau" é uma pista — é o apelido que denuncia
- *    quem está do outro lado do número anônimo. Traduzido, viraria "cocoa" e
- *    a pista morreria. Nomes próprios, apelidos e marcas fictícias são
- *    trocados por sentinelas antes da tradução e restaurados depois, nos dois
- *    sentidos.
+ * 1. PROTECTED GLOSSARY. "Cacau" is a clue—the nickname that reveals who is
+ *    behind the anonymous number. Translation would turn it into "cocoa" and
+ *    destroy the clue. Proper names, nicknames, and fictional brands are
+ *    replaced with sentinels before translation and restored afterward in
+ *    both directions.
  *
- * 2. FORMA DA MENSAGEM. Os personagens escrevem fragmentado, com emoji e
- *    quebras de linha. Traduzir o bloco inteiro achata isso. Traduzimos linha
- *    a linha, preservando linhas vazias, e devolvemos emoji e pontuação de
- *    borda no lugar.
+ * 2. MESSAGE SHAPE. Characters write in fragments, with emoji and line breaks.
+ *    Translating the entire block flattens that style. Each line is translated
+ *    separately, preserving blank lines and restoring edge emoji and punctuation.
  */
 
 import { AiError, toAiError } from "./errors";
@@ -25,7 +24,7 @@ import {
   type DownloadProgressSample,
 } from "./availability";
 
-/** Termos que nunca podem ser traduzidos. */
+/** Terms that must never be translated. */
 const GLOSSARY = [
   "Cacau",
   "Lice",
@@ -64,7 +63,7 @@ const GLOSSARY = [
   "Pix",
 ];
 
-/** Sentinelas que sobrevivem à tradução por não parecerem palavras. */
+/** Sentinels that survive translation because they do not look like words. */
 function token(index: number) {
   return `zqx${index}qzx`;
 }
@@ -101,7 +100,7 @@ function shield(input: string): Shield {
   };
 }
 
-/** Separa emoji e pontuação de borda para que não sejam reescritos. */
+/** Separates edge emoji and punctuation so they are not rewritten. */
 const EDGE = new RegExp(
   "^([\\s]*)([\\s\\S]*?)([\\s]*)$",
 );
@@ -118,7 +117,7 @@ function pullEmoji(core: string) {
   const match = EMOJI_TAIL.exec(core);
   if (!match) return { body: core, emoji: "" };
   const emoji = match[1] ?? "";
-  // Só considera se realmente houver algo fora do padrão ASCII.
+  // Only treat it as an edge when something falls outside the ASCII range.
   if (!/[^\x00-\x7F]/.test(emoji)) return { body: core, emoji: "" };
   return { body: core.slice(0, core.length - emoji.length), emoji };
 }
@@ -198,9 +197,9 @@ export async function createTranslator(
   let instance = await build();
 
   /**
-   * Uma única tentativa de tradução, sem recriação. `withTimeout` não cancela
-   * a chamada real — ela continua rodando no navegador mesmo depois que o JS
-   * para de esperar. Isso é aceitável: o resultado tardio é só descartado.
+   * A single translation attempt without recreation. `withTimeout` does not
+   * cancel the actual call—it keeps running in the browser after JavaScript
+   * stops waiting. This is acceptable because the late result is discarded.
    */
   async function attempt(text: string): Promise<string> {
     const raced = await withTimeout(instance.translate(text), 20_000);
@@ -224,15 +223,14 @@ export async function createTranslator(
     try {
       translated = await attempt(guarded.text);
     } catch (error) {
-      // A tradução pode falhar porque o motor on-device foi reciclado pelo
-      // navegador no meio do turno (já observado: AbortError espontâneo,
-      // sem relação com o nosso próprio teto de tempo). Uma única
-      // recriação + nova tentativa resolve isso sem perder a conversa —
-      // o mesmo tratamento que a sessão de conversa já recebe.
+      // Translation can fail when the browser recycles the on-device engine
+      // mid-turn (observed as a spontaneous AbortError unrelated to our own
+      // timeout). One recreation and retry resolves it without losing the
+      // conversation, matching the handling used by the conversation session.
       try {
         instance.destroy?.();
       } catch {
-        /* já encerrada */
+        /* already closed */
       }
       try {
         instance = await build();
@@ -261,7 +259,7 @@ export async function createTranslator(
       try {
         instance.destroy?.();
       } catch {
-        // Destruir uma sessão já encerrada não é um problema do jogador.
+        // Destroying an already closed session is not a player-facing problem.
       }
     },
   };

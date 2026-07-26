@@ -1,6 +1,6 @@
 /**
- * Preferências pequenas. Só isto vai para localStorage — nada de progresso,
- * nada de conteúdo narrativo.
+ * Small preferences. Only these go to localStorage—no progress and no
+ * narrative content.
  */
 
 import type { Preferences } from "../engine/types";
@@ -25,7 +25,7 @@ export function loadPrefs(): Preferences {
     return {
       reducedMotion: parsed.reducedMotion === true,
       largeText: parsed.largeText === true,
-      // Som ligado por padrão; só desligado se o jogador tiver escolhido isso.
+      // Sound is enabled by default and disabled only when the player chooses it.
       sound: parsed.sound !== false,
       locale,
       localeChosen: parsed.localeChosen === true && isPlayableLocale(parsed.locale),
@@ -40,8 +40,8 @@ export function savePrefs(prefs: Preferences) {
   try {
     localStorage.setItem(KEY, JSON.stringify(prefs));
   } catch {
-    // Navegação privada ou armazenamento bloqueado: as preferências valem só
-    // para esta sessão. Não é motivo para interromper o jogo.
+    // In private browsing or with blocked storage, preferences apply only to
+    // this session. That is not a reason to interrupt the game.
   }
 }
 

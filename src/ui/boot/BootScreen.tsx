@@ -39,7 +39,7 @@ type Props = {
   onRetry: () => void;
 };
 
-/** Peso real de progresso — nunca número inventado (mesmo espírito do bootstrap). */
+/** Real progress weight—never an invented number, matching the startup logic. */
 function computeProgress(steps: BootStep[]) {
   if (steps.length === 0) return 0;
   const weight = steps.reduce((sum, step) => {
@@ -50,7 +50,7 @@ function computeProgress(steps: BootStep[]) {
   return Math.min(100, Math.round((weight / steps.length) * 100));
 }
 
-/** Digita as citações atmosféricas uma a uma; com reducedMotion, mostra a primeira, estática. */
+/** Types atmospheric quotes one by one; reducedMotion shows the first one statically. */
 function useTypedQuote(quotes: string[], reducedMotion: boolean) {
   const [text, setText] = useState(quotes[0] ?? "");
 

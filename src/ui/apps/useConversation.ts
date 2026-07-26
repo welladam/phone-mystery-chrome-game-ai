@@ -1,13 +1,13 @@
 /**
- * Condução de um turno de conversa.
+ * Conversation-turn orchestration.
  *
- * Ordem das decisões — e todas as que importam são do motor, não da IA:
+ * Decision order—all consequential decisions belong to the engine, not AI:
  *
- * 1. classificar a intenção do jogador (semântica, não frase exata);
- * 2. verificar se há uma fala canônica para este momento;
- * 3. calcular os fatos que o personagem pode usar agora;
- * 4. traduzir, perguntar ao modelo, traduzir de volta;
- * 5. registrar no estado o que foi liberado — nunca a partir do texto gerado.
+ * 1. classify the player's intent (semantics, not an exact phrase);
+ * 2. check for a canonical line for this moment;
+ * 3. calculate the facts the character may use now;
+ * 4. translate, prompt the model, and translate back;
+ * 5. record released information in state—never from generated text.
  */
 
 import { useCallback, useRef, useState } from "react";
@@ -58,7 +58,7 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  /** Entrega uma fala canônica com o ritmo do personagem. */
+  /** Delivers a canonical line using the character's rhythm. */
   const deliverBeat = useCallback(
     async (characterId: CharacterId, beat: ScriptedBeat, reduced: boolean) => {
       dispatch({ type: "CHAT_BEAT", characterId, beatId: beat.id });
@@ -68,8 +68,8 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
       const profile = chatLocale.getCharacter(characterId);
       for (const line of beat.lines) {
         if (!reduced) {
-          // Teto baixo de propósito: falas canônicas longas não podem virar
-          // um minuto de espera olhando o indicador de digitação.
+          // Deliberately low ceiling: long canonical lines must not become a
+          // minute of waiting while staring at the typing indicator.
           const wait = Math.min(1500, profile.minDelayMs + line.length * profile.typingSpeed);
           await new Promise((resolve) => setTimeout(resolve, wait));
         }
@@ -151,14 +151,14 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
       intents.forEach((intent) => dispatch({ type: "CHAT_INTENT", characterId, intent }));
       if (clueId) dispatch({ type: "CHAT_PRESENT", characterId, clueId });
 
-      // O que o jogador conta a um personagem pode chegar a outro — mas só
-      // pela via narrativa, nunca por leitura de sessão.
+      // What the player tells one character may reach another, but only through
+      // the narrative path, never by reading another session.
       if (chatLocale.shouldLeakToShared(intents)) {
         intents.forEach((intent) => dispatch({ type: "LEAK", token: intent }));
       }
 
       try {
-        // 2a. Metalinguagem e ameaça têm resposta canônica, em personagem.
+        // 2a. Metalinguistic attempts and threats receive canonical in-character responses.
         if (intents.includes("INT_021")) {
           dispatch({ type: "META_ATTEMPT" });
           await deliverBeat(characterId, chatLocale.metaReply(characterId), false);
@@ -169,7 +169,7 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
           return;
         }
 
-        // 2b. O contato anônimo tem uma trilha própria de deslizes.
+        // 2b. The anonymous contact has a dedicated sequence of slips.
         if (characterId === "CHAR_005") {
           const pack = await loadAct3(localeId);
           const sourcePresses = chat.intents.filter((intent) => intent === "INT_008").length + (intents.includes("INT_008") ? 1 : 0);
@@ -186,8 +186,8 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
           }
         }
 
-        // 2c. A amiga oferece uma tese sobre outra pessoa — uma vez só. A prova
-        // apresentada agora conta, por isso ela entra na lista antes da checagem.
+        // 2c. The friend offers a theory about someone else only once. Evidence
+        // presented now counts, so it enters the list before the check.
         const steer = chatLocale.friendSteerBeat(characterId, {
           state: current,
           chat: clueId ? { ...chat, presented: [...chat.presented, clueId] } : chat,
@@ -198,19 +198,19 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
           return;
         }
 
-        // 2d. Contar do atropelamento tem consequência declarada em tela.
+        // 2d. Revealing the hit-and-run has an on-screen consequence.
         const leak = chatLocale.leakWarning(characterId, intents as IntentId[]);
         if (leak && !chat.beats.includes(leak.id)) {
           await deliverBeat(characterId, leak, false);
           return;
         }
 
-        // 3. Fatos permitidos agora. Nada além disto chega à sessão.
+        // 3. Facts allowed now. Nothing beyond these reaches the session.
         const { ids, facts } = chatLocale.allowedFacts(current, characterId, chat, intents as IntentId[]);
 
-        // Nomes afirmados pelo jogador não viram memórias do personagem. Se o
-        // nome não existe no caso, ainda não pode ser conhecido ou precisa ser
-        // ocultado, a resposta sai do motor e a alegação nem chega ao modelo.
+        // Names asserted by the player do not become character memories. If a
+        // name is outside the case, cannot be known yet, or must be concealed,
+        // the engine answers and the claim never reaches the model.
         const guardedName = chatLocale.guardPersonMention(trimmed, characterId, current.act, facts);
         if (guardedName) {
           await deliverBeat(
@@ -254,11 +254,11 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
           });
         }
 
-        // Perguntar por gravações à melhor amiga tem custo narrativo visível.
+        // Asking the best friend about recordings has a visible narrative cost.
         if (characterId === "CHAR_004" && intents.includes("INT_011")) {
           dispatch({ type: "LEAK", token: "gravacao" });
         }
-        // A intenção principal fica registrada para as dicas.
+        // The primary intent is recorded for hints.
         dispatch({ type: "CHAT_INTENT", characterId, intent: primary.id });
       } catch (caught) {
         const mapped =
@@ -267,9 +267,9 @@ export function useConversation({ state, dispatch, sessions, localeId }: Params)
             : new AiError("SESSION_FAILED", caught instanceof Error ? `${caught.name}: ${caught.message}` : String(caught));
         setError(mapped);
 
-        // Sem isto, uma falha real de IA não deixa rastro nenhum — nem no
-        // painel de diagnóstico. O código e o detalhe técnico vão só para lá;
-        // o jogador continua vendo apenas a explicação em português.
+        // Without this, a real AI failure leaves no trace, even in diagnostics.
+        // Only the code and technical details go there; the player still sees
+        // only the Portuguese explanation.
         void logDiagnostic({
           category: "chat",
           code: mapped.code,

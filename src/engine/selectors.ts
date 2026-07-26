@@ -63,7 +63,7 @@ export function describeClue(clueId: string) {
   return { label: clue.label, summary: clue.summary };
 }
 
-/** Blocos probatórios cobertos pelas evidências escolhidas na acusação. */
+/** Evidentiary blocks covered by the evidence selected for the accusation. */
 export function evidenceCoverage(clueIds: string[]) {
   const blocks = new Set<string>();
   clueIds.forEach((id) => {

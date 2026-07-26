@@ -37,9 +37,9 @@ import { getLocaleChat } from "./locales/chatRegistry";
 import { getLocaleContent } from "./locales/contentRegistry";
 
 /**
- * Um aplicativo protegido não renderiza o próprio conteúdo enquanto a senha
- * não for aceita pelo motor. A verificação fica aqui, na casca, e não dentro
- * de cada tela — assim nenhum aplicativo novo pode esquecer de fazê-la.
+ * A protected app does not render its content until the engine accepts the
+ * password. Verification lives here in the shell rather than inside each screen,
+ * so no new app can forget to enforce it.
  */
 function AppLocked({
   appId,
@@ -85,7 +85,7 @@ export default function App() {
   const sessionsRef = useRef<CharacterSessions | undefined>(undefined);
   const [sessions, setSessions] = useState<CharacterSessions>();
 
-  /* ---------------- estado do jogo ---------------- */
+  /* ---------------- game state ---------------- */
   const [state, dispatch] = useReducer(gameReducer, undefined, createInitialState);
   const [packs, setPacks] = useState<ContentPacks>({});
   const [prefs, setPrefs] = useState(loadPrefs);
@@ -116,10 +116,9 @@ export default function App() {
     unlockedApps: [...state.unlockedApps],
   });
   /**
-   * A pasta reservada. Aparece sozinha depois que tudo está instalado e antes
-   * de o celular ligar — é onde o jogador recebe o briefing e o código da
-   * tela. Depois disso continua acessível pela lateral, e a folha de anotações
-   * dentro dela acompanha o que já foi descoberto.
+   * The confidential file. It appears by itself after installation and before
+   * the phone turns on, providing the briefing and screen code. It remains
+   * accessible from the side afterward, and its notes sheet tracks discoveries.
    */
   const [caseFile, setCaseFile] = useState<"entrada" | "consulta" | undefined>();
 
@@ -140,14 +139,14 @@ export default function App() {
     [],
   );
 
-  /* ---------------- som ---------------- */
+  /* ---------------- sound ---------------- */
 
   useEffect(() => {
     setSoundEnabled(prefs.sound);
   }, [prefs.sound]);
 
-  // Toque discreto ao clicar em qualquer elemento interativo. O primeiro
-  // gesto também "acorda" o áudio (política de autoplay do navegador).
+  // Play a subtle sound when any interactive element is clicked. The first
+  // gesture also wakes the audio context under the browser autoplay policy.
   useEffect(() => {
     const handler = (event: PointerEvent) => {
       const target = event.target as HTMLElement | null;
@@ -165,7 +164,7 @@ export default function App() {
     return () => document.removeEventListener("pointerdown", handler);
   }, []);
 
-  /* ---------------- persistência ---------------- */
+  /* ---------------- persistence ---------------- */
 
   useEffect(() => {
     autoSaver.onError((error) => {
@@ -190,7 +189,7 @@ export default function App() {
     };
   }, [autoSaver]);
 
-  /* ---------------- conteúdo por ato ---------------- */
+  /* ---------------- content by act ---------------- */
 
   useEffect(() => {
     let alive = true;
@@ -209,7 +208,7 @@ export default function App() {
     };
   }, [localeId, state.act]);
 
-  /* ---------------- entrada do contato anônimo ---------------- */
+  /* ---------------- anonymous contact entry ---------------- */
 
   useEffect(() => {
     if (state.unknownEntered || state.act < 3) return;
@@ -247,10 +246,10 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [localeId, state, reducedMotion]);
 
-  /* ---------------- revelação ---------------- */
+  /* ---------------- revelation ---------------- */
 
-  // `conversation` é recriado a cada render, então o efeito reexecutaria sem
-  // parar e reiniciaria o desfecho. A trava garante uma única execução.
+  // `conversation` is recreated on every render, so the effect would run
+  // continuously and restart the ending. The guard ensures a single run.
   const revealRunning = useRef(false);
 
   useEffect(() => {
@@ -266,7 +265,7 @@ export default function App() {
     })();
   }, [state.eventsFired, state.revealShown, state.unknownEntered, conversation]);
 
-  /* ---------------- ações do boot ---------------- */
+  /* ---------------- startup actions ---------------- */
 
   const runInspection = useCallback(async () => {
     setBootError(undefined);
@@ -323,10 +322,9 @@ export default function App() {
       return;
     }
 
-    // Uma nova preparação substitui os recursos anteriores de forma explícita.
-    // Eles não podem ficar presos ao cleanup de um efeito dependente de
-    // `sessions`: esse cleanup também roda quando o estado recebe a primeira
-    // sessão e acabaria destruindo os tradutores recém-criados.
+    // A new preparation explicitly replaces previous resources. They cannot be
+    // tied to cleanup for an effect that depends on `sessions`: that cleanup also
+    // runs when state receives the first session and would destroy new translators.
     sessionsRef.current?.destroy();
     runtimeRef.current?.destroy();
 
@@ -341,8 +339,8 @@ export default function App() {
     let jaComecou = false;
     let restoredState: GameState | undefined;
     try {
-      // A tela "aparelho pronto" precisa de um instante para ser percebida —
-      // sem isso, uma restauração rápida do save a atravessa num único quadro.
+      // The "device ready" screen needs a moment to register; otherwise a fast
+      // save restoration passes through it in a single frame.
       const save = reducedMotion
         ? await loadSave(localeId)
         : (await Promise.all([loadSave(localeId), new Promise((resolve) => setTimeout(resolve, 500))]))[0];
@@ -373,9 +371,9 @@ export default function App() {
     setPhase("restaurando");
     setTimeout(() => setPhase("desligado"), 0);
 
-    // Investigação nova: a pasta reservada vem antes do aparelho, porque é
-    // dela que sai o código da tela. Quem já estava no meio do caso entra
-    // direto e consulta a pasta quando quiser.
+    // For a new investigation, the confidential file precedes the device because
+    // it contains the screen code. Returning players enter directly and can
+    // consult the file whenever they want.
     setCaseFile(jaComecou ? undefined : "entrada");
     const baseline = restoredState ?? createInitialState();
     incomingCountsRef.current = Object.fromEntries(
@@ -386,8 +384,8 @@ export default function App() {
     setBooted(true);
   }, [locale, localeId, report, t, reducedMotion]);
 
-  // Recursos nativos do Chrome sobrevivem durante toda a partida e são
-  // encerrados apenas quando o aplicativo realmente sai da página.
+  // Native Chrome resources survive for the entire game and are closed only
+  // when the app actually leaves the page.
   useEffect(() => () => {
     sessionsRef.current?.destroy();
     runtimeRef.current?.destroy();
@@ -395,7 +393,7 @@ export default function App() {
     runtimeRef.current = undefined;
   }, []);
 
-  /* ---------------- API dos aplicativos ---------------- */
+  /* ---------------- app API ---------------- */
 
   const api = useMemo(
     () => ({
@@ -466,7 +464,7 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  /* ---------------- notificações de mensagens ---------------- */
+  /* ---------------- message notifications ---------------- */
 
   useEffect(() => {
     if (!incomingReadyRef.current) return;
@@ -506,7 +504,7 @@ export default function App() {
     if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
   }, []);
 
-  /* ---------------- feedback narrativo de progressão ---------------- */
+  /* ---------------- narrative progression feedback ---------------- */
 
   useEffect(() => {
     if (!booted || !progressReadyRef.current) return;
@@ -621,7 +619,7 @@ export default function App() {
     );
   }
 
-  // A pasta de entrada ocupa a tela inteira: é leitura, não é multitarefa.
+  // The entry file fills the screen: this is reading, not multitasking.
   if (caseFile === "entrada") {
     return (
       <CaseFile
@@ -653,7 +651,7 @@ export default function App() {
   }
 
   const badges: Partial<Record<AppId, number>> = {
-    // O aviso fica no ícone do Chat até o jogador abrir a conversa nova.
+    // The badge remains on the Chat icon until the player opens the new conversation.
     APP_002: state.unknownEntered && !state.unknownRead ? 1 : 0,
   };
 

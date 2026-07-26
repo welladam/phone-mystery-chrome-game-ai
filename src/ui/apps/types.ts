@@ -9,7 +9,7 @@ export type ContentPacks = {
   act4?: Act4Pack;
 };
 
-/** Tudo o que um aplicativo pode fazer passa por estas ações do motor. */
+/** Everything an app can do passes through these engine actions. */
 export type AppApi = {
   state: GameState;
   packs: ContentPacks;

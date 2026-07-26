@@ -1,10 +1,10 @@
 /**
- * Pasta reservada entregue ao perito antes do exame do aparelho.
+ * Confidential file delivered to the investigator before examining the device.
  *
- * Todo o conteúdo aqui é seguro para o Ato 1: é o que a família e a advogada
- * sabiam antes de qualquer descoberta. Nada nesta pasta antecipa a solução.
- * O caderno de trabalho fica fora do aparelho e é preenchido manualmente pelo
- * jogador; esta pasta permanece apenas como briefing original do caso.
+ * Everything here is safe for Act 1: it is what the family and lawyer knew
+ * before any discovery. Nothing in this file foreshadows the solution. The work
+ * notebook lives outside the device and is filled manually by the player; this
+ * file remains only as the original case briefing.
  */
 
 import type { ActNumber } from "../engine/types";
@@ -84,7 +84,7 @@ export const DOSSIER_METHOD = [
 export const DOSSIER_WARNING =
   "Uma observação que eu faço a todo mundo: não trate nenhuma das três pessoas como suspeita antes de ter documento na mão. Duas delas estão de luto. Uma delas talvez esteja mentindo. Você ainda não sabe qual, e chutar cedo custa caro.";
 
-/** Objetivo corrente — orienta sem entregar nada. */
+/** Current objective—provides direction without giving anything away. */
 export const ACT_BRIEF: Record<ActNumber, { title: string; goal: string }> = {
   1: {
     title: "Ato 1 — Morte a esclarecer",

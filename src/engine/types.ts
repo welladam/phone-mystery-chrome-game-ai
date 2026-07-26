@@ -1,35 +1,35 @@
 /**
- * Tipos centrais do motor de jogo.
+ * Core game-engine types.
  *
- * Regra de ouro: nenhum identificador aqui pode revelar a solução do caso.
- * Usamos IDs opacos e estáveis (CLUE_0xx, EVENT_0xx, LOCK_00x, MEMORY_0xx).
+ * Golden rule: no identifier here may reveal the case solution. IDs are opaque
+ * and stable (CLUE_0xx, EVENT_0xx, LOCK_00x, MEMORY_0xx).
  */
 
 export type ActNumber = 1 | 2 | 3 | 4;
 export type Difficulty = "normal" | "hard";
 
 export type AppId =
-  | "APP_001" // Notificações
+  | "APP_001" // Notifications
   | "APP_002" // Vínculo (chat)
-  | "APP_003" // Galeria
-  | "APP_004" // Correio
-  | "APP_005" // Contatos
-  | "APP_006" // Agenda
-  | "APP_007" // Órbita (navegador)
-  | "APP_008" // Telefone
+  | "APP_003" // Gallery
+  | "APP_004" // Mail
+  | "APP_005" // Contacts
+  | "APP_006" // Calendar
+  | "APP_007" // Órbita (browser)
+  | "APP_008" // Phone
   | "APP_009" // Voz Segura
-  | "APP_010" // Bloco (notas)
-  | "APP_011" // Rumo (mapas)
+  | "APP_010" // Bloco (notes)
+  | "APP_011" // Rumo (maps)
   | "APP_012" // Nimbo Drive
-  | "APP_013" // Recuperados
-  | "APP_014" // Pulso (saúde)
+  | "APP_013" // Recovered
+  | "APP_014" // Pulso (health)
   | "APP_015" // Banco Aurora
   | "APP_016" // Vello
   | "APP_017" // Fluxo
   | "APP_018" // Chave
   | "APP_019" // Feito
-  | "APP_020" // Ajustes
-  | "APP_021"; // Caderno do Caso
+  | "APP_020" // Settings
+  | "APP_021"; // Case Notebook
 
 export type LockId =
   | "LOCK_001"
@@ -51,7 +51,7 @@ export type PhotoId = string;
 export type VoiceId = string;
 export type VideoId = string;
 
-/** Linha de transcrição cronometrada, usada por gravações e vídeos. */
+/** Timed transcript line used by recordings and videos. */
 export type TranscriptLine = { t: string; who?: string; text: string };
 
 export type ClueWeight = 1 | 2 | 3 | 4;
@@ -59,17 +59,17 @@ export type ClueKind = "fato" | "testemunhal" | "inferencial" | "falsa";
 
 export type Clue = {
   id: ClueId;
-  /** Rótulo curto exibido no caderno. */
+  /** Short label displayed in the notebook. */
   label: string;
-  /** Descrição neutra do que a pista mostra. */
+  /** Neutral description of what the clue shows. */
   summary: string;
   app: AppId;
   act: ActNumber;
   kind: ClueKind;
   weight: ClueWeight;
-  /** Blocos probatórios usados na acusação: A (presença), B (horário), C (motivo). */
+  /** Evidentiary blocks used in the accusation: A (presence), B (time), C (motive). */
   block?: "A" | "B" | "C";
-  /** Fato correspondente em inglês, injetado na IA apenas quando permitido. */
+  /** Corresponding English fact, injected into AI only when allowed. */
   factEN?: string;
 };
 
@@ -77,7 +77,7 @@ export type Memory = {
   id: MemoryId;
   label: string;
   text: string;
-  /** Precisa de pelo menos N destas pistas examinadas. */
+  /** Requires at least N of these clues to have been examined. */
   requiresAnyOf?: ClueId[];
   requiresCount?: number;
   requiresAllOf?: ClueId[];
@@ -88,37 +88,37 @@ export type LockKind = "pin" | "palavra" | "pergunta";
 export type Lock = {
   id: LockId;
   kind: LockKind;
-  /** Rótulo do campo. */
+  /** Field label. */
   prompt: string;
-  /** Dica escrita pela própria Clara, sempre visível. */
+  /** Hint written by Clara herself, always visible. */
   hint: string;
-  /** Comprimento esperado (só informativo para o teclado numérico). */
+  /** Expected length, used only to inform the numeric keypad. */
   length?: number;
-  /** Segundo fator opcional (código do autenticador). */
+  /** Optional second factor (authenticator code). */
   secondFactorPrompt?: string;
-  /** Registro de tentativas anteriores exibido antes de destravar. */
+  /** Previous-attempt log displayed before unlocking. */
   priorAttempts?: string;
-  /** Aceita estas respostas (já normalizadas). */
+  /** Accepts these already-normalized answers. */
   accepts: string[];
   secondFactorAccepts?: string[];
-  /** Pistas liberadas ao abrir. */
+  /** Clues released when opened. */
   grantsClues?: ClueId[];
-  /** Aplicativo/áreas liberadas ao abrir. */
+  /** Apps or areas released when opened. */
   unlocksApps?: AppId[];
 };
 
 export type PhoneAppDescriptor = {
   id: AppId;
   name: string;
-  /** Nome do ícone lucide-react. */
+  /** lucide-react icon name. */
   icon: string;
-  /** Ato mínimo em que o app aparece na tela inicial. */
+  /** Earliest act in which the app appears on the home screen. */
   availableFrom: ActNumber;
-  /** Cor de acento do ícone. */
+  /** Icon accent color. */
   tone: "verde" | "azul" | "ambar" | "rosa" | "cinza" | "roxo";
-  /** Texto curto exibido sob o ícone quando há novidade. */
+  /** Short text displayed below the icon when something is new. */
   subtitle?: string;
-  /** Bloqueio que protege o app inteiro. */
+  /** Lock protecting the entire app. */
   lock?: LockId;
 };
 
@@ -129,23 +129,23 @@ export type ChatMessage = {
   role: ChatRole;
   text: string;
   at: string;
-  /** Pista anexada pelo jogador nesta mensagem. */
+  /** Clue attached by the player to this message. */
   clueId?: ClueId;
-  /** Marca falas canônicas (não geradas pela IA). */
+  /** Marks canonical lines not generated by AI. */
   scripted?: boolean;
 };
 
 export type ChatState = {
   messages: ChatMessage[];
-  /** IDs de fatos já liberados para este personagem. */
+  /** IDs of facts already released to this character. */
   disclosed: string[];
-  /** Beats canônicos já disparados. */
+  /** Canonical beats already triggered. */
   beats: string[];
-  /** Pistas que o jogador já apresentou a este personagem. */
+  /** Clues the player has already presented to this character. */
   presented: ClueId[];
-  /** Intenções já detectadas nesta conversa. */
+  /** Intents already detected in this conversation. */
   intents: string[];
-  /** Bloqueio temporário (silêncio narrativo) em epoch ms. */
+  /** Temporary lock (narrative silence) in epoch milliseconds. */
   silentUntil?: number;
   collapsed?: boolean;
 };
@@ -172,10 +172,10 @@ export type Preferences = {
 export type GameState = {
   saveVersion: number;
   difficulty: Difficulty;
-  /** A escolha é feita antes de ligar o aparelho e só muda ao reiniciar. */
+  /** Chosen before turning on the device and changed only by restarting. */
   difficultyChosen: boolean;
   act: ActNumber;
-  /** Aparelho já destravado com o PIN da tela. */
+  /** Device already unlocked with the screen PIN. */
   phoneUnlocked: boolean;
   unlockedApps: AppId[];
   solvedLocks: LockId[];
@@ -185,12 +185,12 @@ export type GameState = {
   memories: MemoryId[];
   eventsFired: EventId[];
   chats: Record<string, ChatState>;
-  /** Conhecimento compartilhado entre CHAR_004 e CHAR_005 (mesma pessoa). */
+  /** Knowledge shared between CHAR_004 and CHAR_005 (the same person). */
   sharedLeak: string[];
   unknownEntered: boolean;
-  /** O jogador já abriu a conversa do contato anônimo? Controla o aviso no ícone. */
+  /** Whether the player opened the anonymous contact chat; controls the icon badge. */
   unknownRead: boolean;
-  /** Registro de qual janela está "digitando" — nunca duas ao mesmo tempo. */
+  /** Tracks which window is "typing"—never two at once. */
   typingLock?: CharacterId;
   notificationsSeen: string[];
   zoomed: PhotoId[];
@@ -204,7 +204,7 @@ export type GameState = {
   sentAudioToDiego: boolean;
   startedAt: string;
   lastSavedAt: string;
-  /** Marca de tempo da entrada no ato atual (usada nos fallbacks anti-bloqueio). */
+  /** Timestamp for entering the current act, used by anti-blocking fallbacks. */
   actEnteredAt: number;
 };
 

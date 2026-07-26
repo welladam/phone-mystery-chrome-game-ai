@@ -1,9 +1,9 @@
 /**
- * Registro técnico.
+ * Technical log.
  *
- * O jogador nunca vê estas mensagens durante a partida. Elas existem para o
- * painel de diagnóstico, disponível apenas em desenvolvimento, e para o botão
- * de exportar que aparece nas telas de erro.
+ * The player never sees these messages during the game. They exist for the
+ * development-only diagnostics panel and for the export button shown on error
+ * screens.
  */
 
 import { withStore } from "./db";
@@ -31,7 +31,7 @@ export async function logDiagnostic(event: Omit<DiagnosticEvent, "id" | "at">) {
   try {
     await withStore<IDBValidKey>("diagnostics", "readwrite", (store) => store.put(entry));
   } catch {
-    // Sem armazenamento o log continua em memória e ainda pode ser exportado.
+    // Without storage, the log remains in memory and can still be exported.
   }
   return entry;
 }

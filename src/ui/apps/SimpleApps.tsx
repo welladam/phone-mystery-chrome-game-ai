@@ -1,11 +1,11 @@
 /**
- * Leitores genéricos.
+ * Generic readers.
  *
- * Onze aplicativos do aparelho são, na prática, listas de registros com
- * metadados: contatos, agenda, chamadas, navegação, extrato, corridas,
- * tarefas, rede social, autenticador, lixeira e correio. Em vez de escrever
- * onze telas quase iguais, eles compartilham estes leitores e diferem apenas
- * nos dados — que continuam sendo exatamente os do documento narrativo.
+ * Eleven device apps are effectively metadata-rich record lists: contacts,
+ * calendar, calls, browsing, statements, rides, tasks, social network,
+ * authenticator, trash, and mail. Instead of eleven nearly identical screens,
+ * they share these readers and differ only in data, which still matches the
+ * narrative document exactly.
  */
 
 import { useState } from "react";

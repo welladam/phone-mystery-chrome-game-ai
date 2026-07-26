@@ -59,9 +59,8 @@ for (const path of sourceFiles) {
   }
 }
 
-// Componentes não devem voltar a receber texto humano diretamente. Conteúdo
-// proveniente dos pacotes narrativos aparece como expressão JSX e não é pego
-// por esta regra.
+// Components must not receive human-facing text directly again. Content from
+// narrative packages appears as a JSX expression and is not caught by this rule.
 const uiFiles = sourceFiles.filter(
   (path) =>
     path.endsWith(".tsx") &&

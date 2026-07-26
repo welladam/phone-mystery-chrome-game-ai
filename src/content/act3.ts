@@ -1,16 +1,16 @@
 /**
- * Pacote narrativo do Ato 3 — carregado sob demanda.
- * Gravações, e-mails da criminalista, declaração, corridas e o contato anônimo.
+ * Act 3 narrative package—loaded on demand.
+ * Recordings, forensic expert emails, statement, rides, and the anonymous contact.
  */
 
 import type { ClueId, TranscriptLine } from "../engine/types";
 import type { MailRecord } from "./act2";
 
 /* ------------------------------------------------------------------ */
-/* Gravador                                                            */
+/* Recorder                                                            */
 /* ------------------------------------------------------------------ */
 
-/** O tipo mora em `engine/types` porque vídeos também o usam. */
+/** The type lives in `engine/types` because videos use it as well. */
 export type { TranscriptLine };
 
 export type VoiceRecord = {
@@ -246,7 +246,7 @@ export const VOICES: VoiceRecord[] = [
   },
 ];
 
-/** Trecho que, enviado à melhor amiga, derruba a versão dela. */
+/** Excerpt that disproves the best friend's account when sent to her. */
 export const DECISIVE_EXCERPT = {
   voiceId: "VOICE_004",
   from: "02:19",
@@ -257,7 +257,7 @@ export const DECISIVE_EXCERPT = {
 };
 
 /* ------------------------------------------------------------------ */
-/* E-mails da conta secundária                                         */
+/* Secondary-account emails                                           */
 /* ------------------------------------------------------------------ */
 
 export const MAIL_ARCHIVE: MailRecord[] = [
@@ -322,7 +322,7 @@ export const MAIL_ARCHIVE: MailRecord[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Declaração                                                          */
+/* Statement                                                           */
 /* ------------------------------------------------------------------ */
 
 export const DOC_DECLARACAO = `DECLARAÇÃO
@@ -353,7 +353,7 @@ Juiz de Fora, 8 de março de 2026.
 Clara Mendonça Vasques`;
 
 /* ------------------------------------------------------------------ */
-/* Corridas                                                            */
+/* Rides                                                               */
 /* ------------------------------------------------------------------ */
 
 export const RIDES_OWN = [
@@ -378,7 +378,7 @@ export const RIDES_SHARED = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Autenticador                                                        */
+/* Authenticator                                                       */
 /* ------------------------------------------------------------------ */
 
 export const AUTH_CODES = [
@@ -390,12 +390,12 @@ export const AUTH_CODES = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Contato anônimo — falas canônicas                                   */
+/* Anonymous contact—canonical lines                                  */
 /* ------------------------------------------------------------------ */
 
 /**
- * Estas linhas nunca passam pela tradução automática: são texto final.
- * O apelido e o detalhe do casaco são pistas e precisam sair exatos.
+ * These lines never pass through automatic translation; they are final text.
+ * The nickname and coat detail are clues and must remain exact.
  */
 export const UNKNOWN_ENTRY_INFORMED = [
   "Você não é a Clara.",
@@ -414,13 +414,13 @@ export const UNKNOWN_ENTRY_FALLBACK = [
 ];
 
 export const UNKNOWN_SCRIPTED = {
-  /** Deslize do apelido — só dispara depois de empatia genuína. */
+  /** Nickname slip—triggered only after genuine empathy. */
   nickname: {
     id: "BEAT_NICK",
     lines: ["A Cacau nunca ia fazer isso com a mãe dela. Nunca.", "Você acha que ela faria?"],
     clueId: "CLUE_026",
   },
-  /** Deslize do casaco. */
+  /** Coat-detail slip. */
   coat: {
     id: "BEAT_COAT",
     lines: [
@@ -429,7 +429,7 @@ export const UNKNOWN_SCRIPTED = {
     ],
     clueId: "CLUE_027",
   },
-  /** O valor exato do conserto. */
+  /** Exact repair amount. */
   amount: {
     id: "BEAT_AMOUNT",
     lines: [
@@ -438,13 +438,13 @@ export const UNKNOWN_SCRIPTED = {
     ],
     clueId: "CLUE_040",
   },
-  /** Concessão quando pressionada duas vezes sobre a fonte. */
+  /** Concession after being pressed twice about the source. */
   concession: {
     id: "BEAT_SOURCE",
     lines: ["A Clara me contou.", "Pronto. Falei. Agora deixa isso pra lá."],
     clueId: "CLUE_065",
   },
-  /** Pergunta obsessiva por gravações. */
+  /** Obsessive question about recordings. */
   recordings: {
     id: "BEAT_REC",
     lines: [
@@ -454,13 +454,13 @@ export const UNKNOWN_SCRIPTED = {
     ],
     clueId: "CLUE_064",
   },
-  /** Reação ao nome próprio. */
+  /** Reaction to the proper name. */
   nameRefusal: {
     id: "BEAT_NAME",
     lines: ["Não."],
     silenceMs: 6 * 60 * 1000,
   },
-  /** Reação à discagem do número. */
+  /** Reaction to dialing the number. */
   dialed: {
     id: "BEAT_DIAL",
     lines: ["Não faz isso."],

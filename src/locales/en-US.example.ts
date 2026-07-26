@@ -1,8 +1,8 @@
 import type { LocaleBundle } from "./types";
 
 /**
- * Exemplo deliberadamente incompleto. Ele documenta o contrato de um locale,
- * mas permanece bloqueado até receber toda a narrativa e todos os áudios.
+ * Deliberately incomplete example. It documents the locale contract but remains
+ * disabled until it receives the full narrative and all audio.
  */
 export const enUSExample = {
   meta: {

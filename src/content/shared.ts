@@ -1,8 +1,8 @@
 /**
- * Conteúdo presente desde o Ato 1.
+ * Content available from Act 1 onward.
  *
- * Nada aqui revela a solução. Fotografias, contatos, notificações, chamadas e
- * dados de saúde: material que o jogador vê logo ao ligar o aparelho.
+ * Nothing here reveals the solution. Photos, contacts, notifications, calls,
+ * and health data are visible as soon as the player turns on the device.
  */
 
 import type { ActNumber, ClueId, PhotoId, TranscriptLine, VideoId } from "../engine/types";
@@ -13,44 +13,44 @@ export type PhotoRecord = {
   takenAt: string;
   album: string;
   caption: string;
-  /** Descrição objetiva, usada também como texto alternativo. */
+  /** Objective description, also used as alternative text. */
   alt: string;
   gps?: string;
   device?: string;
   narrative: boolean;
   clueId?: ClueId;
-  /** Detalhe revelado ao usar "Aprimorar imagem". */
+  /** Detail revealed by using "Enhance image". */
   zoom?: { label: string; text: string; clueId?: ClueId };
-  /** Foto em movimento: o trecho de vídeo gravado junto com o disparo. */
+  /** Motion photo: the video clip recorded with the shot. */
   motionVideo?: VideoId;
-  /** Ato mínimo para aparecer. */
+  /** Earliest act in which it appears. */
   act: 1 | 2 | 3 | 4;
   hidden?: boolean;
   deleted?: boolean;
 };
 
 /**
- * Vídeo do aparelho. Os registros ficam nos pacotes de ato, não aqui: este
- * módulo entra no bundle inicial e transcrição de vídeo é material narrativo.
+ * Device video. Records live in act packages rather than here because this
+ * module enters the initial bundle and video transcripts are narrative material.
  */
 export type VideoRecord = {
   id: VideoId;
-  /** Nome real do arquivo, como em `PhotoRecord.file`. */
+  /** Real filename, as in `PhotoRecord.file`. */
   file: string;
-  /** Foto que serve de pôster — reaproveita `photoSrc`, sem asset extra. */
+  /** Poster photo—reuses `photoSrc` with no extra asset. */
   posterPhoto?: string;
   takenAt: string;
   album: string;
   caption?: string;
-  /** Descrição objetiva do que se vê. É o texto alternativo e, num vídeo mudo, a própria pista. */
+  /** Objective visual description. It is both the alt text and, for silent video, the clue itself. */
   alt: string;
   duration: string;
   seconds: number;
-  /** Sem faixa de áudio: o player não mostra volume nem transcrição. */
+  /** No audio track: the player shows neither volume nor transcript. */
   silent?: boolean;
   gps?: string;
   device?: string;
-  /** Observação do sistema sobre o arquivo (formato, interrupção, recuperação). */
+  /** System note about the file (format, interruption, recovery). */
   systemNote?: string;
   clueId?: ClueId;
   act: ActNumber;
@@ -384,7 +384,7 @@ export const PHOTO_ALBUMS = [
 ] as const;
 
 /* ------------------------------------------------------------------ */
-/* Contatos                                                            */
+/* Contacts                                                            */
 /* ------------------------------------------------------------------ */
 
 export type ContactRecord = {
@@ -415,7 +415,7 @@ export const CONTACTS: ContactRecord[] = [
 export const UNKNOWN_NUMBER = "(32) 99486-0075";
 
 /* ------------------------------------------------------------------ */
-/* Chamadas                                                            */
+/* Calls                                                               */
 /* ------------------------------------------------------------------ */
 
 export type CallRecord = {
@@ -463,7 +463,7 @@ export const CALLS: CallRecord[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Notificações                                                        */
+/* Notifications                                                       */
 /* ------------------------------------------------------------------ */
 
 export type NotificationRecord = {
@@ -473,7 +473,7 @@ export type NotificationRecord = {
   from: string;
   preview: string;
   clueId?: ClueId;
-  /** Marca prévias cuja mensagem original não existe mais na conversa. */
+  /** Marks previews whose original message no longer exists in the conversation. */
   orphan?: boolean;
 };
 
@@ -578,7 +578,7 @@ export const NOTIFICATIONS: NotificationRecord[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Saúde                                                               */
+/* Health                                                              */
 /* ------------------------------------------------------------------ */
 
 export const HEALTH_DAY = {
@@ -591,7 +591,7 @@ export const HEALTH_DAY = {
   sleepNextNight: "não registrado",
 };
 
-/** Série do dia 08/03, usada no gráfico. */
+/** March 8 series used in the chart. */
 export const HEART_SERIES: Array<{ time: string; bpm: number | null }> = [
   { time: "00h", bpm: 58 },
   { time: "03h", bpm: 61 },
@@ -626,7 +626,7 @@ export const HEALTH_TREND = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Ajustes                                                             */
+/* Settings                                                            */
 /* ------------------------------------------------------------------ */
 
 export const SCREEN_TIME = [

@@ -49,7 +49,7 @@
     </sc-for>
   </div>
 
-  <!-- ======================= ENTRADA ======================= -->
+  <!-- ======================= ENTRY ======================= -->
   <sc-if value="{{ isEntrada }}" hint-placeholder-val="{{ true }}">
   <div class="mc-reveal" style="position:relative; z-index:20; min-height:100vh; display:grid; grid-template-columns:minmax(300px, 0.92fr) minmax(360px, 1fr); gap:clamp(24px,4vw,64px); align-items:center; max-width:1240px; margin:0 auto; padding:clamp(64px,7vh,96px) clamp(24px,5vw,72px);">
 
@@ -97,13 +97,13 @@
         “{{ t.tagline }}”
       </p>
 
-      <!-- section: O caso -->
+      <!-- section: The case -->
       <div style="margin-top:30px; padding:18px 20px; border:1px solid rgba(236,245,239,.1); border-radius:12px; background:rgba(255,255,255,.025);">
         <p style="margin:0 0 8px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.18em; color:#f1bf6a; text-transform:uppercase;">01 — {{ t.caseHead }}</p>
         <p style="margin:0; font-size:14.5px; line-height:1.65; color:#c9d6cf; text-wrap:pretty;">{{ t.caseBody }}</p>
       </div>
 
-      <!-- section: Como funciona -->
+      <!-- section: How it works -->
       <div style="margin-top:14px; padding:18px 20px; border:1px solid rgba(131,181,223,.18); border-radius:12px; background:rgba(131,181,223,.06);">
         <p style="margin:0 0 12px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.18em; color:#83b5df; text-transform:uppercase;">02 — {{ t.howHead }}</p>
         <div style="display:grid; gap:10px;">
@@ -126,7 +126,7 @@
   </div>
   </sc-if>
 
-  <!-- ======================= CARREGAMENTO ======================= -->
+  <!-- ======================= LOADING ======================= -->
   <sc-if value="{{ isCarregando }}" hint-placeholder-val="{{ false }}">
   <div style="position:relative; z-index:20; min-height:100vh; display:grid; place-items:center; padding:40px 24px;">
     <div style="width:min(100%,680px); display:grid; gap:34px; justify-items:center; text-align:center;">
@@ -170,7 +170,7 @@
   </div>
   </sc-if>
 
-  <!-- ======================= PRONTO ======================= -->
+  <!-- ======================= READY ======================= -->
   <sc-if value="{{ isPronto }}" hint-placeholder-val="{{ false }}">
   <div class="mc-reveal" style="position:relative; z-index:20; min-height:100vh; display:grid; place-items:center; padding:40px 24px; text-align:center;">
     <div style="display:grid; gap:24px; justify-items:center; max-width:420px;">

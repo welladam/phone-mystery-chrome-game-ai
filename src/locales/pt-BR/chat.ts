@@ -1,6 +1,6 @@
 /**
- * Ponto de entrada de tudo que o chat precisa localizar. As regras continuam
- * usando IDs estáveis; perfis, falas e classificadores pertencem ao locale.
+ * Entry point for everything chat needs to localize. Rules continue using
+ * stable IDs; profiles, lines, and classifiers belong to the locale.
  */
 export { CHARACTERS, getCharacter } from "../../content/characters/base";
 export { classifyAll, classifyIntent, HOSTILE_INTENTS } from "../../engine/intents";

@@ -1,8 +1,8 @@
 /**
- * Pacote narrativo do Ato 1.
+ * Act 1 narrative package.
  *
- * Carregado sob demanda pelo registry. Contém os históricos das conversas já
- * existentes no aparelho, a agenda e as notas visíveis.
+ * Loaded on demand by the registry. Contains histories for conversations already
+ * on the device, the calendar, and visible notes.
  */
 
 import type { ClueId } from "../engine/types";
@@ -14,7 +14,7 @@ export type ArchivedLine = {
   self?: boolean;
   kind?: "texto" | "audio" | "chamada" | "foto" | "sistema";
   clueId?: ClueId;
-  /** Marca o vão deixado pelas mensagens que sumiram. */
+  /** Marks the gap left by missing messages. */
   gap?: boolean;
 };
 
@@ -27,7 +27,7 @@ export type ArchivedThread = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Históricos das três conversas ativas                                */
+/* Histories of the three active conversations                        */
 /* ------------------------------------------------------------------ */
 
 export const HISTORY_MOTHER: ArchivedLine[] = [
@@ -264,7 +264,7 @@ export const HISTORY_FRIEND: ArchivedLine[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Conversas estáticas secundárias                                     */
+/* Secondary static conversations                                     */
 /* ------------------------------------------------------------------ */
 
 export const ARCHIVED_THREADS: ArchivedThread[] = [
@@ -322,7 +322,7 @@ export const ARCHIVED_THREADS: ArchivedThread[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Agenda                                                              */
+/* Calendar                                                            */
 /* ------------------------------------------------------------------ */
 
 export type CalendarEvent = {
@@ -367,7 +367,7 @@ export const CALENDAR: CalendarEvent[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Notas visíveis                                                      */
+/* Visible notes                                                       */
 /* ------------------------------------------------------------------ */
 
 export type NoteRecord = {

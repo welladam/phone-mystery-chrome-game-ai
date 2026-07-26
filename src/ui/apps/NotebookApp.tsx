@@ -34,7 +34,7 @@ function storeNotes(locale: string, value: string) {
   try {
     localStorage.setItem(notesKey(locale), value);
   } catch {
-    // O texto continua disponível durante a sessão se o armazenamento falhar.
+    // Text remains available during the session if storage fails.
   }
 }
 
@@ -44,7 +44,7 @@ export function clearNotebookStorage(locale: string) {
     if (locale === "pt-BR") localStorage.removeItem(LEGACY_NOTES_KEY);
     localStorage.removeItem(LEGACY_TIMELINE_KEY);
   } catch {
-    // O save principal ainda é limpo separadamente.
+    // The primary save is still cleared separately.
   }
 }
 
@@ -147,8 +147,8 @@ function AccusationPanel({ api }: { api: AppApi }) {
   const { t } = useLocale();
   const draft = api.state.accusation;
   const lastAttempt = api.state.accusationAttempts[api.state.accusationAttempts.length - 1];
-  // A resposta escrita para aquele nome específico. O pacote do Ato 4 carrega de
-  // forma assíncrona, então o texto genérico continua sendo o fallback.
+  // The response written for that specific name. The Act 4 package loads
+  // asynchronously, so generic text remains the fallback.
   const feedback = lastAttempt ? api.packs.act4?.FEEDBACK[lastAttempt.feedbackId] : undefined;
   const highlighted = feedback?.highlight ? getClue(feedback.highlight) : undefined;
   return (

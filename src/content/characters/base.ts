@@ -1,38 +1,38 @@
 /**
- * Prompts de sistema dos personagens.
+ * Character system prompts.
  *
- * Escritos em inglês porque o modelo local interpreta personalidade e emoção
- * com mais estabilidade nesse idioma. O jogador nunca vê este texto: a
- * mensagem dele é traduzida para inglês antes de chegar aqui e a resposta é
- * traduzida de volta para o português antes de aparecer na tela.
+ * Written in English because the local model interprets personality and emotion
+ * more reliably in that language. The player never sees this text: their message
+ * is translated into English before arriving here, and the response is translated
+ * back into Portuguese before appearing on screen.
  *
- * Nenhum prompt contém a solução do caso. Os fatos que cada personagem pode
- * usar chegam em tempo de execução, um a um, pelo motor (`disclosure.ts`).
+ * No prompt contains the case solution. Facts each character may use arrive at
+ * runtime, one at a time, from the engine (`disclosure.ts`).
  */
 
 import type { CharacterId } from "../../engine/types";
 
 export type CharacterProfile = {
   id: CharacterId;
-  /** Nome exibido na lista de conversas. */
+  /** Name displayed in the conversation list. */
   displayName: string;
-  /** Linha de status sob o nome. */
+  /** Status line below the name. */
   status: string;
-  /** Iniciais para o avatar. */
+  /** Avatar initials. */
   initials: string;
   tone: "verde" | "azul" | "rosa" | "cinza";
-  /** Atraso base de digitação, em milissegundos por caractere. */
+  /** Base typing delay in milliseconds per character. */
   typingSpeed: number;
-  /** Atraso mínimo antes de começar a responder. */
+  /** Minimum delay before responding. */
   minDelayMs: number;
   systemPrompt: string;
-  /** Primeira mensagem do perito, exigida pelo termo de autorização. */
+  /** Investigator's first message, required by the authorization terms. */
   openingFromPlayer: string;
-  /** Resposta canônica de abertura, em português, sem passar pela IA. */
+  /** Canonical Portuguese opening response, bypassing AI. */
   openingLines: string[];
-  /** Respostas canônicas a tentativas metalinguísticas. */
+  /** Canonical responses to metalinguistic attempts. */
   metaReplies: string[];
-  /** Respostas canônicas a ameaças. */
+  /** Canonical responses to threats. */
   threatReplies: string[];
 };
 

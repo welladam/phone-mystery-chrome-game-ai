@@ -1,9 +1,9 @@
 /**
- * Redutor único do jogo.
+ * Single game reducer.
  *
- * Toda progressão passa por aqui. A interface nunca desbloqueia conteúdo
- * mexendo em estado local, e a IA nunca escreve neste redutor — respostas do
- * modelo entram apenas como texto de mensagem, através de CHAT_APPEND.
+ * All progression passes through here. The UI never unlocks content by changing
+ * local state, and AI never writes to this reducer—model responses enter only
+ * as message text through CHAT_APPEND.
  */
 
 import { getClue, getLock, isKnownClue } from "../content/manifest";
@@ -23,7 +23,7 @@ function withChat(state: GameState, characterId: string, patch: Partial<ChatStat
   };
 }
 
-/** Aplica avanço de ato e deduções derivadas depois de qualquer mudança. */
+/** Applies act advancement and derived deductions after any change. */
 function settle(state: GameState): GameState {
   let next = { ...state, memories: unique([...state.memories, ...deriveMemories(state)]) };
 
@@ -40,7 +40,7 @@ function settle(state: GameState): GameState {
       unlockedApps: unique([...next.unlockedApps, ...appsUnlockedForAct(act)]),
       eventsFired: eventId ? unique([...next.eventsFired, eventId]) : next.eventsFired,
     };
-    // Um ato pode habilitar outro imediatamente (jogador que já tinha tudo).
+    // One act may immediately enable another when the player already has everything.
     const again = nextAct(next);
     if (again && again > next.act) {
       return settle(next);
@@ -247,7 +247,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
   }
 }
 
-/** Conveniência para a UI: a pista existe e já foi encontrada? */
+/** UI convenience: does the clue exist, and has it already been found? */
 export function clueLabel(clueId: string) {
   return getClue(clueId)?.label ?? clueId;
 }

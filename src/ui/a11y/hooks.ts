@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { systemPrefersReducedMotion } from "../../persistence/prefs";
 
-/** Combina a preferência do sistema com a escolha feita dentro do jogo. */
+/** Combines the system preference with the in-game choice. */
 export function useReducedMotion(override: boolean) {
   const [system, setSystem] = useState(systemPrefersReducedMotion);
 
@@ -16,7 +16,7 @@ export function useReducedMotion(override: boolean) {
   return system || override;
 }
 
-/** Mantém o foco dentro de um diálogo enquanto ele estiver aberto. */
+/** Keeps focus inside a dialog while it is open. */
 export function useFocusTrap<T extends HTMLElement>(active: boolean) {
   const ref = useRef<T>(null);
 
@@ -59,7 +59,7 @@ export function useFocusTrap<T extends HTMLElement>(active: boolean) {
   return ref;
 }
 
-/** Rola para o fim sempre que a lista crescer. */
+/** Scrolls to the end whenever the list grows. */
 export function useAutoScroll<T extends HTMLElement>(dependency: unknown, smooth: boolean) {
   const ref = useRef<T>(null);
   useEffect(() => {
@@ -68,7 +68,7 @@ export function useAutoScroll<T extends HTMLElement>(dependency: unknown, smooth
   return ref;
 }
 
-/** Fecha com a tecla Esc. */
+/** Closes when the Escape key is pressed. */
 export function useEscape(active: boolean, onClose: () => void) {
   useEffect(() => {
     if (!active) return;

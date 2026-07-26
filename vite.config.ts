@@ -5,26 +5,25 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, ".", "");
 
   return {
-    // GitHub Pages publica este projeto sob /phone-mystery-chrome-game-ai/.
-    // Localmente, Vite continua usando "/" quando a variável não é definida.
+    // GitHub Pages publishes this project under /phone-mystery-chrome-game-ai/.
+    // Locally, Vite continues using "/" when the variable is undefined.
     base: env.VITE_BASE_PATH || "/",
     plugins: [react()],
     server: {
-      // Contexto seguro é obrigatório para as APIs do Chrome usadas aqui.
+      // A secure context is required by the Chrome APIs used here.
       host: "127.0.0.1",
     },
     build: {
-      // Sem source maps em produção: eles reconstruiriam o código original,
-      // incluindo o material narrativo, para qualquer pessoa que abrisse as
-      // ferramentas do navegador.
+      // Disable production source maps: they would reconstruct the original code,
+      // including narrative material, for anyone opening browser developer tools.
       sourcemap: false,
-      // Vite 8 usa Rolldown/Oxc; `true` seleciona o minificador nativo.
+      // Vite 8 uses Rolldown/Oxc; `true` selects the native minifier.
       minify: true,
       target: "es2022",
       rollupOptions: {
         output: {
-          // Cada ato vira um arquivo próprio. O conteúdo do desfecho não é
-          // baixado enquanto o jogador não chegar lá.
+          // Each act becomes its own file. Ending content is not downloaded
+          // until the player reaches it.
           manualChunks(id) {
             if (id.includes("/content/act1")) return "cap-a";
             if (id.includes("/content/act2")) return "cap-b";
