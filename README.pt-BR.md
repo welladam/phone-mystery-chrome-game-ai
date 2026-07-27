@@ -64,11 +64,20 @@ O motor do jogo continua controlando fatos, senhas, progressão e desfecho; o Ge
 
 No Chrome 148+ normalmente não é necessário instalar o modelo manualmente, usar extensão, criar chave de API ou habilitar flag experimental. Parâmetros de amostragem podem ter disponibilidade experimental separada, mas este projeto não depende deles.
 
+### Como desinstalar os modelos locais
+
+1. No Chrome, abra **⋮ → Configurações → Sistema**, ou acesse `chrome://settings/system`.
+2. Desligue **IA no dispositivo** (**On-device AI**, caso o navegador esteja em inglês).
+3. O Chrome removerá os modelos locais e liberará o espaço. O progresso salvo do jogo não é apagado.
+
+Para jogar novamente, reative **IA no dispositivo**, volte ao jogo e aguarde o novo download. Os modelos são administrados pelo Chrome; o site não pode removê-los diretamente. Consulte também a [ajuda oficial do Chrome sobre remoção de modelos de IA](https://support.google.com/chrome/answer/16961953?hl=pt-BR).
+
 ## Requisitos
 
 - Google Chrome **148+ no computador**
 - Windows 10/11, macOS 13+, Linux ou Chromebook Plus compatível
-- Aproximadamente 22 GB livres no volume do perfil do Chrome
+- O Gemini Nano ocupa aproximadamente **4 GB**; o tamanho exato pode variar e os pacotes de tradução usam espaço adicional
+- O Chrome pode exigir **22 GB livres** no volume do perfil para permitir a instalação — essa é uma condição de elegibilidade, não o tamanho do modelo
 - Mais de 4 GB de VRAM, ou pelo menos 16 GB de RAM e 4 núcleos de CPU
 - Conexão sem limite para o primeiro download dos modelos
 - `localhost`, `127.0.0.1` ou HTTPS

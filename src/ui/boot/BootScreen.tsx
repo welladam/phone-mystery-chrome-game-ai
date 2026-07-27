@@ -445,6 +445,14 @@ function EntradaView({ onPowerOn, reducedMotion }: { onPowerOn: () => void; redu
             <li>{t("boot.reqNetwork")}</li>
             <li>{t("boot.reqSecure")}</li>
           </ul>
+          <section className="boot-entrada__uninstall" aria-labelledby="boot-uninstall-title">
+            <h3 id="boot-uninstall-title">{t("boot.uninstallTitle")}</h3>
+            <ol>
+              <li>{t("boot.uninstallStep1")}</li>
+              <li>{t("boot.uninstallStep2")}</li>
+            </ol>
+            <p>{t("boot.uninstallEffect")}</p>
+          </section>
         </details>
       </div>
     </div>

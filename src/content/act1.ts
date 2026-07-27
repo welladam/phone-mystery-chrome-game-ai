@@ -197,6 +197,12 @@ export const HISTORY_FRIEND: ArchivedLine[] = [
     who: "Alice ❤️ (Lice)",
     text: "11 anos de você me aturando desde a sétima série ❤️❤️",
   },
+  {
+    at: "11/09/2025 00:05",
+    who: "Alice ❤️ (Lice)",
+    text: "e vc até hoje bota o ano que a gente se conheceu em tudo 🙄",
+  },
+  { at: "11/09/2025 00:06", who: "Clara", text: "é o único ano que eu não esqueço", self: true },
   { at: "19/11/2025 23:40", who: "Alice ❤️ (Lice)", text: "vc tá me evitando" },
   { at: "19/11/2025 23:55", who: "Clara", text: "não", self: true },
   { at: "19/11/2025 23:55", who: "Alice ❤️ (Lice)", text: "tá sim. e tá tudo bem, eu entendo" },
@@ -392,7 +398,7 @@ export const NOTES_OPEN: NoteRecord[] = [
     id: "NOTE_002",
     title: "senhas do wifi",
     editedAt: "11/2024",
-    body: "NAU_CLIENTES — naucerveja2023\nUFJF-VISITANTE — sem senha\ncasa da Lice — pergunta pra ela, ela troca toda hora",
+    body: "NAU_CLIENTES — naucerveja2023\nUFJF-VISITANTE — sem senha\ncasa da Lice — pergunta pra ela, ela troca toda hora\n\nas minhas eu não anoto. é sempre meu nome + um ano",
     act: 1,
   },
   {

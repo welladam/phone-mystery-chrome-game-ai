@@ -64,11 +64,20 @@ The game engine still controls facts, passwords, progression, and the ending; Ge
 
 No manual model installation, Chrome extension, API key, or experimental flag is normally required in Chrome 148+. Sampling parameters may have separate experimental availability, but this project does not depend on them.
 
+### Uninstall the local models
+
+1. In Chrome, open **⋮ → Settings → System**, or visit `chrome://settings/system`.
+2. Turn off **On-device AI**.
+3. Chrome removes the local models and frees their storage. The game's saved progress is not deleted.
+
+To play again, turn **On-device AI** back on, return to the game, and wait for the new download. Chrome owns these models; the website cannot remove them directly. See the [official Chrome Help instructions for deleting AI models](https://support.google.com/chrome/answer/16961953?hl=en).
+
 ## Requirements
 
 - Google Chrome **148+ on desktop**
 - Windows 10/11, macOS 13+, Linux, or a supported Chromebook Plus
-- Approximately 22 GB of free profile-volume storage for Chrome's model requirements
+- Gemini Nano occupies approximately **4 GB**; its exact size can vary and translation packs use additional storage
+- Chrome may require **22 GB of free profile-volume storage** before allowing installation — this is an eligibility condition, not the model's size
 - More than 4 GB of GPU VRAM, or at least 16 GB RAM and 4 CPU cores
 - An unmetered connection for the initial model downloads
 - `localhost`, `127.0.0.1`, or HTTPS

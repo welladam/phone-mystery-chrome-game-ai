@@ -32,6 +32,12 @@
 | **LOCK_008** `pedralascada` | PHOTO_018 — legenda *"PL 💛 sempre"* | Locais frequentes no APP_011 — nome completo do mirante | Regina ou Alice, nível 2, nomeiam o lugar |
 | **LOCK_009** `clara2014` | Mensagem de Alice 11/09/2025: *"11 anos… desde a sétima série"* | PHOTO_011 — legenda *"10 anos disso 🥹 2014–2024"* | Dica salva no navegador |
 
+**[DEV — LOCK_009 no modo difícil]** As três camadas de dica são atadas a `difficulty === "normal"` (`App.tsx`, `PasscodeSheet.tsx`), então a dica salva no navegador — *"a de sempre + o ano que a gente se conheceu"* — **não aparece no difícil**. As duas fontes acima resolvem só o `2014`; a raiz `clara` ficava sem trilha, porque nenhum outro cadeado compartilha raiz (`fumaça`, `pedralascada`, `wesley`) e o único padrão de senha visível era de terceiro (`naucerveja2023`, NOTE_002). Duas âncoras diegéticas foram acrescentadas para reconstruir a dica de dentro da ficção:
+- **NOTE_002** (ato 1) ganhou a linha *"as minhas eu não anoto. é sempre meu nome + um ano"* → estabelece o formato.
+- **HISTORY_FRIEND**, 11/09/2025 00:05–00:06, logo após a mensagem dos 11 anos: Alice *"e vc até hoje bota o ano que a gente se conheceu em tudo 🙄"* / Clara *"é o único ano que eu não esqueço"* → estabelece **qual** ano, sem fazer a conta pelo jogador.
+
+O `accepts` passou a incluir `clara 2014`, alinhado com LOCK_008 (`pedralascada` / `pedra lascada`), já que `normalizeText` colapsa espaços mas não os remove.
+
 **[DEV — regras gerais de bloqueio]**
 - Tentativas **ilimitadas**. Nada trava, nada apaga, nada penaliza. O jogo não é sobre punição.
 - Após **6 tentativas erradas** no mesmo lock, o botão *"Consultar dica"* (seção 31) acende sozinho.

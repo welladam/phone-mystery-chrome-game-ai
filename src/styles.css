@@ -625,6 +625,34 @@ pre {
 
 .boot-entrada__requirements li + li { margin-top: 0.35rem; }
 
+.boot-entrada__uninstall {
+  margin-top: 0.85rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(231, 174, 76, 0.25);
+  border-radius: 10px;
+  background: rgba(231, 174, 76, 0.06);
+  color: #d6e2da;
+}
+
+.boot-entrada__uninstall h3 {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--amber);
+}
+
+.boot-entrada__uninstall ol {
+  margin: 0.55rem 0 0;
+  padding-left: 1.15rem;
+  line-height: 1.55;
+}
+
+.boot-entrada__uninstall p {
+  margin: 0.65rem 0 0;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
 @media (max-width: 860px) {
   .boot-entrada {
     grid-template-columns: 1fr;

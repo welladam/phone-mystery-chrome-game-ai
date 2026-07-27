@@ -74,7 +74,8 @@ export const ERROR_CATALOG: Record<AiErrorCode, AiErrorInfo> = {
     title: "Este aparelho não consegue rodar o modelo local",
     cause:
       "O modelo de conversa exige espaço em disco e memória de vídeo acima do que este computador tem disponível. Celulares e tablets não são suportados.",
-    action: "Tente em um computador com pelo menos 22 GB livres e 4 GB de memória de vídeo, ou 16 GB de RAM.",
+    action:
+      "O modelo ocupa aproximadamente 4 GB, mas o Chrome pode exigir 22 GB livres para habilitar a instalação. Tente em um computador com essa folga e 4 GB de memória de vídeo, ou 16 GB de RAM.",
     retryable: true,
     keepsProgress: true,
   },

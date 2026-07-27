@@ -124,7 +124,8 @@ For the complete web experience:
 
 - **Google Chrome 148 or newer on desktop.** Prompt API support for websites begins in Chrome 148; the Translator API has been available since Chrome 138.
 - Windows 10/11, macOS 13+, Linux, or Chromebook Plus on a supported ChromeOS version.
-- At least **22 GB of free storage** on the volume containing the Chrome profile.
+- Gemini Nano occupies approximately **4 GB**. Its exact size can vary, and translation packs use additional storage.
+- Chrome may require at least **22 GB of free storage** on the profile volume before allowing installation. This is a browser eligibility and maintenance condition, not the size of the model or download.
 - Either more than 4 GB of GPU VRAM, or at least 16 GB of system RAM and 4 CPU cores for CPU execution.
 - An unmetered connection for the initial model and language-pack downloads.
 - A secure context: `localhost`, `127.0.0.1`, or HTTPS.
@@ -143,6 +144,18 @@ The requirements and API signatures may change. Check the official [Prompt API d
 6. If a compatible machine still reports a missing component, inspect `chrome://on-device-internals`, confirm that the profile has enough free space, and check whether an enterprise policy is restricting built-in AI.
 
 The stable website flow requires no Gemini cloud API key, extension, manual model installer, or experimental Chrome flag. Sampling parameters have separate experimental availability, but the game does not depend on them.
+
+## Remove Chrome's local models
+
+The models belong to Chrome, not the game. To remove them safely:
+
+1. Open Chrome's **⋮** menu and select **Settings**.
+2. Open **System**, or go directly to `chrome://settings/system`.
+3. Turn off **On-device AI**.
+
+Chrome removes the local models and frees their storage. Features that depend on built-in AI become unavailable. This does not delete game progress, messages, or settings saved in IndexedDB.
+
+To play again, turn **On-device AI** back on, open the game with an internet connection, and authorize the new download. A website cannot uninstall browser-managed components. Their current size and state can be inspected at `chrome://on-device-internals`. The procedure is also covered in the [official Chrome Help page](https://support.google.com/chrome/answer/16961953?hl=en).
 
 ## Run locally
 

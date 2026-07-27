@@ -131,7 +131,7 @@ export const LOCKS: Lock[] = [
     kind: "palavra",
     prompt: "Senha da conta",
     hint: "a de sempre + o ano que a gente se conheceu",
-    accepts: ["clara2014"],
+    accepts: ["clara2014", "clara 2014"],
     grantsClues: ["CLUE_018", "CLUE_036", "CLUE_043"],
   },
 ];

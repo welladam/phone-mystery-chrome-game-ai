@@ -124,7 +124,8 @@ Para a experiência web completa:
 
 - **Google Chrome 148 ou superior no computador.** O Prompt API para sites começa no Chrome 148; o Translator API está disponível desde o Chrome 138.
 - Windows 10/11, macOS 13+, Linux ou Chromebook Plus com versão compatível do ChromeOS.
-- Pelo menos **22 GB livres** no volume que contém o perfil do Chrome.
+- O Gemini Nano ocupa aproximadamente **4 GB**. O tamanho exato pode variar e os pacotes de tradução usam espaço adicional.
+- O Chrome pode exigir pelo menos **22 GB livres** no volume que contém o perfil para habilitar a instalação. Essa é uma condição de elegibilidade e manutenção do navegador, não o tamanho do modelo nem do download.
 - Mais de 4 GB de VRAM, ou pelo menos 16 GB de RAM e 4 núcleos de CPU para execução pela CPU.
 - Conexão sem limite de dados para o download inicial dos modelos e pacotes de idioma.
 - Contexto seguro: `localhost`, `127.0.0.1` ou HTTPS.
@@ -143,6 +144,18 @@ Requisitos e assinaturas ainda podem mudar. Consulte a documentação oficial do
 6. Se um computador compatível ainda indicar componente ausente, consulte `chrome://on-device-internals`, confirme o espaço livre do perfil e verifique se alguma política corporativa está restringindo a IA integrada.
 
 O fluxo estável para sites não exige chave da API Gemini na nuvem, extensão, instalador manual de modelo nem flag experimental do Chrome. Parâmetros de amostragem têm disponibilidade experimental separada, mas o jogo não depende deles.
+
+## Como remover os modelos locais do Chrome
+
+Os modelos pertencem ao Chrome e não ao jogo. Para removê-los de forma segura:
+
+1. Abra o menu **⋮** do Chrome e selecione **Configurações**.
+2. Abra **Sistema**, ou acesse diretamente `chrome://settings/system`.
+3. Desligue **IA no dispositivo** (**On-device AI**, se a interface estiver em inglês).
+
+O Chrome removerá os modelos locais e liberará o armazenamento ocupado por eles. Recursos que dependem da IA integrada ficarão indisponíveis. Essa ação não apaga o progresso do jogo, as mensagens ou as configurações salvas no IndexedDB.
+
+Para jogar novamente, reative **IA no dispositivo**, abra o jogo com conexão à internet e autorize o novo download. O site não tem permissão para desinstalar componentes administrados pelo navegador. O tamanho e o estado atuais podem ser consultados em `chrome://on-device-internals`. O procedimento também está descrito na [ajuda oficial do Chrome](https://support.google.com/chrome/answer/16961953?hl=pt-BR).
 
 ## Rodar localmente
 

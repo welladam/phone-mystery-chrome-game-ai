@@ -4,6 +4,12 @@
 
 This directory contains the prompts, narrative-design output, and media-production references used to create **The Clara Mystery**.
 
+## Local model storage and removal
+
+Gemini Nano occupies approximately **4 GB**, although the exact size can vary and translation packs require additional storage. Chrome may still require **22 GB of free profile-volume storage** before it allows installation; that number is an eligibility condition, not the model's size.
+
+To remove the local models, open Chrome's **⋮ → Settings → System** (`chrome://settings/system`) and turn off **On-device AI**. Chrome frees the model storage without deleting the game's IndexedDB progress. Turning the option back on allows Chrome to download the components again. See the [official Chrome Help page](https://support.google.com/chrome/answer/16961953?hl=en).
+
 > ## Full spoiler warning
 >
 > Most files in this directory reveal passwords, evidence paths, character secrets, the identity of the person responsible, and the complete ending. Players should not read them before finishing the game.
